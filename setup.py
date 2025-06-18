@@ -4,7 +4,7 @@ name = "skhippr"
 version = "1.0"
 author = "Fabia Bayer"
 author_email = "skhippr@inm.uni-stuttgart.de"
-url = "TODO"
+url = "SKHiPPR <https://github.com/f-bayer/SKHiPPR>"
 description = (
     "Sparse Koopman-Hill Projection for Periodic Solutions and Resonance Curves"
 )
