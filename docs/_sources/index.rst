@@ -13,13 +13,13 @@ SKHiPPR documentation
       
 
 
-SKHiPPR (/ˈski-pr/) is a Python toolbox with focus on **S**\ tability using the **K**\ oopman-\ **Hi**\ ll **P**\ rojection method for **P**\ eriodic solutions and **R**\ esonance curves.
+`SKHiPPR <https://github.com/f-bayer/SKHiPPR>`_ (/ˈski-pr/) is a Python toolbox with focus on **S**\ tability using the **K**\ oopman-\ **Hi**\ ll **P**\ rojection method for **P**\ eriodic solutions and **R**\ esonance curves.
 
    
 
 .. 
 
-   SKHiPPR is a continuation toolbox developed by Fabia Bayer as part of a research project in close cooperation with Remco Leine at the Institute for Nonlinear Mechanics, University of Stuttgart, Germany. The main focus of the project is the Koopman-based Hill stability method for periodic solutions.
+   `SKHiPPR <https://github.com/f-bayer/SKHiPPR>`_ is a continuation toolbox developed by Fabia Bayer as part of a research project in close cooperation with Remco Leine at the Institute for Nonlinear Mechanics, University of Stuttgart, Germany. The main focus of the project is the Koopman-based Hill stability method for periodic solutions.
 
    For more information about the Koopman-Hill projection method, please see the following references:
 
