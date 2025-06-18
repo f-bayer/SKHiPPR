@@ -3,7 +3,7 @@ Installation guide
 
 To install SKHiPPR, perform the following steps:
 
-#. Download or clone the git repository <TODO link to public repo>
+#. Download or clone the `git repository <https://github.com/f-bayer/SKHiPPR>`_
 #. Navigate to the folder containing SKHiPPR.
 #. (optional) Create and activate a new virtual environment
 #. From the root folder of the SKHiPPr repository, install SKHiPPR using pip::
