@@ -7,7 +7,10 @@ Veraszto and Stepan, "Nonlinear Dynamics of hardware-in-the-loop experiments on 
 import numpy as np
 import matplotlib.pyplot as plt
 
+from skhippr.Fourier import Fourier
+from skhippr.problems.HBM import HBMProblem, HBMProblem_autonomous
 from skhippr.problems.newton import NewtonProblem
+from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 from skhippr.problems.continuation import pseudo_arclength_continuator
 
@@ -22,7 +25,6 @@ def main(parameters=None):
     eq_problem = NewtonProblem(
         residual_function=stick_slip_equilibrium,
         initial_guess=initial_guess_eq,
-        variable="y",
         stability_method=StabilityEquilibrium(n_dof=2),
         verbose=False,
         **parameters
@@ -60,6 +62,32 @@ def main(parameters=None):
     except UnboundLocalError:
         print("No bifurcation found")
     plt.legend()
+
+    # find and continue periodic solution
+    parameters["v"] = point_bif.v
+    # omega_init = np.abs(point_bif.eigenvalues[0])
+    omega_init = parameters["omega"]
+    fourier = Fourier(N_HBM=10, L_DFT=1024, n_dof=2)
+    initial_amplitude = 0.01
+    ts = fourier.time_samples(omega_init)
+    initial_guess = np.vstack(
+        (
+            initial_amplitude * np.cos(omega_init * ts),
+            omega_init * np.sin(omega_init * ts),
+        )
+    )
+    initial_HBM = HBMProblem_autonomous(
+        f=stick_slip_dynamics,
+        initial_guess=fourier.DFT(initial_guess),
+        omega=omega_init,
+        fourier=fourier,
+        stability_method=KoopmanHillSubharmonic(fourier, autonomous=True),
+        parameters_f=parameters,
+        verbose=True,
+    )
+
+    initial_HBM.solve()
+    print(initial_HBM.x[3])
 
 
 def stick_slip_parameters(
@@ -123,6 +151,7 @@ def stick_slip_parameters(
         "m": m,
         "b_0": b_0,
         "k": k,
+        "omega": omega,
         "v": v,
         "C": C,
         "C_0": C_0,
@@ -142,7 +171,7 @@ def y_equilibrium(k=6957, v=0.22, C=2, C_0=6, c_v=10, b_s=0.2, **_):
 
 
 def force_stribeck(
-    y_dot: float | np.ndarray,
+    x_dot: float | np.ndarray,
     v: float,
     C: float,
     C_0: float,
@@ -182,25 +211,25 @@ def force_stribeck(
     """
 
     force = np.atleast_1d(
-        (C + (C_0 - C) * np.exp(-c_v * np.abs(v - y_dot))) * np.sign(v - y_dot)
-        + b_s * (v - y_dot)
+        (C + (C_0 - C) * np.exp(-c_v * np.abs(v - x_dot))) * np.sign(v - x_dot)
+        + b_s * (v - x_dot)
     )
 
-    dforce_dv = -c_v * (C_0 - C) * np.exp(-c_v * np.abs(v - y_dot)) + b_s
+    dforce_dv = -c_v * (C_0 - C) * np.exp(-c_v * np.abs(v - x_dot)) + b_s
 
     # Sticking case
     try:
-        force[y_dot == v] = np.nan
-        dforce_dv[y_dot == v] = np.nan
+        force[x_dot == v] = np.nan
+        dforce_dv[x_dot == v] = np.nan
     except TypeError:
         # force is not array_like
-        if y_dot == v:
+        if x_dot == v:
             force = np.nan
             dforce_dv = np.nan
 
     dforce_dydot = -dforce_dv
 
-    return force, {"y_dot": dforce_dydot, "v": dforce_dv}
+    return force, {"x_dot": dforce_dydot, "v": dforce_dv}
 
 
 def stick_slip_equilibrium(y, **parameters):
@@ -208,7 +237,7 @@ def stick_slip_equilibrium(y, **parameters):
 
 
 def stick_slip_dynamics(
-    t, y: np.array, **parameters
+    t, x: np.array, **parameters
 ) -> tuple[np.array, dict[str, np.array]]:
     """
     Compute the dynamics and Jacobians for the stick-slip system.
@@ -219,8 +248,8 @@ def stick_slip_dynamics(
 
     t : float
         Current time (not used in the computation but included for compatibility with ODE solvers).
-    y : ndarray
-        State vector of shape (2, ...) where `y[0, ...]` is position and `y[1, ...]` is velocity.
+    x : ndarray
+        State vector of shape (2, ...) where `x[0, ...]` is position and `x[1, ...]` is velocity.
     **parameters :
         Additional keyword arguments (parameters) required for the dynamics, must include:
             - "b_0": float, viscous damping coefficient.
@@ -237,23 +266,23 @@ def stick_slip_dynamics(
             - "y": Jacobian of `f` with respect to `y`, shape (2, 2, ...).
             - "v": Jacobian of `f` with respect to `v`, same shape as `y`.
     """
-    f_stribeck, derivatives_stribeck = force_stribeck(y_dot=y[1, ...], **parameters)
+    f_stribeck, derivatives_stribeck = force_stribeck(x_dot=x[1, ...], **parameters)
 
-    f = np.zeros_like(y)
-    f[0, ...] = y[1, ...]
+    f = np.zeros_like(x)
+    f[0, ...] = x[1, ...]
     f[1, ...] = (
-        -parameters["b_0"] * y[1, ...] - parameters["k"] * y[0, ...] + f_stribeck
+        -parameters["b_0"] * x[1, ...] - parameters["k"] * x[0, ...] + f_stribeck
     )
 
-    df_dy = np.zeros((y.shape[0], y.shape[0], *y.shape[1:]))
-    df_dy[0, 1, ...] = 1
-    df_dy[1, 0, ...] = -parameters["k"]
-    df_dy[1, 1, ...] = -parameters["b_0"] + derivatives_stribeck["y_dot"]
+    df_dx = np.zeros((x.shape[0], x.shape[0], *x.shape[1:]))
+    df_dx[0, 1, ...] = 1
+    df_dx[1, 0, ...] = -parameters["k"]
+    df_dx[1, 1, ...] = -parameters["b_0"] + derivatives_stribeck["x_dot"]
 
-    df_dv = np.zeros_like(y)
+    df_dv = np.zeros_like(x)
     df_dv[1, ...] = derivatives_stribeck["v"]
 
-    return f, {"y": df_dy, "v": df_dv}
+    return f, {"x": df_dx, "v": df_dv}
 
 
 def plot_stribeck(v: float, C: float, C_0: float, c_v: float, b_s: float, **_):
@@ -262,7 +291,7 @@ def plot_stribeck(v: float, C: float, C_0: float, c_v: float, b_s: float, **_):
     delta_v_max = (3 + np.log(C_0 - C)) / c_v
     x_dot = -np.linspace(0, delta_v_max, 270)
     delta_speeds = v - x_dot
-    forces, _ = force_stribeck(y_dot=x_dot, v=v, C=C, C_0=C_0, c_v=c_v, b_s=b_s)
+    forces, _ = force_stribeck(x_dot=x_dot, v=v, C=C, C_0=C_0, c_v=c_v, b_s=b_s)
     forces[0] = v
 
     kinetic = C + delta_speeds * b_s
