@@ -10,15 +10,18 @@ from copy import copy
 from skhippr.Fourier import Fourier
 from skhippr.problems.HBM import HBMProblem
 from skhippr.systems.ltp import mathieu
-from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
+from skhippr.stability.KoopmanHillProjection import (
+    KoopmanHillProjection,
+    KoopmanHillSubharmonic,
+)
 import matplotlib.pyplot as plt
 
 
 def main():
-    a_grid = np.linspace(-1, 8, 101)
-    b_grid = np.linspace(0, 2, num=101)
+    a_grid = np.linspace(2.24, 2.34, 41)
+    b_grid = np.linspace(0, 1, num=41)
 
-    fourier = Fourier(N_HBM=10, L_DFT=100, n_dof=2, real_formulation=True)
+    fourier = Fourier(N_HBM=30, L_DFT=500, n_dof=2, real_formulation=True)
     solution = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
     problem = HBMProblem(
         mathieu,
@@ -26,7 +29,7 @@ def main():
         omega=1,
         fourier=fourier,
         variable="y",
-        stability_method=KoopmanHillProjection(fourier=fourier, autonomous=False),
+        stability_method=KoopmanHillSubharmonic(fourier=fourier, autonomous=False),
         parameters_f={"a": 1, "b": 1, "omega": 1, "d": 0},
         verbose=False,
     )
@@ -69,7 +72,7 @@ def plot_magnitude(magnitude_fm, logscale=True, a_grid=None, b_grid=None):
     #     magnitude_fm = magnitude_fm - 1
 
     max_val = np.max(magnitude_fm)
-    shade = np.maximum(0, magnitude_fm)
+    shade = np.minimum(magnitude_fm, 10)  # np.maximum(0, magnitude_fm)
 
     if logscale:
         norm = "log"
