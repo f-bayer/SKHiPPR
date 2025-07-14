@@ -35,8 +35,6 @@ Dependencies
 - skhippr (with modules: systems.ltp.mathieu, Fourier, problems.HBM, problems.shooting, stability.KoopmanHillProjection)
 """
 
-from enum import auto
-from colorama import init
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
