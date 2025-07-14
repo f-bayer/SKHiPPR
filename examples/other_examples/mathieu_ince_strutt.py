@@ -18,10 +18,10 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    a_grid = np.linspace(2.24, 2.34, 41)
-    b_grid = np.linspace(0, 1, num=41)
+    a_grid = np.linspace(-0.5, 3, 101)
+    b_grid = np.linspace(0, 5, num=101)
 
-    fourier = Fourier(N_HBM=30, L_DFT=500, n_dof=2, real_formulation=True)
+    fourier = Fourier(N_HBM=10, L_DFT=30, n_dof=2, real_formulation=True)
     solution = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
     problem = HBMProblem(
         mathieu,
@@ -29,7 +29,7 @@ def main():
         omega=1,
         fourier=fourier,
         variable="y",
-        stability_method=KoopmanHillSubharmonic(fourier=fourier, autonomous=False),
+        stability_method=KoopmanHillProjection(fourier=fourier, autonomous=False),
         parameters_f={"a": 1, "b": 1, "omega": 1, "d": 0},
         verbose=False,
     )
