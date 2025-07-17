@@ -119,7 +119,7 @@ class NewtonProblem:
         numpy.ndarray
             A 1-D array containing all unknowns concatenated along axis 0.
         """
-        return np.concatenate(self.unknowns_dict.values(), axis=0)
+        return np.concatenate(list(self.unknowns_dict.values()), axis=0)
 
     @unknowns.setter
     def unknowns(self, x: np.ndarray) -> None:
@@ -145,14 +145,14 @@ class NewtonProblem:
         - If the variable exists as an attribute of the object or as a key in `self.f_kwargs`, those are updated as well.
         """
 
-        if len(x.size) > 1:
+        if len(x.shape) > 1:
             raise ValueError(
-                f"unknowns must be a 1-D array but array is {len(x.size)}-D"
+                f"unknowns must be a 1-D array but array is {len(x.shape)}-D"
             )
 
         idx = 0
         for variable, old_value in self.unknowns_dict.items():
-            n = old_value.size[0]
+            n = old_value.shape[0]
             self.unknowns_dict[variable] = x[idx:n]
             idx += n
 
@@ -162,6 +162,26 @@ class NewtonProblem:
 
             if variable in self.f_kwargs:
                 self.f_kwargs[variable] = self.unknowns_dict[variable]
+
+    def __getattr__(self, name):
+        """Custom attribute extension that searches also in the unknowns and problem inputs"""
+        if "unknowns_dict" in self.__dict__ and name in self.unknowns_dict:
+            return self.unknowns_dict[name]
+        if "f_kwargs" in self.__dict__ and name in self.f_kwargs:
+            return self.f_kwargs[name]
+        raise AttributeError(f"Attribute '{name}' does not exist for object {self}")
+
+    def __setattr__(self, name, value) -> None:
+        """Custom attribute setter also attempts to set the attribute in self.unknowns and/or self.f_kwargs. Success leads to a convergence reset."""
+
+        if "unknowns_dict" in self.__dict__ and name in self.unknowns_dict:
+            self.unknowns_dict[name] = value
+            self.reset()
+        if "f_kwargs" in self.__dict__ and name in self.f_kwargs:
+            self.f_kwargs[name] = value
+            self.reset()
+
+        super().__setattr__(name, value)
 
     def __str__(self):
         if self.converged:
@@ -196,7 +216,9 @@ class NewtonProblem:
         """
 
         return {
-            key: value for key, value in self.f_kwargs if not key in keys_to_exclude
+            key: value
+            for key, value in self.f_kwargs.items()
+            if not key in keys_to_exclude
         }
 
     def f_with_params(
@@ -250,7 +272,7 @@ class NewtonProblem:
         """
         if recompute:
             for fun in self.residuals_dict:
-                res, jacobians = fun(**self.unknowns)
+                res, jacobians = fun(**self.unknowns_dict)
 
                 # Populate the dictionaries
                 self.residuals_dict[fun] = res
@@ -258,14 +280,17 @@ class NewtonProblem:
                     self.jacobians_dict[(fun, key)] = jacobians[key]
 
         # Construct the overall residual
-        return np.concatenate([self.residuals_dict])
+        return np.concatenate(list(self.residuals_dict.values()))
 
     def jacobian(self):
         """Assemble the derivative of the residual w.r.t the unknowns row by row."""
         return np.vstack(
             [
                 np.hstack(
-                    [self.jacobians_dict[(fun, unknown)] for unknown in self.unknowns]
+                    [
+                        self.jacobians_dict[(fun, unknown)]
+                        for unknown in self.unknowns_dict
+                    ]
                 )
                 for fun in self.residuals_dict
             ]

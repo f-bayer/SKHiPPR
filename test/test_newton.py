@@ -72,7 +72,8 @@ def test_reset(prb):
 def test_solution_getter(prb):
     # Ensure that the custom getter does not lead to a recursion loop
     a = prb.a
-    r = prb.residual
+    y = prb.y
+    label = prb.label
     try:
         b = prb.this_attribute_does_not_exist
         assert False, f"Expected an AttributeError, but got {b}"
