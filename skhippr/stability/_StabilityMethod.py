@@ -114,8 +114,7 @@ class StabilityEquilibrium(_StabilityMethod):
 
     def determine_eigenvalues(self, problem) -> np.ndarray:
         """Stability is governed immediately by the eigenvalues of the Jacobian matrix, which are returned by this function."""
-        dr_dx = problem.derivatives[problem.variable][: self.n_dof :, : self.n_dof]
-        return np.linalg.eigvals(dr_dx)
+        return np.linalg.eigvals(problem.jacobian())
 
     def determine_stability(self, eigenvalues) -> bool:
         """returns ``True`` if all eigenvalues have negative real part (smaller than ``self.tol``)."""

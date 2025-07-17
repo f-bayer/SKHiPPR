@@ -169,7 +169,7 @@ class NewtonProblem:
             return self.unknowns_dict[name]
         if "f_kwargs" in self.__dict__ and name in self.f_kwargs:
             return self.f_kwargs[name]
-        raise AttributeError(f"Attribute '{name}' does not exist for object {self}")
+        raise AttributeError(f"Attribute '{name}' does not exist")
 
     def __setattr__(self, name, value) -> None:
         """Custom attribute setter also attempts to set the attribute in self.unknowns and/or self.f_kwargs. Success leads to a convergence reset."""

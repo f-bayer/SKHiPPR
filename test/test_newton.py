@@ -1,3 +1,4 @@
+from tkinter import Y
 import pytest
 import numpy as np
 
@@ -49,8 +50,10 @@ def test_problem_constructor(prb, params):
 def test_solve(prb, params):
     prb.solve()
     assert prb.converged
-    assert np.allclose(prb.residual, np.array([0, 0]), atol=params["tol"])
-    assert np.allclose(prb.x, np.array([1, 1]), atol=1e-4)
+    assert np.allclose(
+        prb.residual_function(recompute=False), np.array([0, 0]), atol=params["tol"]
+    )
+    assert np.allclose(prb.unknowns, np.array([1, 1]), atol=1e-4)
     assert not prb.stable
 
 
@@ -59,12 +62,25 @@ def test_reset(prb):
     assert prb.converged
     assert prb.num_iter > 0
 
-    prb.reset(x0_new=np.array([5.0, 0.0]))
+    # Perform manual reset
+    y_new = np.array([5.0, 0.0])
+    prb.reset(x0_new=y_new)
     assert not prb.converged
     assert prb.num_iter == 0
-    assert prb.residual is None
-    assert prb.derivatives is None
+    prb.solve()
+    assert prb.converged
 
+    # Expect that reset is performed if component of unknowns is manually updated
+    prb.y = np.array(y_new)
+    assert not prb.converged
+    assert prb.num_iter == 0
+    prb.solve()
+    assert prb.converged
+
+    # Expect that reset is performed if parameter is manually updated
+    prb.a = 3
+    assert not prb.converged
+    assert prb.num_iter == 0
     prb.solve()
     assert prb.converged
 
@@ -93,16 +109,26 @@ def test_solution_setter(prb, params):
     prb.reset()
     assert not prb.converged
     assert prb.a == params["a_ref"]
-    assert prb.derivatives["a"] == params["a_ref"]
+    assert prb.jacobians_dict[(prb.f_with_params, "a")] == params["a_ref"]
 
     prb.a = a_update
     # Ensure that new parameter value is passed into function
-    _, derivatives = prb.f_with_params(prb.x)
+    _, derivatives = prb.f_with_params(prb.unknowns)
     assert derivatives["a"] == a_update
 
     # Ensure that updated parameter is used during function calls of solve()
     prb.solve()
-    assert prb.derivatives["a"] == a_update
+    assert prb.jacobians_dict[(prb.f_with_params, "a")] == a_update
+
+    # Check if update of unknowns works as expected
+    assert prb.converged
+    y_new = np.array([15.0, 10.0])
+    assert all(y_new != prb.y)
+    prb.y = y_new
+    assert all(prb.y == y_new)
+    assert all(prb.unknowns == y_new)
+    res = prb.residual_function(recompute=True)
+    assert all(res == residual_function(y=y_new, a=prb.a)[0])
 
 
 if __name__ == "__main__":
