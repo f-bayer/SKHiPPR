@@ -4,13 +4,19 @@ import numpy as np
 def finite_differences(fun, kwargs, variable, h_step):
 
     x = kwargs[variable]
+
+    try:
+        n = len(x)
+    except TypeError:
+        n = 1
+
     f = fun(**kwargs)
 
-    delta = x + h_step * np.eye(len(x))
-    derivative = np.zeros((len(f), len(x)))
-    for k in range(len(x)):
-        kwargs[variable] = delta[k, :]
+    delta = x + h_step * np.eye(n)
+    derivative = np.zeros((len(f), n))
+    for k in range(n):
+        kwargs[variable] = np.squeeze(delta[k, :])
         derivative[:, k] = (fun(**kwargs) - f) / h_step
 
     kwargs[variable] = x
-    return derivative
+    return derivative.squeeze()
