@@ -123,7 +123,7 @@ def test_cont_truss(truss_params, verbose=False):
         verbose=verbose,
     ):
         branch.append(branch_point)
-        xs_pred.append(branch_point.x0)
+        xs_pred.append(branch_point.initial_guess)
         xs.append(branch_point.x)
         Fs.append(branch_point.F)
         stable.append(branch_point.stable)

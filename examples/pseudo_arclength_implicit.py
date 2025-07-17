@@ -52,7 +52,7 @@ def main():
         stepsize_range=(0.05, 0.15),
     ):
         # Predictor (before correction steps) is available at branch_point.x0
-        ax.plot(branch_point.x0[0], branch_point.x0[1], "r+")
+        ax.plot(branch_point.initial_guess[0], branch_point.initial_guess[1], "r+")
 
         # Solution is at branch_point.x (even when variable name is not x...)
         ax.plot(branch_point.x[0], branch_point.x[1], ".", color="blue")

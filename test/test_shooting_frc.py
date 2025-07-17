@@ -65,11 +65,21 @@ def shooting_frc():
         amp_1 = (branch_point.x[0], x_tng[0])
         amp_2 = (branch_point.x[1], x_tng[1])
         ax.plot(Ts, amp_1, amp_2, "gray")
-        ax.plot(branch_point.x0[-1], branch_point.x0[0], branch_point.x0[1], "r+")
+        ax.plot(
+            branch_point.initial_guess[-1],
+            branch_point.initial_guess[0],
+            branch_point.initial_guess[1],
+            "r+",
+        )
 
         if len(frc) > 1:
             assert (
-                abs(np.inner(branch_point.x - branch_point.x0, frc[-2].tangent)) < 1e-3
+                abs(
+                    np.inner(
+                        branch_point.x - branch_point.initial_guess, frc[-2].tangent
+                    )
+                )
+                < 1e-3
             )
 
         if branch_point.omega < omega_range[0] or branch_point.omega > omega_range[1]:

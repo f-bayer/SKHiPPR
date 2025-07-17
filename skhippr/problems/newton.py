@@ -83,18 +83,20 @@ class NewtonProblem:
     ):
 
         self.label = "Newton"
-        for key, value in parameters.items():
-            setattr(self, key, value)
-        self._list_params = parameters.keys()
         self.f = residual_function
-        self.variable = variable
 
-        # Initial guess
-        self.x0 = initial_guess
-        self.x = self.x0  # is overwritten later during updates
+        # Initialize unknowns and residuals dictionaries.
+        self.unknowns_dict = {variable: initial_guess}
+        self.residuals_dict = {
+            self.f_with_params: None
+        }  # all sub-residual functions must accept **self.unknowns as keyword arguments.
+        self.jacobians_dict: dict[tuple[Callable, str], np.ndarray] = {}
+        self.initial_guess = self.unknowns
+
+        # Initialize optional arguments into self.f
+        self.f_kwargs = parameters
+
         self.converged = False
-        self.residual: np.ndarray = None  # type:ignore
-        self.derivatives: dict[str, np.ndarray] = None  # type:ignore
         self.num_iter: int = 0
 
         # Stability
@@ -106,6 +108,60 @@ class NewtonProblem:
         self.max_iterations = max_iterations
         self.verbose = verbose
         self.tolerance = tolerance
+
+    @property
+    def unknowns(self):
+        """
+        Stack all individual unknowns into a single 1-D numpy array.
+
+        Returns
+        -------
+        numpy.ndarray
+            A 1-D array containing all unknowns concatenated along axis 0.
+        """
+        return np.concatenate(self.unknowns_dict.values(), axis=0)
+
+    @unknowns.setter
+    def unknowns(self, x: np.ndarray) -> None:
+        """
+        Separates a 1-D array into individual unknowns components and updates their values.
+        This method takes a 1-D NumPy array `x`, splits it into segments corresponding to the sizes of the unknown variables stored in `self.unknowns_dict`, and updates these variables accordingly.
+        It also updates the attributes and values in `self.f_kwargs` if applicable.
+
+        Parameters
+        ----------
+
+        x : np.ndarray
+            A 1-D NumPy array containing the concatenated values of all unknown variables.
+
+        Raises
+        ------
+
+        ValueError
+            If `x` is not a 1-D array.
+
+        Notes
+        -----
+        - If the variable exists as an attribute of the object or as a key in `self.f_kwargs`, those are updated as well.
+        """
+
+        if len(x.size) > 1:
+            raise ValueError(
+                f"unknowns must be a 1-D array but array is {len(x.size)}-D"
+            )
+
+        idx = 0
+        for variable, old_value in self.unknowns_dict.items():
+            n = old_value.size[0]
+            self.unknowns_dict[variable] = x[idx:n]
+            idx += n
+
+            # Attempt to update the value in other places
+            if hasattr(self, variable):
+                setattr(self, variable, self.unknowns_dict[variable])
+
+            if variable in self.f_kwargs:
+                self.f_kwargs[variable] = self.unknowns_dict[variable]
 
     def __str__(self):
         if self.converged:
@@ -126,7 +182,7 @@ class NewtonProblem:
 
     def get_params(self, keys_to_exclude: tuple[str] = ()):
         """
-        Retrieve a dictionary of the parameters that are passed to the residual function, optionally excluding some.
+        Retrieve a subset of self.f_kwargs.
 
         Parameters
         ----------
@@ -136,12 +192,11 @@ class NewtonProblem:
         Returns
         -------
         dict
-            A dictionary containing the parameter names of the residual function and their corresponding values, excluding those specified in ``keys_to_exclude``.
+            A dictionary containing the parameter names of the residual function (including the main unknown variable) and their corresponding values, excluding those specified in ``keys_to_exclude``.
         """
+
         return {
-            key: getattr(self, key)
-            for key in self._list_params
-            if not key in keys_to_exclude
+            key: value for key, value in self.f_kwargs if not key in keys_to_exclude
         }
 
     def f_with_params(
@@ -166,18 +221,22 @@ class NewtonProblem:
             * the residual as a ``np.ndarray``
             * the derivatives as a dictionary
         """
+
         return self.f(
             *args,
             **self.get_params(keys_to_exclude=kwargs.keys()),
             **kwargs,
         )
 
-    def residual_function(self) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """Residual function evaluated at the current guess :py:attr:`~skhippr.problems.newton.NewtonProblem.x` with the default parameters.
+    def residual_function(
+        self, recompute=False
+    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        """Residual function evaluated at the current unknowns with the current parameters.
+            Updates all sub-residuals and sub-Jacobians of the corresponding dictionaries.
 
         Note
         ----
-        This function is used in the Newton update and should be overridden by subclasses.
+        This function is used in the Newton update. Residuals and Jacobians are updated in order of appearance in self.residuals_dict().
 
         Returns
         -------
@@ -186,11 +245,31 @@ class NewtonProblem:
             The result of calling the residual with the combined arguments and parameters:
 
             * the residual as a ``np.ndarray``
-            * the derivatives as a dictionary
+            * the derivatives w.r.t all the unknowns as a numpy array
 
         """
+        if recompute:
+            for fun in self.residuals_dict:
+                res, jacobians = fun(**self.unknowns)
 
-        return self.f_with_params(self.x)
+                # Populate the dictionaries
+                self.residuals_dict[fun] = res
+                for key in jacobians:
+                    self.jacobians_dict[(fun, key)] = jacobians[key]
+
+        # Construct the overall residual
+        return np.concatenate([self.residuals_dict])
+
+    def jacobian(self):
+        """Assemble the derivative of the residual w.r.t the unknowns row by row."""
+        return np.vstack(
+            [
+                np.hstack(
+                    [self.jacobians_dict[(fun, unknown)] for unknown in self.unknowns]
+                )
+                for fun in self.residuals_dict
+            ]
+        )
 
     def reset(self, x0_new=None) -> None:
         """
@@ -209,53 +288,47 @@ class NewtonProblem:
         """
 
         if x0_new is not None:
-            self.x0 = x0_new
-            # Shallow copy is needed for x to allow += during correction_step().
-            self.x = x0_new.copy()
-            self.derivatives = None  # type:ignore
-            self.residual = None  # type:ignore
+            self.initial_guess = x0_new
+            self.unknowns = x0_new
+
         self.converged = False
         self.num_iter = 0
         self.stable = None  # type:ignore
         self.eigenvalues = None  # type:ignore
 
     def correction_step(self) -> None:
-        sol = self.residual_function()
-        self.residual = sol[0]
-        self.derivatives = sol[1]
 
-        self.check_converged()
+        residual = self.check_converged(recompute_residual=True)
         if not self.converged:
-            jacobian = self.derivatives[self.variable]
+            delta_x = np.linalg.solve(self.jacobian(), -residual)
+            self.unknowns = self.unknowns + delta_x
 
-            delta_x = np.linalg.solve(jacobian, -1 * self.residual)
-            # Here, self.x is overwritten. This removes the link between self.x and self.x0
-            # '+=' would NOT remove the link and does not work with BranchPoint objects.
-            self.x = self.x + delta_x
-
-    def check_converged(self) -> None:
-        if np.linalg.norm(self.residual) < self.tolerance:
+    def check_converged(self, recompute_residual=True) -> None:
+        residual = self.residual_function(recompute=recompute_residual)
+        if np.linalg.norm(residual) < self.tolerance:
             self.converged = True
+        return residual
 
     def determine_stability(self):
         if self.stability_method is not None:
             self.eigenvalues = self.stability_method.determine_eigenvalues(self)
-            self.stable = self.stability_method.determine_stability(self.eigenvalues)
+            self.stable = self.stability_method.determine_stability(
+                self.eigenvalues
+            )  # TODO sollte das nicht die Klasse 'Problem' machen?!
 
     def solve(self):
         """
         Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.problems.newton.NewtonProblem.residual_function`.
 
-        Performs iterative correction steps starting from the initial guess :py:attr:`~skhippr.problems.newton.NewtonProblem.x0` until the residual norm is sufficiently small or the maximum number of iterations is reached. After convergence, performs a stability check if applicable.
+        Performs iterative correction steps starting from the current vector of unknowns until the residual norm is sufficiently small or the maximum number of iterations is reached. After convergence, performs a stability check if applicable.
 
         Notes
         -----
-        * Solution is stored in :py:attr:`~skhippr.problems.newton.NewtonProblem.x` and final residual in :py:attr:`~skhippr.problems.newton.NewtonProblem.residual` with derivatives :py:attr:`~skhippr.problems.newton.NewtonProblem.derivatives`.
-
+        * Solution is stored in :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns`,constructed by the members of :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns_dict`
         * Prints progress and convergence information if :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose` is ``True``.
         """
         if self.verbose:
-            print(f", Initial guess: x[-1]={self.x[-1]:.3g}")
+            print(f", Initial guess: x[-1]={self.unknowns[-1]:.3g}")
 
         while self.num_iter < self.max_iterations and not self.converged:
             self.num_iter += 1
@@ -265,10 +338,9 @@ class NewtonProblem:
             self.correction_step()
             if self.verbose:
                 print(
-                    f", |r| = {np.linalg.norm(self.residual):8.3g}, x[-1]={self.x[-1]:.3g}"
+                    f", |r| = {np.linalg.norm(self.residual_function(recompute=False)):8.3g}, x[-1]={self.unknowns[-1]:.3g}"
                 )
 
-            self.check_converged()
             if self.converged and self.verbose:
                 print(f" Converged", end="")
                 if len(self.x) < 5:
