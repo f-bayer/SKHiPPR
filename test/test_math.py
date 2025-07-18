@@ -27,3 +27,16 @@ def test_finite_differences(variable):
     assert np.allclose(
         finite_diff, true_diff, 1e-4, 1e-4
     ), f"derivative w.r.t {variable} does not match!"
+
+
+def test_finite_differences_matrix():
+
+    def my_matrix_function(x):
+        return np.vstack([x, x]).T
+
+    n = 3
+    x = np.random.rand(n)
+    derivative = np.dstack([np.eye(n), np.eye(n)])
+    derivative_fd = finite_differences(my_matrix_function, {"x": x}, "x", 1e-5)
+
+    assert np.allclose(derivative, derivative_fd, 1e-4, 1e-4)

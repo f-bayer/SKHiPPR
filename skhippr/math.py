@@ -13,10 +13,10 @@ def finite_differences(fun, kwargs, variable, h_step):
     f = fun(**kwargs)
 
     delta = x + h_step * np.eye(n)
-    derivative = np.zeros((len(f), n))
+    derivative = np.zeros((f.shape[0], n, *f.shape[1:]))
     for k in range(n):
         kwargs[variable] = np.squeeze(delta[k, :])
-        derivative[:, k] = (fun(**kwargs) - f) / h_step
+        derivative[:, k, ...] = (fun(**kwargs) - f) / h_step
 
     kwargs[variable] = x
     return derivative.squeeze()
