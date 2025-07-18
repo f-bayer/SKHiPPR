@@ -140,139 +140,153 @@ class Vanderpol(FirstOrderODE):
                 )
 
 
-def truss(
-    t: float | np.ndarray,
-    x: np.ndarray,
-    k: float,
-    c: float,
-    F: float,
-    a: float,
-    l_0: float,
-    m: float,
-) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-    """
-    Dynamics  of a truss system.
-    The truss system is given by a block (mass 'm') that can move in horizontal direction under viscous damping ('c').
-    It is attached to a spring (unforced length 'l_0', spring constant 'k') whose other end is fixed at vertical height 'a'.
-    The block is forced by 'F' in horizontal direction.
-    This system can have up to three equilibria, depending on 'F'.
-    Parameters
-    ----------
-    t : float or np.ndarray
-        Current time or array of time values.
-    x : np.ndarray
-        State vector of the system, where x[0, ...] is position (q) and x[1, ...] is velocity (q_dot).
-    k : float
-        Spring constant.
-    c : float
-        Damping coefficient.
-    F : float
-        External force applied to the system.
-    a : float
-        Height of the spring.
-    l_0 : float
-        Rest length of the spring.
-    m : float
-        Mass of the system.
-    Returns
-    -------
-    f : np.ndarray
-        Time derivative of the state vector (i.e., [q_dot, q_ddot]).
-    derivatives : dict[str, np.ndarray]
-        Dictionary containing partial derivatives of the system dynamics with respect to parameters:
-        - "k": Derivative with respect to spring constant.
-        - "F": Derivative with respect to external force.
-        - "c": Derivative with respect to damping coefficient.
-        - "x": Jacobian of the system with respect to the state vector.
-    """
-    q = x[0, ...]
-    q_dot = x[1, ...]
+class Truss(FirstOrderODE):
 
-    derivatives = dict()
+    def __init__(
+        self,
+        x: np.ndarray,
+        k: float,
+        c: float,
+        F: float,
+        a: float,
+        l_0: float,
+        m: float,
+        **kwargs,
+    ):
+        super().__init__(autonomous=True, n_dof=2)
+        self.t = kwargs.get("t", None)
+        self.x = x
+        self.k = k
+        self.c = c
+        self.F = F
+        self.a = a
+        self.l_0 = l_0
+        self.m = m
 
-    f = np.zeros_like(x)
-    f[1, ...] = -k / m * q
-    f[1, ...] += k / m * q * l_0 / np.sqrt(a**2 + q**2)
-    derivatives["k"] = f / k
+    def parse_kwargs(self, **kwargs):
+        x = np.atleast_1d(kwargs.get("x", self.x))
+        k = kwargs.get("k", self.k)
+        c = kwargs.get("c", self.c)
+        F = kwargs.get("F", self.F)
+        a = kwargs.get("a", self.a)
+        l_0 = kwargs.get("l_0", self.l_0)
+        m = kwargs.get("m", self.m)
 
-    f[1, ...] += F / m - c / m * q_dot
-    derivatives["F"] = np.zeros_like(x)
-    derivatives["F"][1, ...] = 1 / m
-    derivatives["c"] = np.zeros_like(x)
-    derivatives["c"][1, ...] = x[1, ...] / m
+        if x.shape[0] != self.n_dof:
+            raise ValueError("first dimension of x must have length n_dof=2")
 
-    derivatives["x"] = np.zeros((f.shape[0], f.shape[0], *f.shape[1:]))
-    derivatives["x"][0, 1, ...] = 1
-    derivatives["x"][1, 1, ...] = -c / m
-    derivatives["x"][1, 0, ...] = -k / m
-    derivatives["x"][1, 0, ...] += k / m * l_0 / np.sqrt(a**2 + x[0, ...] ** 2)
-    derivatives["x"][1, 0, ...] -= k / m * l_0 * q**2 / (np.sqrt(a**2 + q**2) ** 3)
+        return x, k, c, F, a, l_0, m
 
-    derivatives["x"] = derivatives["x"]
-    derivatives["F"] = derivatives["F"]
-    derivatives["c"] = derivatives["c"]
-    derivatives["k"] = derivatives["k"]
+    def dynamics(self, **kwargs):
+        x, k, c, F, a, l_0, m = self.parse_kwargs(**kwargs)
+        q = x[0, ...]
+        q_dot = x[1, ...]
 
-    return f, derivatives
+        f = np.zeros_like(x)
+        f[1, ...] = -k / m * q
+        f[1, ...] += k / m * q * l_0 / np.sqrt(a**2 + q**2)
+        f[1, ...] += F / m - c / m * q_dot
+        return f
+
+    def df_dF(self, **kwargs):
+        x, _, _, _, _, _, m = self.parse_kwargs(**kwargs)
+        df_dF = np.zeros_like(x)
+        df_dF[1, ...] = 1 / m
+        return df_dF
+
+    def df_dc(self, **kwargs):
+        x, _, _, _, _, _, _, m = self.parse_kwargs(**kwargs)
+        df_dc = np.zeros_like(x)
+        df_dc[1, ...] = x[1, ...] / m
+        return df_dc
+
+    def df_dk(self, **kwargs):
+        x, _, _, _, a, l_0, m = self.parse_kwargs(**kwargs)
+        q = x[0, ...]
+        df_dk = np.zeros_like(x)
+        df_dk[1, ...] = -1 / m * q
+        df_dk[1, ...] += 1 / m * q * l_0 / np.sqrt(a**2 + q**2)
+        return df_dk
+
+    def df_dx(self, **kwargs):
+        x, k, c, _, a, l_0, m = self.parse_kwargs(**kwargs)
+        q = x[0, ...]
+
+        df_dx = np.zeros((x.shape[0], x.shape[0], *x.shape[1:]))
+        df_dx[0, 1, ...] = 1
+        df_dx[1, 1, ...] = -c / m
+        df_dx[1, 0, ...] = -k / m
+        df_dx[1, 0, ...] += k / m * l_0 / np.sqrt(a**2 + x[0, ...] ** 2)
+        df_dx[1, 0, ...] -= k / m * l_0 * q**2 / (np.sqrt(a**2 + q**2) ** 3)
+        return df_dx
 
 
-def blockonbelt(
-    t: float | np.ndarray,
-    x: np.ndarray,
-    epsilon: float,
-    k: float,
-    m: float,
-    Fs: float,
-    vdr: float,
-    delta: float,
-) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-    """
-    Dynamics of a block-on-belt system with stick-slip motion and regularized Coulomb friction.
-    Parameters
-    ----------
-    t : float or np.ndarray
-        Current time or array of time points.
-    x : np.ndarray
-        State vector(s) of the system. The first row represents position(s), the second row velocity(ies).
-    epsilon : float
-        Regularization parameter for the friction law.
-    k : float
-        Spring constant.
-    m : float
-        Mass of the block.
-    Fs : float
-        Normal force.
-    vdr : float
-        Driving velocity of the belt.
-    delta : float
-        Slope parameter for the regularization of friction.
-    Returns
-    -------
-    f : np.ndarray
-        Time derivative(s) of the state vector(s).
-    derivatives : dict[str, np.ndarray]
-        Dictionary containing the Jacobian of the system with respect to the state vector, under the key "x".
-    """
+class BlockOnBelt(FirstOrderODE):
 
-    gamma_T = x[1, ...] - vdr
-    F_T = -Fs / (1 + delta * np.abs(gamma_T)) * 2 / np.pi * np.arctan(epsilon * gamma_T)
+    def __init__(
+        self,
+        x: np.ndarray,
+        epsilon: float,
+        k: float,
+        m: float,
+        Fs: float,
+        vdr: float,
+        delta: float,
+    ):
+        super().__init__(True, 2)
+        self.x = x
+        self.epsilon = epsilon
+        self.k = k
+        self.m = m
+        self.Fs = Fs
+        self.vdr = vdr
+        self.delta = delta
 
-    f = np.zeros_like(x)
-    f[0, ...] = x[1, ...]
-    f[1, ...] = -k / m * x[0, ...] + F_T / m
+    def parse_kwargs(self, **kwargs):
+        x = np.atleast_1d(kwargs.get("x", self.x))
+        epsilon = kwargs.get("epsilon", self.epsilon)
+        k = kwargs.get("k", self.k)
+        m = kwargs.get("m", self.m)
+        Fs = kwargs.get("Fs", self.Fs)
+        vdr = kwargs.get("vdr", self.vdr)
+        delta = kwargs.get("delta", self.delta)
 
-    df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
-    df_dx[0, 1, ...] = 1
-    df_dx[1, 0, ...] = -k / m
-    df_dx[1, 1, ...] = (Fs / m) * (
-        (np.arctan(epsilon * gamma_T) / (1 + delta * np.abs(gamma_T)) ** 2)
-        * (delta * np.sign(gamma_T) * 2 / np.pi)
-        - (1 / (1 + delta * np.abs(gamma_T)))
-        * (2 / np.pi)
-        / (1 + (epsilon * gamma_T) ** 2)
-        * epsilon
-    )
+        if x.shape[0] != self.n_dof:
+            raise ValueError("first dimension of x must have length n_dof=2")
+        return x, epsilon, k, m, Fs, vdr, delta
 
-    derivatives = dict()
-    derivatives["x"] = df_dx
-    return f.squeeze(), derivatives
+    def dynamics(self, **kwargs):
+        x, epsilon, k, m, Fs, vdr, delta = self.parse_kwargs(**kwargs)
+
+        gamma_T = x[1, ...] - vdr
+        F_T = (
+            -Fs
+            / (1 + delta * np.abs(gamma_T))
+            * 2
+            / np.pi
+            * np.arctan(epsilon * gamma_T)
+        )
+
+        f = np.zeros_like(x)
+        f[0, ...] = x[1, ...]
+        f[1, ...] = -k / m * x[0, ...] + F_T / m
+        return f
+
+    def derivative(self, variable, **kwargs):
+        if variable == "x":
+            x, epsilon, k, m, Fs, vdr, delta = self.parse_kwargs(**kwargs)
+            gamma_T = x[1, ...] - vdr
+            df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
+            df_dx[0, 1, ...] = 1
+            df_dx[1, 0, ...] = -k / m
+            df_dx[1, 1, ...] = (Fs / m) * (
+                (np.arctan(epsilon * gamma_T) / (1 + delta * np.abs(gamma_T)) ** 2)
+                * (delta * np.sign(gamma_T) * 2 / np.pi)
+                - (1 / (1 + delta * np.abs(gamma_T)))
+                * (2 / np.pi)
+                / (1 + (epsilon * gamma_T) ** 2)
+                * epsilon
+            )
+            return df_dx
+        else:
+            return super().derivative(variable, **kwargs)
