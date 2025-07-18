@@ -1,6 +1,7 @@
 import pytest
 import numpy as np
-from skhippr.systems.nonautonomous import duffing
+
+from skhippr.systems.nonautonomous import Duffing
 
 
 def test_duffing_array_inputs(params_duffing):
@@ -10,21 +11,24 @@ def test_duffing_array_inputs(params_duffing):
     t = np.linspace(0, 10, 100)  # Array of time points
     x = np.random.rand(2, len(t))  # 2xL array
 
-    f, derivatives = duffing(t, x, **params_duffing[1])
+    duff = Duffing(t=t, x=x, **params_duffing[1])
+
+    f = duff.dynamics()
 
     # Check dimensions of the output
     assert f.shape == x.shape, f"Expected f to have shape {x.shape}, but got {f.shape}"
-    assert derivatives["x"].shape == (
+
+    df_dx = duff.derivative("x")
+    assert df_dx.shape == (
         2,
         2,
         len(t),
     ), f"Expected df_dx to have shape {(2, 2, len(t))}, but got {f.shape}"
-    for key in derivatives:
-        if key == "x":
-            continue
+    for key in ["F", "omega", "alpha"]:
+        df_dkey = duff.derivative(key)
         assert (
-            derivatives[key].shape == x.shape
-        ), f"Expected df_d{key} to have shape {x.shape}, but got {derivatives.shape}"
+            df_dkey.shape == x.shape
+        ), f"Expected df_d{key} to have shape {x.shape}, but got {df_dkey.shape}"
 
 
 def test_duffing_scalar_inputs(params_duffing):
@@ -34,20 +38,22 @@ def test_duffing_scalar_inputs(params_duffing):
     t = 1.0  # Scalar time point
     x = np.random.rand(2)  # 1-dimensional array of length 2
 
-    # Call the duffing function
-    f, derivatives = duffing(t, x, **params_duffing[1])
+    duff = Duffing(t=t, x=x, **params_duffing[1])
+    f = duff.dynamics()
 
     assert f.shape == x.shape, f"Expected f to have shape {x.shape}, but got {f.shape}"
-    assert derivatives["x"].shape == (
+
+    df_dx = duff.derivative("x")
+    assert df_dx.shape == (
         2,
         2,
     ), f"Expected df_dx to have shape {(2, 2)}, but got {f.shape}"
-    for key in derivatives:
-        if key == "x":
-            continue
+
+    for key in ["F", "omega", "alpha"]:
+        df_dkey = duff.derivative(key)
         assert (
-            derivatives[key].shape == x.shape
-        ), f"Expected df_d{key} to have shape {x.shape}, but got {derivatives.shape}"
+            df_dkey.shape == x.shape
+        ), f"Expected df_d{key} to have shape {x.shape}, but got {df_dkey.shape}"
 
 
 def test_duffing_mismatched_ndof(params_duffing):

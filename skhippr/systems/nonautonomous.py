@@ -51,11 +51,11 @@ class Duffing(FirstOrderODE):
             case "x":
                 return self.df_dx(**kwargs)
             case "omega":
-                return self.df_domega(**kwargs)
+                return self.df_dom(**kwargs)
             case "F":
                 return self.df_dF(**kwargs)
             case _:
-                return super().derivative()
+                return super().derivative(variable, **kwargs)
 
     def df_dx(self, **kwargs):
 

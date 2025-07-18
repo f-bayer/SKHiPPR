@@ -8,10 +8,10 @@ from skhippr.math import finite_differences
 
 
 class FirstOrderODE(ABC):
-    def __init__(self, autonomous, n_dof, **kwargs):
+    def __init__(self, autonomous: bool, n_dof: int, **kwargs):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
-        self.autonomous: bool
-        self.n_dof: int
+        self.autonomous = autonomous
+        self.n_dof = n_dof
 
     @abstractmethod
     def dynamics(self, **kwargs) -> np.ndarray:
@@ -25,6 +25,9 @@ class FirstOrderODE(ABC):
 
     def derivative(self, variable, h_fd=1e-4, **kwargs):
         """Return the partial derivative of f w.r.t <variable> as a self-n_dof x self.n_dof numpy array. Recommended implementation using switch/case and individual methods for all required derivatives."""
+        if variable not in kwargs:
+            kwargs[variable] = getattr(self, variable)
+
         derivative = finite_differences(
             self.dynamics, kwargs=kwargs, variable=variable, h_step=h_fd
         )
