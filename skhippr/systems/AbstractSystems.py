@@ -1,13 +1,15 @@
 """Algebraic equation system. Encodes a system of algebraic equations. Base class."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import Any, override
 import numpy as np
 
-from skhippr.math import finite_difference_derivative
-
 
 class AbstractEquationSystem(ABC):
+
+    def __init__(self):
+        super().__init__()
 
     def residual(self, update=False):
         if update:
@@ -59,7 +61,7 @@ class AbstractEquationSystem(ABC):
             derivative = self.closed_form_derivative(variable)
         except NotImplementedError:
             # Fall back on finite differences.
-            derivative = finite_difference_derivative(self, variable, h_step=h_fd)
+            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
 
         self._derivative_dict[variable] = derivative
 
@@ -71,7 +73,55 @@ class AbstractEquationSystem(ABC):
             f"Closed-form derivative of residual w.r.t {variable} not implemented."
         )
 
+    def finite_difference_derivative(self, variable, h_step=1e-4) -> np.ndarray:
 
+        x_orig = getattr(self, variable)
+        x = np.atleast_2d(x_orig)
+        n = x.shape[0]
+        if n == 1 and x.shape[1] > 1:
+            x = x.T
+            n = x.shape[0]
+
+        f = self.residual(update=True)
+        delta = h_step * np.eye(n)
+        derivative = np.zeros((f.shape[0], n, *f.shape[1:]))
+
+        for k in range(n):
+            setattr(self, variable, np.squeeze(x + delta[:, [k]]))
+            derivative[:, k, ...] = (self.residual_function() - f) / h_step
+
+        setattr(self, variable, x_orig)
+        return np.squeeze(derivative)
+
+
+class EquationSystem(AbstractEquationSystem):
+    def __init__(
+        self,
+        residual_function,
+        closed_form_derivative: dict[str, Callable],
+        **parameters,
+    ):
+        super().__init__()
+        # Overwrite the residual function and derivatives by passed functions
+        self._residual_function = residual_function
+        self._closed_form_derivative = closed_form_derivative
+        self._list_params = list(parameters.keys())
+        self.__dict__.update(parameters)
+
+    @override
+    def residual_function(self):
+        return self._residual_function(
+            **{key: self.__dict__[key] for key in self._list_params}
+        )
+
+    @override
+    def closed_form_derivative(self, variable):
+        return self._closed_form_derivative(
+            variable, **{key: self.__dict__[key] for key in self._list_params}
+        )
+
+
+# still an abstract class
 class FirstOrderODE(AbstractEquationSystem):
     def __init__(self, autonomous: bool, n_dof: int):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
