@@ -209,6 +209,7 @@ class Truss(FirstOrderODE):
         return df_dk
 
     def df_dx(self, **kwargs):
+
         x, k, c, _, a, l_0, m = self.parse_kwargs(**kwargs)
         q = x[0, ...]
 
@@ -216,7 +217,7 @@ class Truss(FirstOrderODE):
         df_dx[0, 1, ...] = 1
         df_dx[1, 1, ...] = -c / m
         df_dx[1, 0, ...] = -k / m
-        df_dx[1, 0, ...] += k / m * l_0 / np.sqrt(a**2 + x[0, ...] ** 2)
+        df_dx[1, 0, ...] += k / m * l_0 / np.sqrt(a**2 + q**2)
         df_dx[1, 0, ...] -= k / m * l_0 * q**2 / (np.sqrt(a**2 + q**2) ** 3)
         return df_dx
 

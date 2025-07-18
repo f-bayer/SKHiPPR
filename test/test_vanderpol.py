@@ -77,7 +77,7 @@ def test_derivatives(ode_setting):
     ), f"Expected df_dx to have shape {df_dx_shape_expected}, but got {df_dx.shape}"
 
     params["x"] = x
-    df_dx_fd = finite_differences(ode.dynamics, params, "x", 1e-5)
+    df_dx_fd = finite_differences(ode.dynamics, params, "x", 1e-4)
     assert np.allclose(
         df_dx_fd, df_dx, 1e-3, 1e-3
     ), f"df_dx does not match FD derivative with max error {np.max(np.abs(df_dx_fd - df_dx))}"
