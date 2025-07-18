@@ -96,7 +96,7 @@ def test_duffing_mismatched_dimensions(params_duffing):
 
 
 @pytest.mark.parametrize(
-    "variable", ["x", "omega", "F", "alpha", "beta", "delta", "undefined_var"]
+    "variable", ["x", "omega", "F", "alpha", "beta", "delta", "bad_var"]
 )
 def test_duffing_derivatives(params_duffing, variable):
     """Verify that the returned derivative matches finite difference derivative"""
@@ -108,16 +108,12 @@ def test_duffing_derivatives(params_duffing, variable):
     kwargs["x"] = x
     kwargs["t"] = t
 
-    try:
-        deriv_duff = duff.derivative(variable, **kwargs)
-    except AttributeError as exc:
-        if variable != "x" and variable not in params_duffing[1]:
-            # The variable is undefined and trying to differentiate by it should indeed raise an error
-            print(exc)
-            return
-        else:
-            raise exc
+    if variable != "x" and variable not in params_duffing[1]:
+        with pytest.raises(AttributeError):
+            deriv_duff = duff.derivative(variable, **kwargs)
+        return
 
+    deriv_duff = duff.derivative(variable, **kwargs)
     deriv_finite_diff = finite_differences(duff.dynamics, kwargs, variable, 1e-5)
 
     assert np.allclose(
