@@ -54,6 +54,12 @@ class Duffing(FirstOrderODE):
                 return self.df_dom(**kwargs)
             case "F":
                 return self.df_dF(**kwargs)
+            case "alpha":
+                return self.df_dalpha(**kwargs)
+            case "beta":
+                return self.df_dbeta(**kwargs)
+            case "delta":
+                return self.df_ddelta(**kwargs)
             case _:
                 return super().derivative(variable, **kwargs)
 
@@ -70,6 +76,29 @@ class Duffing(FirstOrderODE):
         df_dx[1, 1, ...] = -delta
 
         return df_dx
+
+    def df_dalpha(self, **kwargs):
+        x = kwargs.get("x", self.x)
+
+        df_dal = np.zeros_like(x)
+        df_dal[1, ...] = -x[0, ...]
+
+        return df_dal
+
+    def df_dbeta(self, **kwargs):
+        x = kwargs.get("x", self.x)
+
+        df_dbe = np.zeros_like(x)
+        df_dbe[1, ...] = -x[0, ...] ** 3
+        return df_dbe
+
+    def df_ddelta(self, **kwargs):
+        x = kwargs.get("x", self.x)
+
+        df_ddel = np.zeros_like(x)
+        df_ddel[1, ...] = -x[1, ...]
+
+        return df_ddel
 
     def df_dF(self, **kwargs):
         t = kwargs.get("t", self.t)
