@@ -1,50 +1,143 @@
 import numpy as np
+from skhippr.systems.AbstractSystems import FirstOrderODE
 
 
-def vanderpol(
-    t: float | np.ndarray, x: np.ndarray, nu: float
-) -> tuple[np.ndarray, dict[str, np.array]]:
+class Vanderpol(FirstOrderODE):
     """
-    Computes the dynamics and derivatives of the Van der Pol oscillator:
-    ddot{x} + nu*(x**2 - 1)*dot{x} + x = 0
+    Van der Pol oscillator as a first-order autonomous ODE system.
+
     Parameters
     ----------
-    t : float or np.ndarray
-        Current time or array of time values (not used in computation, included for API compatibility).
+
     x : np.ndarray
-        State vector(s) of the system. Should have shape (2, ...) where the first row is position and the second is velocity.
+        Initial state vector of shape (2, ...), where the first dimension corresponds to the two degrees of freedom.
     nu : float
         Nonlinearity/damping parameter of the Van der Pol oscillator.
-    Returns
+
+    Attributes
+    ----------
+
+    nu : float
+        Nonlinearity/damping parameter.
+    x : np.ndarray
+        State vector.
+
+    Methods
     -------
-    f : np.ndarray
-        Time derivative(s) of the state vector(s), same shape as `x`.
-    derivatives : dict[str, np.ndarray]
-        Dictionary containing partial derivatives:
-            - "x": Jacobian of `f` with respect to `x`, shape (2, 2, ...).
-            - "nu": Partial derivative of `f` with respect to `nu`, shape as `x`.
-            - "T": Placeholder for time derivative (zeros), shape as `x`.
+
+    parse_kwargs(**kwargs)
+        Parses keyword arguments for state and parameter values.
+    dynamics(t=None, **kwargs)
+        Computes the time derivative of the state vector according to the Van der Pol equations.
+    derivative(variable, **kwargs)
+        Computes the derivative of the dynamics with respect to a given variable ('x' or 'nu').
+
+    Raises
+    ------
+
+    ValueError
+        If the state vector `x` does not have the correct shape.
+    AttributeError
+        If the requested derivative variable is not recognized.
     """
 
-    f = np.zeros_like(x)
-    f[0, ...] = x[1, ...]
-    f[1, ...] = nu * (1 - x[0, ...] ** 2) * x[1, ...] - x[0, ...]
+    def __init__(self, x: np.ndarray, nu: float, **kwargs):
+        super().__init__(autonomous=True, n_dof=2)
+        self.nu = nu
+        self.x = x
+        self.t = kwargs.get("t", None)
 
-    df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
-    df_dx[0, 1, ...] = 1
-    df_dx[1, 0, ...] = -1 - 2 * nu * x[0, ...] * x[1, ...]
-    df_dx[1, 1, ...] = nu * (1 - x[0, ...] ** 2)
+    def parse_kwargs(self, **kwargs):
+        x = kwargs.get("x", self.x)
+        nu = kwargs.get("nu", self.nu)
 
-    df_dnu = np.zeros_like(x)
-    df_dtau = np.zeros_like(x)
-    df_dnu[1, ...] = (1 - x[0, ...] ** 2) * x[1, ...]
+        if x.shape[0] != self.n_dof:
+            raise ValueError("first dimension of x must have length n_dof=2")
 
-    derivatives = dict()
-    derivatives["x"] = df_dx
-    derivatives["nu"] = df_dnu
-    derivatives["T"] = df_dtau
+        return x, nu
 
-    return f, derivatives
+    def dynamics(self, t=None, **kwargs):
+        """
+        Calculates the dynamics of the system at a given time.
+
+        Parameters
+        ----------
+
+        t : float, optional
+            The current time. Default is None.
+        **kwargs : dict
+            Additional keyword arguments. Can contain 'x' and 'nu', which are otherwise onbtained from self.x and self.nu.
+
+        Returns
+        -------
+
+        f : ndarray
+            The computed derivatives of the state variables.
+
+        Notes
+        -----
+
+        This function expects `kwargs` to contain the state `x` and input `nu`, which are parsed using `self.parse_kwargs`.
+        The dynamics are defined as:
+            f[0] = x[1]
+            f[1] = nu * (1 - x[0]**2) * x[1] - x[0]
+        """
+
+        x, nu = self.parse_kwargs(**kwargs)
+        f = np.zeros_like(x)
+        f[0, ...] = x[1, ...]
+        f[1, ...] = nu * (1 - x[0, ...] ** 2) * x[1, ...] - x[0, ...]
+        return f
+
+    def derivative(self, variable, **kwargs):
+        """
+        Compute the derivative of the Van der Pol system with respect to a given variable.
+
+        Parameters
+        ----------
+
+        variable : str
+            The variable with respect to which the derivative is computed.
+            Supported values are "x" (state variable) and "nu" (system parameter).
+        **kwargs
+            Additional keyword arguments. May contain:
+                x : np.ndarray
+                    State variable array of shape (2, ...).
+                nu : float or np.ndarray
+                    System parameter(s).
+            By default, these values are set by self.x and self.nu.
+
+        Returns
+        -------
+
+        np.ndarray
+            The derivative of the system with respect to the specified variable:
+            - If `variable` is "x", returns the Jacobian matrix with respect to `x` of shape (2, 2, ...).
+            - If `variable` is "nu", returns the derivative with respect to `nu` of shape (2, ...).
+
+        Raises
+        ------
+
+        AttributeError
+            If the specified variable is not "x" or "nu".
+        """
+
+        x, nu = self.parse_kwargs(**kwargs)
+        match variable:
+            case "x":
+                df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
+                df_dx[0, 1, ...] = 1
+                df_dx[1, 0, ...] = -1 - 2 * nu * x[0, ...] * x[1, ...]
+                df_dx[1, 1, ...] = nu * (1 - x[0, ...] ** 2)
+                return df_dx
+            case "nu":
+                df_dnu = np.zeros_like(x)
+                df_dnu[1, ...] = (1 - x[0, ...] ** 2) * x[1, ...]
+                return df_dnu
+            case _:
+                raise AttributeError(
+                    f"{x} is not a parameter of vanderpol, derivative thus undefined"
+                )
 
 
 def truss(

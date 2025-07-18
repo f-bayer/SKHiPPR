@@ -66,14 +66,12 @@ def test_duffing_mismatched_ndof(params_duffing):
 
     duff = Duffing(t=t, x=x, **params_duffing[1])  # no error detected yet
 
-    try:
-        # Call the duffing function
+    with pytest.raises(ValueError):
         f = duff.dynamics()
-        assert (
-            False
-        ), "Expected ValueError for mismatched dimensions, but no error was raised."
-    except ValueError:
-        pass  # Expected behavior
+
+    with pytest.raises(ValueError):
+        df_dx = duff.derivative("x")
+        pass
 
 
 def test_duffing_mismatched_dimensions(params_duffing):
@@ -85,14 +83,12 @@ def test_duffing_mismatched_dimensions(params_duffing):
 
     duff = Duffing(t=t, x=x, **params_duffing[1])  # no error detected yet
 
-    try:
-        # Call the duffing function
+    with pytest.raises(ValueError):
         f = duff.dynamics()
-        assert (
-            False
-        ), "Expected ValueError for mismatched dimensions, but no error was raised."
-    except ValueError:
-        pass  # Expected behavior
+
+    with pytest.raises(ValueError):
+        df_dx = duff.derivative("x")
+        pass
 
 
 @pytest.mark.parametrize(

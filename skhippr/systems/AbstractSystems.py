@@ -8,7 +8,7 @@ from skhippr.math import finite_differences
 
 
 class FirstOrderODE(ABC):
-    def __init__(self, autonomous: bool, n_dof: int, **kwargs):
+    def __init__(self, autonomous: bool, n_dof: int):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
         self.autonomous = autonomous
         self.n_dof = n_dof

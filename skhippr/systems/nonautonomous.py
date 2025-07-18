@@ -22,10 +22,9 @@ class Duffing(FirstOrderODE):
         self.omega = omega
         self.delta = delta
 
-    def dynamics(self, **kwargs) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-
-        t = kwargs.get("t", self.t)
-        x = kwargs.get("x", self.x)
+    def parse_kwargs(self, **kwargs):
+        t = np.atleast_1d(kwargs.get("t", self.t))
+        x = np.atleast_1d(kwargs.get("x", self.x))
         alpha = kwargs.get("alpha", self.alpha)
         beta = kwargs.get("beta", self.beta)
         omega = kwargs.get("omega", self.omega)
@@ -34,6 +33,18 @@ class Duffing(FirstOrderODE):
 
         if x.shape[0] != self.n_dof:
             raise ValueError("first dimension of x must have length n_dof=2")
+
+        if (len(x.shape) == 1 and len(t) > 1) or (
+            len(x.shape) > 1 and len(t) != x.shape[1]
+        ):
+            raise ValueError(
+                f"Dimensions of x ({x.shape}) and t ({t.shape}) contradict"
+            )
+
+        return t, x, alpha, beta, omega, F, delta
+
+    def dynamics(self, **kwargs) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        t, x, alpha, beta, omega, F, delta = self.parse_kwargs(**kwargs)
 
         f = np.zeros_like(x)
         f[0, ...] = x[1, ...]
@@ -65,10 +76,7 @@ class Duffing(FirstOrderODE):
 
     def df_dx(self, **kwargs):
 
-        x = kwargs.get("x", self.x)
-        alpha = kwargs.get("alpha", self.alpha)
-        beta = kwargs.get("beta", self.beta)
-        delta = kwargs.get("delta", self.delta)
+        _, x, alpha, beta, _, _, delta = self.parse_kwargs(**kwargs)
 
         df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
         df_dx[0, 1, ...] = 1
@@ -78,7 +86,7 @@ class Duffing(FirstOrderODE):
         return df_dx
 
     def df_dalpha(self, **kwargs):
-        x = kwargs.get("x", self.x)
+        x = self.parse_kwargs(**kwargs)[1]
 
         df_dal = np.zeros_like(x)
         df_dal[1, ...] = -x[0, ...]
@@ -86,14 +94,14 @@ class Duffing(FirstOrderODE):
         return df_dal
 
     def df_dbeta(self, **kwargs):
-        x = kwargs.get("x", self.x)
+        x = self.parse_kwargs(**kwargs)[1]
 
         df_dbe = np.zeros_like(x)
         df_dbe[1, ...] = -x[0, ...] ** 3
         return df_dbe
 
     def df_ddelta(self, **kwargs):
-        x = kwargs.get("x", self.x)
+        x = self.parse_kwargs(**kwargs)[1]
 
         df_ddel = np.zeros_like(x)
         df_ddel[1, ...] = -x[1, ...]
@@ -101,6 +109,7 @@ class Duffing(FirstOrderODE):
         return df_ddel
 
     def df_dF(self, **kwargs):
+        t, x, _, _, omega, _, _ = self.parse_kwargs(**kwargs)
         t = kwargs.get("t", self.t)
         x = kwargs.get("x", self.x)
         omega = kwargs.get("omega", self.omega)
@@ -110,7 +119,7 @@ class Duffing(FirstOrderODE):
         return df_dF
 
     def df_dom(self, **kwargs):
-
+        t, x, _, _, omega, F, _ = self.parse_kwargs(**kwargs)
         t = kwargs.get("t", self.t)
         x = kwargs.get("x", self.x)
         omega = kwargs.get("omega", self.omega)
