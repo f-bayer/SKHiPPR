@@ -31,12 +31,13 @@ def test_finite_differences(variable):
 
 def test_finite_differences_matrix():
 
-    def my_matrix_function(x):
-        return np.vstack([x, x]).T
+    def identity(x):
+        return x
 
-    n = 3
-    x = np.random.rand(n)
-    derivative = np.dstack([np.eye(n), np.eye(n)])
-    derivative_fd = finite_differences(my_matrix_function, {"x": x}, "x", 1e-5)
+    n_dof = 3
+    n_samples = 100
+    x = np.random.rand(n_dof, n_samples)
+    derivative = np.tile(np.eye(n_dof)[:, :, np.newaxis], (1, 1, n_samples))
+    derivative_fd = finite_differences(identity, {"x": x}, "x", 1e-5)
 
     assert np.allclose(derivative, derivative_fd, 1e-4, 1e-4)
