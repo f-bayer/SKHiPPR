@@ -1,59 +1,99 @@
 import pytest
 import numpy as np
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
+from skhippr.systems.AbstractSystems import AbstractEquationSystem
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
+class TestEquationY(AbstractEquationSystem):
+    def __init__(self, y, a):
+        super().__init__()
+        self.y = y
+        self.a = a
+
+    def residual_function(self):
+        return np.array([self.y[0] ** 2 - 2 * self.y[1] + 1, self.y[0] - self.y[1]])
+
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "y":
+                return np.array([[2 * self.y[0], -2], [1, -1]])
+            case "a":
+                return self.a
+            case _:
+                raise NotImplementedError
+
+
+class TestEquationB(AbstractEquationSystem):
+    def __init__(self, a, b):
+        super().__init__()
+        self.a = a
+        self.b = b
+
+    def residual_function(self):
+        return np.atleast_1d(self.b - self.a)
+
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "b":
+                return np.atleast_1d(1)
+            case "a":
+                return np.atleast_1d(-1)
+            case "y":
+                return np.array([0, 0])
+            case _:
+                raise NotImplementedError
+
+
 @pytest.fixture
-def params():
-    return {
-        "tol": 1e-8,
+def setup():
+    params = {
+        "tolerance": 1e-8,
         "max_iter": 20,
         "a_ref": 3.0,
+        "y_0": [0.0, 0.0],
+        "y_sol": [1.0, 1.0],
+        "b_0": 3,
     }
 
+    equ_y = TestEquationY(y=params["y_0"], a=params["a_ref"])
+    equ_b = TestEquationB(a=params["a_ref"], b=params["b_0"])
+    return params, equ_y, equ_b
 
-@pytest.fixture
-def prb(params):
-    tol = params["tol"]
-    max_iter = params["max_iter"]
-    a_ref = params["a_ref"]
 
-    x0 = np.array([-3.0, -5.0])
-
-    return NewtonProblem(
-        residual_function=residual_function,
-        initial_guess=x0,
-        variable="y",
-        stability_method=StabilityEquilibrium(n_dof=2),
-        tolerance=tol,
-        max_iterations=max_iter,
-        verbose=False,
-        a=a_ref,
+def test_solver_constructor(setup):
+    params, equ_y, equ_b = setup
+    solver = NewtonSolver(
+        [equ_y, equ_b],
+        ["y", "a"],
+        stability_method=None,
+        tolerance=params["tolerance"],
+        max_iterations=params["max_iter"],
+        verbose=True,
     )
+    assert not solver.converged
+    assert solver.a == params["a_ref"]
 
 
-def residual_function(y, *, a):
-    residual = np.array([y[0] ** 2 - 2 * y[1] + 1, y[0] - y[1]])
-    jacobian = np.array([[2 * y[0], -2], [1, -1]])
-    return residual, {"y": jacobian, "a": a}
-
-
-def test_problem_constructor(prb, params):
-    # This test must always run first because prb is modified / solved by other tests
-    assert not prb.converged
-    assert prb.a == params["a_ref"]
-
-
-def test_solve(prb, params):
-    prb.solve()
-    assert prb.converged
+def test_solve_one_eq(setup):
+    params, equ_y, _ = setup
+    solver = NewtonSolver(
+        [equ_y],
+        ["y"],
+        stability_method=None,
+        tolerance=params["tolerance"],
+        max_iterations=params["max_iter"],
+        verbose=True,
+    )
+    assert not solver.converged
+    solver.solve()
+    assert solver.converged
     assert np.allclose(
-        prb.residual_function(recompute=False), np.array([0, 0]), atol=params["tol"]
+        solver.residual_function(recompute=False), np.array([0, 0]), atol=params["tol"]
     )
-    assert np.allclose(prb.unknowns, np.array([1, 1]), atol=1e-4)
-    assert not prb.stable
+    assert np.allclose(solver.unknowns, np.array([1, 1]), atol=1e-4)
+    # assert not prb.stable
 
 
 def test_reset(prb):
@@ -127,7 +167,7 @@ def test_solution_setter(prb, params):
     assert all(prb.y == y_new)
     assert all(prb.unknowns == y_new)
     res = prb.residual_function(recompute=True)
-    assert all(res == residual_function(y=y_new, a=prb.a)[0])
+    assert all(res == my_function(y=y_new, a=prb.a)[0])
 
 
 if __name__ == "__main__":

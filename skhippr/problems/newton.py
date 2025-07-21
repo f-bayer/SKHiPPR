@@ -1,12 +1,14 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 from collections.abc import Callable
 import numpy as np
 
 if TYPE_CHECKING:
     from skhippr.stability._StabilityMethod import _StabilityMethod
 
+from skhippr.systems.AbstractSystems import AbstractEquationSystem
 
-class NewtonProblem:
+
+class NewtonSolver:
     """
     Implements Newton's method for solving nonlinear equations. Also supports optional stability analysis after convergence.
 
@@ -39,20 +41,7 @@ class NewtonProblem:
 
     Attributes:
     -----------
-    f : Callable[..., tuple[np.ndarray, dict[str, np.ndarray]]]
-        Residual function directly as provided by the user. Takes the parameters as keyword arguments. Must return a tuple whose first entry is the residual and whose second entry is a dictionary collecting the derivatives w.r.t. the arguments (argument name as key).
-    variable : str
-        Name of the variable being solved for. Defaults to ``"x"``.
-    x0 : np.ndarray
-        Initial guess for the solution.
-    x : np.ndarray
-        Current solution estimate.
-    converged : bool
-        Indicates whether the solver has converged.
-    residual : ``np.ndarray`` or ``None``
-        Current residual vector.
-    derivatives : dict[str, np.ndarray] or ``None``
-        Dictionary of derivatives (e.g., Jacobian) with respect to variables at :py:attr:`~skhippr.problems.newton.NewtonProblem.x`. Keys correspond to input arguments of the residual function and values to the corresponding Jacobian.
+    # TODO
     num_iter : int
         Number of iterations performed.
     stability_method : :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod` or ``None``
@@ -72,29 +61,19 @@ class NewtonProblem:
 
     def __init__(
         self,
-        residual_function: Callable[..., tuple[np.ndarray, dict[str, np.ndarray]]],
-        initial_guess: np.ndarray,
-        variable: str = "x",
+        equations: Iterable[AbstractEquationSystem],
+        unknowns: Iterable[str],
         stability_method: "_StabilityMethod" = None,
         tolerance: float = 1e-8,
         max_iterations: int = 20,
         verbose: bool = False,
-        **parameters,
     ):
 
         self.label = "Newton"
-        self.f = residual_function
-
-        # Initialize unknowns and residuals dictionaries.
-        self.unknowns_dict = {variable: initial_guess}
-        self.residuals_dict = {
-            self.f_with_params: None
-        }  # all sub-residual functions must accept **self.unknowns as keyword arguments.
-        self.jacobians_dict: dict[tuple[Callable, str], np.ndarray] = {}
-        self.initial_guess = self.unknowns
-
-        # Initialize optional arguments into self.f
-        self.f_kwargs = parameters
+        self.equations = equations
+        self.unknowns = unknowns
+        self.init_unknowns()
+        self.initial_guess = unknowns
 
         self.converged = False
         self.num_iter: int = 0
@@ -109,24 +88,55 @@ class NewtonProblem:
         self.verbose = verbose
         self.tolerance = tolerance
 
+    def init_unknowns(self):
+        """Make sure that every Equation object (and self) has every unknown as attribute"""
+        self.length_unknowns = {}
+        for unk in self.unknowns:
+            equ_with_value = next(equ for equ in self.equations if hasattr(equ, unk))
+            value = np.atleast_1d(getattr(equ_with_value, unk))
+
+            if value.ndim > 1:
+                raise ValueError(
+                    f"Attribute{equ_with_value}.{unk} has shape {value.shape}, not 1-D: not valid as unknown!"
+                )
+
+            # Check integrity of system of equations
+            for equ_other in self.equations:
+                if hasattr(equ_other, unk):
+                    other_value = np.atleast_1d(getattr(equ_other, unk))
+                    if not np.array_equal(value, other_value):
+                        raise ValueError(
+                            f"Error during Newton solver initialization: "
+                            f"Equations {equ_with_value} and {equ_other} have the same parameter '{unk}' "
+                            f"with conflicting initial values: {value} vs. {other_value}"
+                        )
+
+            self.length_unknowns[unk] = value.size
+            # custom setter also sets the attribute in all equations
+            setattr(self, unk, value)
+        self.length_unknowns["total"] = sum(self.length_unknowns.values())
+
     @property
-    def unknowns(self):
+    def vector_of_unknowns(self):
         """
         Stack all individual unknowns into a single 1-D numpy array.
+        For first evaluation:
+            If multiple elements of self.equation have a parameter, the first one is taken.
 
         Returns
         -------
         numpy.ndarray
             A 1-D array containing all unknowns concatenated along axis 0.
         """
-        return np.concatenate(list(self.unknowns_dict.values()), axis=0)
+        return np.concatenate(
+            [getattr(self.equations[0], unk) for unk in self.unknowns]
+        )
 
-    @unknowns.setter
-    def unknowns(self, x: np.ndarray) -> None:
+    @vector_of_unknowns.setter
+    def vector_of_unknowns(self, x: np.ndarray) -> None:
         """
-        Separates a 1-D array into individual unknowns components and updates their values.
-        This method takes a 1-D NumPy array `x`, splits it into segments corresponding to the sizes of the unknown variables stored in `self.unknowns_dict`, and updates these variables accordingly.
-        It also updates the attributes and values in `self.f_kwargs` if applicable.
+        Separates a 1-D array into individual unknowns components and updates their values for every Equation.
+        This method takes a 1-D NumPy array `x`, splits it into segments corresponding to the sizes of the unknown variables, and updates these variables accordingly.
 
         Parameters
         ----------
@@ -139,47 +149,53 @@ class NewtonProblem:
 
         ValueError
             If `x` is not a 1-D array.
-
-        Notes
-        -----
-        - If the variable exists as an attribute of the object or as a key in `self.f_kwargs`, those are updated as well.
         """
 
-        if len(x.shape) > 1:
+        unknowns_parsed = self.parse_vector_of_unknowns()
+        for unk, value in unknowns_parsed.items():
+            # custom setter also sets the attribute in all equations
+            setattr(self, unk, value)
+
+    def parse_vector_of_unknowns(self, x=None):
+        if x is None:
+            x = self.vector_of_unknowns
+
+        if x.ndim != 1:
             raise ValueError(
                 f"unknowns must be a 1-D array but array is {len(x.shape)}-D"
             )
 
         idx = 0
-        for variable, old_value in self.unknowns_dict.items():
-            n = old_value.shape[0]
-            self.unknowns_dict[variable] = x[idx:n]
+        unknowns_parsed = {}
+        for unk in self.unknowns:
+            n = self.length_unknowns[unk]
+            value = x[idx : idx + n]
+            # custom setter also sets the attribute in all equations
+            unknowns_parsed[unk] = value
             idx += n
-
-            # Attempt to update the value in other places
-            if hasattr(self, variable):
-                setattr(self, variable, self.unknowns_dict[variable])
-
-            if variable in self.f_kwargs:
-                self.f_kwargs[variable] = self.unknowns_dict[variable]
+        return unknowns_parsed
 
     def __getattr__(self, name):
-        """Custom attribute extension that searches also in the unknowns and problem inputs"""
-        if "unknowns_dict" in self.__dict__ and name in self.unknowns_dict:
-            return self.unknowns_dict[name]
-        if "f_kwargs" in self.__dict__ and name in self.f_kwargs:
-            return self.f_kwargs[name]
-        raise AttributeError(f"Attribute '{name}' does not exist")
+        """Custom attribute extension that searches also in the unknowns"""
+        if (
+            "unknowns" in self.__dict__
+            and "equations" in self.__dict__
+            and name in self.unknowns
+        ):
+            return getattr(self.equations[0], name)
+        else:
+            raise AttributeError(f"Attribute '{name}' not available")
 
     def __setattr__(self, name, value) -> None:
-        """Custom attribute setter also attempts to set the attribute in self.unknowns and/or self.f_kwargs. Success leads to a convergence reset."""
+        """Custom attribute setter. If the attribute is part of the unknowns, it is set also in all equations."""
 
-        if "unknowns_dict" in self.__dict__ and name in self.unknowns_dict:
-            self.unknowns_dict[name] = value
-            self.reset()
-        if "f_kwargs" in self.__dict__ and name in self.f_kwargs:
-            self.f_kwargs[name] = value
-            self.reset()
+        if (
+            "unknowns" in self.__dict__
+            and "equations" in self.__dict__
+            and name in self.unknowns
+        ):
+            for equ in self.equations:
+                setattr(equ, name, value)
 
         super().__setattr__(name, value)
 
@@ -200,101 +216,52 @@ class NewtonProblem:
             text_x = ""
         return f"{text_converged} {text_x}after {self.num_iter}/{self.max_iterations} iterations {text_stable}"
 
-    def get_params(self, keys_to_exclude: tuple[str] = ()):
-        """
-        Retrieve a subset of self.f_kwargs.
-
-        Parameters
-        ----------
-        keys_to_exclude : tuple[str], optional
-            A tuple of parameter names to exclude from the returned dictionary. Default is an empty tuple.
-
-        Returns
-        -------
-        dict
-            A dictionary containing the parameter names of the residual function (including the main unknown variable) and their corresponding values, excluding those specified in ``keys_to_exclude``.
-        """
-
-        return {
-            key: value
-            for key, value in self.f_kwargs.items()
-            if not key in keys_to_exclude
-        }
-
-    def f_with_params(
-        self, *args, **kwargs
-    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """
-        Calls the residual function with the provided arguments and parameters. Parameters that are not explicitly set are filled by :py:func:`~skhippr.problems.newton.NewtonProblem.get_params`.
-
-        Parameters
-        ----------
-        *args : tuple
-            Positional arguments to pass to the residual function. Must includes the variable itself.
-        **kwargs : dict
-            Keyword arguments to pass to the residual function.
-
-        Returns
-        -------
-
-        tuple[np.ndarray, dict[str, np.ndarray]]
-            The result of calling the residual with the combined arguments and parameters:
-
-            * the residual as a ``np.ndarray``
-            * the derivatives as a dictionary
-        """
-
-        return self.f(
-            *args,
-            **self.get_params(keys_to_exclude=kwargs.keys()),
-            **kwargs,
-        )
-
     def residual_function(
-        self, recompute=False
+        self, update=False
     ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """Residual function evaluated at the current unknowns with the current parameters.
-            Updates all sub-residuals and sub-Jacobians of the corresponding dictionaries.
-
-        Note
-        ----
-        This function is used in the Newton update. Residuals and Jacobians are updated in order of appearance in self.residuals_dict().
+        """
+        Assembles one overall residual from the residuals of self.equations. Raises an error if there are not as many equations as unknowns.
 
         Returns
         -------
 
-        tuple[np.ndarray, dict[str, np.ndarray]]
-            The result of calling the residual with the combined arguments and parameters:
-
-            * the residual as a ``np.ndarray``
-            * the derivatives w.r.t all the unknowns as a numpy array
-
+        np.ndarray
+            The result of calling the individual residuals.
         """
-        if recompute:
-            for fun in self.residuals_dict:
-                res, jacobians = fun(**self.unknowns_dict)
 
-                # Populate the dictionaries
-                self.residuals_dict[fun] = res
-                for key in jacobians:
-                    self.jacobians_dict[(fun, key)] = jacobians[key]
+        res = np.concatenate([equ.residual(update=update) for equ in self.equations])
+        if res.size != self.length_unknowns["total"]:
+            raise RuntimeError(
+                f"Length {res.size} of residual is not number {self.length_unknowns['total']} of unknowns!"
+            )
+        return res
 
-        # Construct the overall residual
-        return np.concatenate(list(self.residuals_dict.values()))
-
-    def jacobian(self):
-        """Assemble the derivative of the residual w.r.t the unknowns row by row."""
-        return np.vstack(
+    def jacobian(self, update=False, h_fd=1e-4):
+        """Assemble the derivative of the residual w.r.t the unknowns.
+        NOTE: If update is True, the equations are updated in order. I.e., if one equation relies on Jacobians of the previous equation, that should work.
+        TO DO: Check more thoroughly for sizing problems here.
+        TO DO: Vectorized evaluation in 3rd dimension
+        """
+        jac = np.vstack(
             [
                 np.hstack(
                     [
-                        self.jacobians_dict[(fun, unknown)]
-                        for unknown in self.unknowns_dict
+                        equ.derivative(unk, update=update, h_fd=h_fd)
+                        for unk in self.unknowns
                     ]
                 )
-                for fun in self.residuals_dict
+                for equ in self.equations
             ]
         )
+        if jac.shape[0] != self.length_unknowns["total"]:
+            raise RuntimeError(
+                "Total number of rows in Jacobian is not length of unknowns!"
+            )
+        if jac.shape[1] != self.length_unknowns["total"]:
+            raise RuntimeError(
+                "Total number of columns in Jacobian is not length of unknowns!"
+            )
+        return jac
 
     def reset(self, x0_new=None) -> None:
         """
@@ -314,7 +281,7 @@ class NewtonProblem:
 
         if x0_new is not None:
             self.initial_guess = x0_new
-            self.unknowns = x0_new
+            self.vector_of_unknowns = x0_new
 
         self.converged = False
         self.num_iter = 0
@@ -323,13 +290,13 @@ class NewtonProblem:
 
     def correction_step(self) -> None:
 
-        residual = self.check_converged(recompute_residual=True)
+        residual = self.check_converged(update=True)
         if not self.converged:
             delta_x = np.linalg.solve(self.jacobian(), -residual)
-            self.unknowns = self.unknowns + delta_x
+            self.vector_of_unknowns = self.vector_of_unknowns + delta_x
 
-    def check_converged(self, recompute_residual=True) -> None:
-        residual = self.residual_function(recompute=recompute_residual)
+    def check_converged(self, update=True) -> None:
+        residual = self.residual_function(update=update)
         if np.linalg.norm(residual) < self.tolerance:
             self.converged = True
         return residual
@@ -353,7 +320,7 @@ class NewtonProblem:
         * Prints progress and convergence information if :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose` is ``True``.
         """
         if self.verbose:
-            print(f", Initial guess: x[-1]={self.unknowns[-1]:.3g}")
+            print(f", Initial guess: x[-1]={self.vector_of_unknowns[-1]:.3g}")
 
         while self.num_iter < self.max_iterations and not self.converged:
             self.num_iter += 1
@@ -363,13 +330,13 @@ class NewtonProblem:
             self.correction_step()
             if self.verbose:
                 print(
-                    f", |r| = {np.linalg.norm(self.residual_function(recompute=False)):8.3g}, x[-1]={self.unknowns[-1]:.3g}"
+                    f", |r| = {np.linalg.norm(self.residual_function(update=False)):8.3g}, x[-1]={self.vector_of_unknowns[-1]:.3g}"
                 )
 
             if self.converged and self.verbose:
                 print(f" Converged", end="")
-                if len(self.x) < 5:
-                    print(f" to {self.variable} = {self.x}")
+                if self.length_unknowns["total"] < 5:
+                    print(f" to {self.parse_vector_of_unknowns()}")
                 else:
                     print("")
 
