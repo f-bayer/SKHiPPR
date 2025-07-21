@@ -1,4 +1,5 @@
 import numpy as np
+from typing import override
 from skhippr.systems.AbstractSystems import FirstOrderODE
 
 
@@ -22,109 +23,112 @@ class Duffing(FirstOrderODE):
         self.omega = omega
         self.delta = delta
 
-    def parse_kwargs(self, **kwargs):
-        t = np.atleast_1d(kwargs.get("t", self.t))
-        x = np.atleast_1d(kwargs.get("x", self.x))
-        alpha = kwargs.get("alpha", self.alpha)
-        beta = kwargs.get("beta", self.beta)
-        omega = kwargs.get("omega", self.omega)
-        F = kwargs.get("F", self.F)
-        delta = kwargs.get("delta", self.delta)
+    @override
+    def dynamics(self, t=None, x=None) -> np.ndarray:
 
-        if x.shape[0] != self.n_dof:
-            raise ValueError("first dimension of x must have length n_dof=2")
-
-        if (len(x.shape) == 1 and len(t) > 1) or (
-            len(x.shape) > 1 and len(t) != x.shape[1]
-        ):
-            raise ValueError(
-                f"Dimensions of x ({x.shape}) and t ({t.shape}) contradict"
-            )
-
-        return t, x, alpha, beta, omega, F, delta
-
-    def dynamics(self, **kwargs) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        t, x, alpha, beta, omega, F, delta = self.parse_kwargs(**kwargs)
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
+        self.check_dimensions(t, x)
 
         f = np.zeros_like(x)
         f[0, ...] = x[1, ...]
         f[1, ...] = (
-            -alpha * x[0, ...]
-            - delta * x[1, ...]
-            - beta * x[0, ...] ** 3
-            + F * np.cos(omega * t)
+            -self.alpha * x[0, ...]
+            - self.delta * x[1, ...]
+            - self.beta * x[0, ...] ** 3
+            + self.F * np.cos(self.omega * t)
         )
 
         return f
 
-    def derivative(self, variable, **kwargs):
+    @override
+    def closed_form_derivative(self, variable, t=None, x=None):
+
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
+
+        self.check_dimensions(t, x)
+
         match variable:
             case "x":
-                return self.df_dx(**kwargs)
+                return self.df_dx(t, x)
             case "omega":
-                return self.df_dom(**kwargs)
+                return self.df_dom(t, x)
             case "F":
-                return self.df_dF(**kwargs)
+                return self.df_dF(t, x)
             case "alpha":
-                return self.df_dalpha(**kwargs)
+                return self.df_dalpha(t, x)
             case "beta":
-                return self.df_dbeta(**kwargs)
+                return self.df_dbeta(t, x)
             case "delta":
-                return self.df_ddelta(**kwargs)
+                return self.df_ddelta(t, x)
             case _:
-                return super().derivative(variable, **kwargs)
+                raise NotImplementedError
 
-    def df_dx(self, **kwargs):
+    def df_dx(self, t=None, x=None):
 
-        _, x, alpha, beta, _, _, delta = self.parse_kwargs(**kwargs)
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
 
-        df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
+        df_dx = np.zeros((2, *x.shape), dtype=x.dtype)
         df_dx[0, 1, ...] = 1
-        df_dx[1, 0, ...] = -alpha - 3 * beta * x[0, ...] ** 2
-        df_dx[1, 1, ...] = -delta
+        df_dx[1, 0, ...] = -self.alpha - 3 * self.beta * x[0, ...] ** 2
+        df_dx[1, 1, ...] = -self.delta
 
         return df_dx
 
-    def df_dalpha(self, **kwargs):
-        x = self.parse_kwargs(**kwargs)[1]
+    def df_dalpha(self, t=None, x=None):
+
+        if x is None:
+            x = self.x
 
         df_dal = np.zeros_like(x)
         df_dal[1, ...] = -x[0, ...]
 
         return df_dal
 
-    def df_dbeta(self, **kwargs):
-        x = self.parse_kwargs(**kwargs)[1]
+    def df_dbeta(self, t=None, x=None):
+
+        if x is None:
+            x = self.x
 
         df_dbe = np.zeros_like(x)
         df_dbe[1, ...] = -x[0, ...] ** 3
         return df_dbe
 
-    def df_ddelta(self, **kwargs):
-        x = self.parse_kwargs(**kwargs)[1]
+    def df_ddelta(self, t=None, x=None):
 
+        if x is None:
+            x = self.x
         df_ddel = np.zeros_like(x)
         df_ddel[1, ...] = -x[1, ...]
 
         return df_ddel
 
-    def df_dF(self, **kwargs):
-        t, x, _, _, omega, _, _ = self.parse_kwargs(**kwargs)
-        t = kwargs.get("t", self.t)
-        x = kwargs.get("x", self.x)
-        omega = kwargs.get("omega", self.omega)
+    def df_dF(self, t=None, x=None):
+
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
 
         df_dF = np.zeros_like(x)
-        df_dF[1, ...] = np.cos(omega * t)
+        df_dF[1, ...] = np.cos(self.omega * t)
         return df_dF
 
-    def df_dom(self, **kwargs):
-        t, x, _, _, omega, F, _ = self.parse_kwargs(**kwargs)
-        t = kwargs.get("t", self.t)
-        x = kwargs.get("x", self.x)
-        omega = kwargs.get("omega", self.omega)
-        F = kwargs.get("F", self.F)
+    def df_dom(self, t=None, x=None):
+
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
 
         df_dom = np.zeros_like(x)
-        df_dom[1, ...] = -F * t * np.sin(omega * t)
+        df_dom[1, ...] = -self.F * t * np.sin(self.omega * t)
         return df_dom

@@ -1,11 +1,10 @@
 import numpy as np
 import pytest
 from skhippr.systems.autonomous import Vanderpol, Truss, BlockOnBelt
+from skhippr.systems.nonautonomous import Duffing
 
-# TODO find errors here on Monday
 
-
-@pytest.fixture(scope="module", params=["vanderpol", "truss", "blockonbelt"])
+@pytest.fixture(scope="module", params=["vanderpol", "truss", "blockonbelt", "Duffing"])
 def ode_setting(x, request):
 
     match request.param:
@@ -18,6 +17,19 @@ def ode_setting(x, request):
         case "blockonbelt":
             params = {"epsilon": 0.1, "k": 1, "m": 1, "Fs": 0.1, "vdr": 2, "delta": 0.5}
             return params, BlockOnBelt(x=x, **params)
+        case "Duffing":
+            params = {
+                "alpha": 1,
+                "beta": 3,
+                "F": 1,
+                "delta": 0.1,
+                "omega": 1.3,
+            }
+            if len(x.shape) == 1:
+                t = 1
+            else:
+                t = np.linspace(0, params["omega"], x.shape[1])
+            return params, Duffing(t=t, x=x, **params)
 
 
 @pytest.fixture(scope="module", params=[1, 100])
@@ -49,8 +61,8 @@ def test_mismatched_ndof(ode_setting):
     """
 
     params, ode = ode_setting
-    x = ode.x
-    x = np.random.rand(*(3, *x.shape[1:]))  # 3xL array (incorrect dimension)
+    x_old = ode.x
+    x = np.random.rand(*(3, *x_old.shape[1:]))  # 3xL array (incorrect dimension)
     ode.x = x  # no error detected yet
 
     with pytest.raises(ValueError):
@@ -64,6 +76,9 @@ def test_mismatched_ndof(ode_setting):
         with pytest.raises(ValueError):
             df_dvar = ode.derivative(variable)
             pass
+
+    # Revert the ode object to correct setting
+    ode.x = x_old
 
 
 def test_derivatives(ode_setting):
