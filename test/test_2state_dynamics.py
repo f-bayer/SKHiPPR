@@ -2,10 +2,35 @@ import numpy as np
 import pytest
 from skhippr.systems.autonomous import Vanderpol, Truss, BlockOnBelt
 from skhippr.systems.nonautonomous import Duffing
+from skhippr.systems.ltp import (
+    HillLTI,
+    MathieuODE,
+    SmoothedMeissner,
+    TruncatedMeissner,
+    ShirleyODE,
+)
 
 
-@pytest.fixture(scope="module", params=["vanderpol", "truss", "blockonbelt", "Duffing"])
+@pytest.fixture(
+    scope="module",
+    params=[
+        "vanderpol",
+        "truss",
+        "blockonbelt",
+        "Duffing",
+        "HillConst",
+        "Meissner",
+        "SmoothedMeissner",
+        "TruncMeissner",
+        "Mathieu",
+        "Shirley",
+    ],
+)
 def ode_setting(x, request):
+    if len(x.shape) == 1:
+        t = 1
+    else:
+        t = np.linspace(0, 2 * np.pi, x.shape[1])
 
     match request.param:
         case "vanderpol":
@@ -25,11 +50,25 @@ def ode_setting(x, request):
                 "delta": 0.1,
                 "omega": 1.3,
             }
-            if len(x.shape) == 1:
-                t = 1
-            else:
-                t = np.linspace(0, params["omega"], x.shape[1])
             return params, Duffing(t=t, x=x, **params)
+        case "HillConst":
+            params = {"a": 0.2, "b": 1, "damping": 0.02, "omega": 1}
+            return params, HillLTI(t, x, **params)
+        case "Meissner":
+            params = {"a": 0.2, "b": 1, "damping": 0.02, "omega": 1}
+            return params, SmoothedMeissner(t, x, smoothing=0, **params)
+        case "SmoothedMeissner":
+            params = {"a": 0.2, "b": 1, "damping": 0.02, "omega": 1, "smoothing": 0.3}
+            return params, SmoothedMeissner(t, x, **params)
+        case "TruncMeissner":
+            params = {"a": 0.2, "b": 1, "damping": 0.02, "omega": 1, "N_harmonics": 5}
+            return params, TruncatedMeissner(t, x, **params)
+        case "Mathieu":
+            params = {"a": 0.2, "b": 1, "damping": 0.02, "omega": 1}
+            return params, MathieuODE(t, x, **params)
+        case "Shirley":
+            params = {"E_alpha": 0.7, "E_beta": 1.5, "b": 2, "omega": 1}
+            return params, ShirleyODE(t, x, **params)
 
 
 @pytest.fixture(scope="module", params=[1, 100])
@@ -100,7 +139,13 @@ def test_derivatives(ode_setting):
 
     # Check derivatives w.r.t scalar parameters
     for variable in params:
-        df_dvar = ode.derivative(variable)
+
+        try:
+            df_dvar = ode.closed_form_derivative(variable)
+        except NotImplementedError:
+            # derivative w.r.t this variable is not implemented
+            continue
+
         assert (
             df_dvar.shape == x.shape
         ), f"Expected df_dmu to have shape {x.shape}, but got {df_dvar.shape}"
@@ -110,7 +155,7 @@ def test_derivatives(ode_setting):
             df_dvar_fd, df_dvar, 1e-3, 1e-3
         ), f"{variable} derivative does not match FD derivative with max error {np.max(np.abs(df_dvar_fd - df_dvar))}"
 
-    # Check that derivative w.r.t a non-parameter fails
+    # Check that derivative w.r.t a non-parameter fails with an AttributeError and not a NotImplementedError
     with pytest.raises(AttributeError):
         df_dvar = ode.derivative("no_param")
 

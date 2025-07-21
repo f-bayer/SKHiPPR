@@ -135,7 +135,9 @@ class Vanderpol(FirstOrderODE):
                 df_dnu[1, ...] = (1 - x[0, ...] ** 2) * x[1, ...]
                 return df_dnu
             case _:
-                raise NotImplementedError
+                raise NotImplementedError(
+                    f"Derivative w.r.t {variable} not implemented in closed form."
+                )
 
 
 class Truss(FirstOrderODE):
@@ -192,7 +194,9 @@ class Truss(FirstOrderODE):
             case "c":
                 return self.df_dc(x)
             case _:
-                return super().closed_form_derivative(variable, t, x)
+                raise NotImplementedError(
+                    f"Derivative w.r.t {variable} not implemented in closed form."
+                )
 
     def df_dF(self, x=None):
         if x is None:
@@ -301,4 +305,6 @@ class BlockOnBelt(FirstOrderODE):
             )
             return df_dx
         else:
-            return super().closed_form_derivative(variable, t=t, x=x)
+            raise NotImplementedError(
+                f"Derivative w.r.t {variable} not implemented in closed form."
+            )

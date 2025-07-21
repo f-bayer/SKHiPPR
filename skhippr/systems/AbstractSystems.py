@@ -85,7 +85,7 @@ class AbstractEquationSystem(ABC):
 
         f = self.residual(update=True)
         delta = h_step * np.eye(n)
-        derivative = np.zeros((f.shape[0], n, *f.shape[1:]))
+        derivative = np.zeros((f.shape[0], n, *f.shape[1:]), dtype=f.dtype)
 
         for k in range(n):
             setattr(self, variable, np.squeeze(x + delta[:, [k]]))

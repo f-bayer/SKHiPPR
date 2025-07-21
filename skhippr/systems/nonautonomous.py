@@ -67,7 +67,9 @@ class Duffing(FirstOrderODE):
             case "delta":
                 return self.df_ddelta(t, x)
             case _:
-                raise NotImplementedError
+                raise NotImplementedError(
+                    f"Derivative w.r.t {variable} not implemented in closed form."
+                )
 
     def df_dx(self, t=None, x=None):
 
