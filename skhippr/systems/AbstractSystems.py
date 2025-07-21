@@ -10,6 +10,7 @@ class AbstractEquationSystem(ABC):
 
     def __init__(self):
         super().__init__()
+        self._derivative_dict = {}
 
     def residual(self, update=False):
         if update:
@@ -133,15 +134,33 @@ class FirstOrderODE(AbstractEquationSystem):
     def dynamics(self, t=None, x=None) -> np.ndarray:
         """Return the right-hand side of the first-order ode x_dot = f(t, x) as a numpy array of size self.n_dof.
         All parameters are to be obtained as attributes.
+        Subclass implementations are expected to check the correct dimensions of x and t.
         """
         if x is None:
             x = self.x
         if t is None:
             t = self.t
-
+        self.check_dimensions(t, x)
         f = ...
         return f
+
+    def check_dimensions(self, t=None, x=None):
+
+        if x is not None and x.shape[0] != self.n_dof:
+            raise ValueError(f"{x} must have {self.n_dof} rows but has {x.shape[0]}")
+        if t is not None and np.isscalar(t) and len(x.shape) > 1 and x.shape[1] > 1:
+            raise ValueError(
+                f"{x} must be 1-D or have exactly one column if t is scalar"
+            )
+        if t is not None and not np.isscalar(t) and x.shape[1] != len(t):
+            raise ValueError(
+                f"t and x have incompatible sizes: {t.shape} vs. {x.shape}"
+            )
 
     @override
     def residual_function(self):
         return self.dynamics()
+
+    def closed_form_derivative(self, variable, t=None, x=None):
+        # Provide an interface which offers t and x
+        return super().closed_form_derivative(variable)

@@ -1,4 +1,5 @@
 import numpy as np
+from typing import override
 from skhippr.systems.AbstractSystems import FirstOrderODE
 
 
@@ -41,22 +42,13 @@ class Vanderpol(FirstOrderODE):
         If the requested derivative variable is not recognized.
     """
 
-    def __init__(self, x: np.ndarray, nu: float, **kwargs):
+    def __init__(self, x: np.ndarray, nu: float):
         super().__init__(autonomous=True, n_dof=2)
         self.nu = nu
         self.x = x
-        self.t = kwargs.get("t", None)
 
-    def parse_kwargs(self, **kwargs):
-        x = kwargs.get("x", self.x)
-        nu = kwargs.get("nu", self.nu)
-
-        if x.shape[0] != self.n_dof:
-            raise ValueError("first dimension of x must have length n_dof=2")
-
-        return x, nu
-
-    def dynamics(self, t=None, **kwargs):
+    @override
+    def dynamics(self, t=None, x=None):
         """
         Calculates the dynamics of the system at a given time.
 
@@ -82,14 +74,18 @@ class Vanderpol(FirstOrderODE):
             f[0] = x[1]
             f[1] = nu * (1 - x[0]**2) * x[1] - x[0]
         """
+        if x is None:
+            x = self.x
 
-        x, nu = self.parse_kwargs(**kwargs)
+        self.check_dimensions(x=x)
+
         f = np.zeros_like(x)
         f[0, ...] = x[1, ...]
-        f[1, ...] = nu * (1 - x[0, ...] ** 2) * x[1, ...] - x[0, ...]
+        f[1, ...] = self.nu * (1 - x[0, ...] ** 2) * x[1, ...] - x[0, ...]
         return f
 
-    def derivative(self, variable, **kwargs):
+    @override
+    def closed_form_derivative(self, variable, t=None, x=None):
         """
         Compute the derivative of the Van der Pol system with respect to a given variable.
 
@@ -122,22 +118,24 @@ class Vanderpol(FirstOrderODE):
             If the specified variable is not "x" or "nu".
         """
 
-        x, nu = self.parse_kwargs(**kwargs)
+        if x is None:
+            x = self.x
+
+        self.check_dimensions(t=t, x=x)
+
         match variable:
             case "x":
-                df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
+                df_dx = np.zeros((2, *x.shape), dtype=x.dtype)
                 df_dx[0, 1, ...] = 1
-                df_dx[1, 0, ...] = -1 - 2 * nu * x[0, ...] * x[1, ...]
-                df_dx[1, 1, ...] = nu * (1 - x[0, ...] ** 2)
+                df_dx[1, 0, ...] = -1 - 2 * self.nu * x[0, ...] * x[1, ...]
+                df_dx[1, 1, ...] = self.nu * (1 - x[0, ...] ** 2)
                 return df_dx
             case "nu":
                 df_dnu = np.zeros_like(x)
                 df_dnu[1, ...] = (1 - x[0, ...] ** 2) * x[1, ...]
                 return df_dnu
             case _:
-                raise AttributeError(
-                    f"{x} is not a parameter of vanderpol, derivative thus undefined"
-                )
+                raise NotImplementedError
 
 
 class Truss(FirstOrderODE):
@@ -151,10 +149,8 @@ class Truss(FirstOrderODE):
         a: float,
         l_0: float,
         m: float,
-        **kwargs,
     ):
         super().__init__(autonomous=True, n_dof=2)
-        self.t = kwargs.get("t", None)
         self.x = x
         self.k = k
         self.c = c
@@ -163,62 +159,78 @@ class Truss(FirstOrderODE):
         self.l_0 = l_0
         self.m = m
 
-    def parse_kwargs(self, **kwargs):
-        x = np.atleast_1d(kwargs.get("x", self.x))
-        k = kwargs.get("k", self.k)
-        c = kwargs.get("c", self.c)
-        F = kwargs.get("F", self.F)
-        a = kwargs.get("a", self.a)
-        l_0 = kwargs.get("l_0", self.l_0)
-        m = kwargs.get("m", self.m)
+    def dynamics(self, t=None, x=None):
+        if x is None:
+            x = self.x
 
-        if x.shape[0] != self.n_dof:
-            raise ValueError("first dimension of x must have length n_dof=2")
+        self.check_dimensions(t=t, x=x)
 
-        return x, k, c, F, a, l_0, m
-
-    def dynamics(self, **kwargs):
-        x, k, c, F, a, l_0, m = self.parse_kwargs(**kwargs)
         q = x[0, ...]
         q_dot = x[1, ...]
 
         f = np.zeros_like(x)
-        f[1, ...] = -k / m * q
-        f[1, ...] += k / m * q * l_0 / np.sqrt(a**2 + q**2)
-        f[1, ...] += F / m - c / m * q_dot
+        f[0, ...] = q_dot
+        f[1, ...] = -self.k / self.m * q
+        f[1, ...] += self.k / self.m * q * self.l_0 / np.sqrt(self.a**2 + q**2)
+        f[1, ...] += self.F / self.m - self.c / self.m * q_dot
         return f
 
-    def df_dF(self, **kwargs):
-        x, _, _, _, _, _, m = self.parse_kwargs(**kwargs)
+    def closed_form_derivative(self, variable, t=None, x=None):
+
+        if x is None:
+            x = self.x
+
+        self.check_dimensions(t=t, x=x)
+
+        match variable:
+            case "x":
+                return self.df_dx(x)
+            case "F":
+                return self.df_dF(x)
+            case "k":
+                return self.df_dk(x)
+            case "c":
+                return self.df_dc(x)
+            case _:
+                return super().closed_form_derivative(variable, t, x)
+
+    def df_dF(self, x=None):
+        if x is None:
+            x = self.x
         df_dF = np.zeros_like(x)
-        df_dF[1, ...] = 1 / m
+        df_dF[1, ...] = 1 / self.m
         return df_dF
 
-    def df_dc(self, **kwargs):
-        x, _, _, _, _, _, _, m = self.parse_kwargs(**kwargs)
+    def df_dc(self, x=None):
+        if x is None:
+            x = self.x
         df_dc = np.zeros_like(x)
-        df_dc[1, ...] = x[1, ...] / m
+        df_dc[1, ...] = -x[1, ...] / self.m
         return df_dc
 
-    def df_dk(self, **kwargs):
-        x, _, _, _, a, l_0, m = self.parse_kwargs(**kwargs)
+    def df_dk(self, x=None):
+        if x is None:
+            x = self.x
         q = x[0, ...]
         df_dk = np.zeros_like(x)
-        df_dk[1, ...] = -1 / m * q
-        df_dk[1, ...] += 1 / m * q * l_0 / np.sqrt(a**2 + q**2)
+        df_dk[1, ...] = -1 / self.m * q
+        df_dk[1, ...] += 1 / self.m * q * self.l_0 / np.sqrt(self.a**2 + q**2)
         return df_dk
 
-    def df_dx(self, **kwargs):
+    def df_dx(self, x=None):
+        if x is None:
+            x = self.x
 
-        x, k, c, _, a, l_0, m = self.parse_kwargs(**kwargs)
         q = x[0, ...]
 
         df_dx = np.zeros((x.shape[0], x.shape[0], *x.shape[1:]))
         df_dx[0, 1, ...] = 1
-        df_dx[1, 1, ...] = -c / m
-        df_dx[1, 0, ...] = -k / m
-        df_dx[1, 0, ...] += k / m * l_0 / np.sqrt(a**2 + q**2)
-        df_dx[1, 0, ...] -= k / m * l_0 * q**2 / (np.sqrt(a**2 + q**2) ** 3)
+        df_dx[1, 1, ...] = -self.c / self.m
+        df_dx[1, 0, ...] = -self.k / self.m
+        df_dx[1, 0, ...] += self.k / self.m * self.l_0 / np.sqrt(self.a**2 + q**2)
+        df_dx[1, 0, ...] -= (
+            self.k / self.m * self.l_0 * q**2 / (np.sqrt(self.a**2 + q**2) ** 3)
+        )
         return df_dx
 
 
@@ -243,51 +255,50 @@ class BlockOnBelt(FirstOrderODE):
         self.vdr = vdr
         self.delta = delta
 
-    def parse_kwargs(self, **kwargs):
-        x = np.atleast_1d(kwargs.get("x", self.x))
-        epsilon = kwargs.get("epsilon", self.epsilon)
-        k = kwargs.get("k", self.k)
-        m = kwargs.get("m", self.m)
-        Fs = kwargs.get("Fs", self.Fs)
-        vdr = kwargs.get("vdr", self.vdr)
-        delta = kwargs.get("delta", self.delta)
+        self.check_dimensions(t=None, x=x)
 
-        if x.shape[0] != self.n_dof:
-            raise ValueError("first dimension of x must have length n_dof=2")
-        return x, epsilon, k, m, Fs, vdr, delta
+    def dynamics(self, t=None, x=None):
+        if x is None:
+            x = self.x
 
-    def dynamics(self, **kwargs):
-        x, epsilon, k, m, Fs, vdr, delta = self.parse_kwargs(**kwargs)
+        self.check_dimensions(t=t, x=x)
 
-        gamma_T = x[1, ...] - vdr
+        gamma_T = x[1, ...] - self.vdr
         F_T = (
-            -Fs
-            / (1 + delta * np.abs(gamma_T))
+            -self.Fs
+            / (1 + self.delta * np.abs(gamma_T))
             * 2
             / np.pi
-            * np.arctan(epsilon * gamma_T)
+            * np.arctan(self.epsilon * gamma_T)
         )
 
         f = np.zeros_like(x)
         f[0, ...] = x[1, ...]
-        f[1, ...] = -k / m * x[0, ...] + F_T / m
+        f[1, ...] = -self.k / self.m * x[0, ...] + F_T / self.m
         return f
 
-    def derivative(self, variable, **kwargs):
+    def closed_form_derivative(self, variable, t=None, x=None):
+        if x is None:
+            x = self.x
+
+        self.check_dimensions(t=t, x=x)
+
         if variable == "x":
-            x, epsilon, k, m, Fs, vdr, delta = self.parse_kwargs(**kwargs)
-            gamma_T = x[1, ...] - vdr
+            gamma_T = x[1, ...] - self.vdr
             df_dx = np.zeros((2, 2, *x.shape[1:]), dtype=x.dtype)
             df_dx[0, 1, ...] = 1
-            df_dx[1, 0, ...] = -k / m
-            df_dx[1, 1, ...] = (Fs / m) * (
-                (np.arctan(epsilon * gamma_T) / (1 + delta * np.abs(gamma_T)) ** 2)
-                * (delta * np.sign(gamma_T) * 2 / np.pi)
-                - (1 / (1 + delta * np.abs(gamma_T)))
+            df_dx[1, 0, ...] = -self.k / self.m
+            df_dx[1, 1, ...] = (self.Fs / self.m) * (
+                (
+                    np.arctan(self.epsilon * gamma_T)
+                    / (1 + self.delta * np.abs(gamma_T)) ** 2
+                )
+                * (self.delta * np.sign(gamma_T) * 2 / np.pi)
+                - (1 / (1 + self.delta * np.abs(gamma_T)))
                 * (2 / np.pi)
-                / (1 + (epsilon * gamma_T) ** 2)
-                * epsilon
+                / (1 + (self.epsilon * gamma_T) ** 2)
+                * self.epsilon
             )
             return df_dx
         else:
-            return super().derivative(variable, **kwargs)
+            return super().closed_form_derivative(variable, t=t, x=x)
