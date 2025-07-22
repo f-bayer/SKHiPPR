@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
 from skhippr.problems.continuation import pseudo_arclength_continuator
 from skhippr.systems.autonomous import truss
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
@@ -36,7 +36,7 @@ def circle(y: np.ndarray, radius=1) -> tuple[np.ndarray, dict[str, np.ndarray]]:
 def test_cont_circle(visualize=False):
     radius = 1.5
     y0 = [0.9 * radius, 0]
-    initial_guess = NewtonProblem(
+    initial_guess = NewtonSolver(
         residual_function=circle,
         initial_guess=y0,
         variable="y",
@@ -85,7 +85,7 @@ def test_cont_truss(truss_params, verbose=False):
         return truss(0, x, **params)
 
     x0 = np.array([-1.0, 0.0])
-    initial_guess = NewtonProblem(
+    initial_guess = NewtonSolver(
         residual_function=sys,
         initial_guess=x0,
         variable="x",

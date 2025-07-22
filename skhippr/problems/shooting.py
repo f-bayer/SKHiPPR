@@ -5,11 +5,11 @@ from collections.abc import Callable, Iterable
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
-class ShootingProblem(NewtonProblem):
+class ShootingProblem(NewtonSolver):
     """
     ShootingProblem implements the shooting method for finding periodic solutions of ODEs.
 
@@ -175,7 +175,7 @@ class ShootingProblem(NewtonProblem):
         if t_eval is None:
             t_eval = np.linspace(0, self.T, 150)
         sol = solve_ivp(
-            lambda t, x: self.f_with_params(t, x)[0],
+            lambda t, x: self.residual(t, x)[0],
             (0, self.T),
             self.x[: self.n_dof],
             t_eval=t_eval,
@@ -195,7 +195,7 @@ class ShootingProblem(NewtonProblem):
         derivatives = dict()
         derivatives[self.variable] = dr_dx0
 
-        f_T, _ = self.f_with_params(self.T, x[:, -1])
+        f_T, _ = self.residual(self.T, x[:, -1])
         derivatives["T"] = f_T.squeeze()
 
         if self.key_param:
@@ -212,7 +212,7 @@ class ShootingProblem(NewtonProblem):
                 T = self.T
 
             x_pert = solve_ivp(
-                lambda t, x: self.f_with_params(t, x, **{key_param: param})[0],
+                lambda t, x: self.residual(t, x, **{key_param: param})[0],
                 (0, T),
                 x0,
                 **self.kwargs_odesolver,
@@ -238,7 +238,7 @@ class ShootingProblem(NewtonProblem):
                 np.hstack(
                     (derivatives[self.variable], derivatives["T"][:, np.newaxis])
                 ),
-                np.hstack((self.f_with_params(0, x0)[0][np.newaxis, :], [[0]])),
+                np.hstack((self.residual(0, x0)[0][np.newaxis, :], [[0]])),
             )
         )
 
@@ -316,7 +316,7 @@ class ShootingProblem(NewtonProblem):
             order="F",
         )
 
-        f, derivatives = self.f_with_params(t, x, **kwargs)
+        f, derivatives = self.residual(t, x, **kwargs)
         dx_dt = f
         df_dx = derivatives[self.variable]
         dPhi_dt = df_dx @ Phi

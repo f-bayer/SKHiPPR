@@ -1,90 +1,22 @@
-from typing import TYPE_CHECKING
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 import numpy as np
 
-if TYPE_CHECKING:
-    from skhippr.stability._StabilityMethod import _StabilityMethod
-
-from skhippr.systems.AbstractSystems import AbstractEquationSystem
+from skhippr.systems.AbstractSystems import AbstractEquation
 
 
-class NewtonSolver:
-    """
-    Implements Newton's method for solving nonlinear equations. Also supports optional stability analysis after convergence.
-
-    Definition of the underlying equation system:
-
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.f_with_params`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.variable`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x0` (initial guess)
-    * ``<param>``, when passed to the constructor as optional keyword argument, becomes an attribute with the corresponding value and is passed as keyword argument to the residual function.
-
-    Newton solver parameters:
-
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.tolerance`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.max_iterations`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stability_method`
-
-    Attributes (updated during the solution process):
-
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.derivatives`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.converged`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stable`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.eigenvalues`
-
-    Important class methods:
-
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.solve`
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.reset`
-
-    Attributes:
-    -----------
-    # TODO
-    num_iter : int
-        Number of iterations performed.
-    stability_method : :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod` or ``None``
-        Object encoding stability method. Defaults to ``None`` (no stability analysis performed).
-    stable : bool or None
-        Indicates whether the solution is stable (if stability analysis is performed). ``None`` if no stability analysis was performed.
-    eigenvalues : np.ndarray or None
-        Eigenvalues computed during stability analysis. ``None`` if no stability analysis was performed.
-    max_iterations : int
-        Maximum number of allowed iterations.
-    verbose : bool
-        If True, prints progress information.
-    tolerance : float
-        Convergence tolerance for the residual norm.
-
-    """
-
+class EquationSystem:
     def __init__(
         self,
-        equations: Iterable[AbstractEquationSystem],
+        equations: Iterable[AbstractEquation],
         unknowns: Iterable[str],
-        equation_determining_stability: AbstractEquationSystem = None,
-        tolerance: float = 1e-8,
-        max_iterations: int = 20,
-        verbose: bool = False,
+        equation_determining_stability: AbstractEquation = None,
     ):
-
-        self.label = "Newton"
         self.equations = equations
         self.unknowns = unknowns
         self.init_unknowns()
-        self.initial_guess = unknowns
-
-        self.converged = False
-        self.num_iter: int = 0
-
-        # Stability
         self.equation_determining_stability = equation_determining_stability
 
-        # Parameters
-        self.max_iterations = max_iterations
-        self.verbose = verbose
-        self.tolerance = tolerance
+        self.solved = False
 
     def init_unknowns(self):
         """Make sure that every Equation object (and self) has every unknown as attribute"""
@@ -193,7 +125,9 @@ class NewtonSolver:
             raise AttributeError(f"Attribute '{name}' not available")
 
     def __setattr__(self, name, value) -> None:
-        """Custom attribute setter. If the attribute is part of the unknowns, it is set also in all equations."""
+        """Custom attribute setter.
+        If anything is changed, self.solved becomes False.
+        If the attribute is part of the unknowns, it is set also in all equations."""
 
         if (
             "unknowns" in self.__dict__
@@ -203,24 +137,10 @@ class NewtonSolver:
             for equ in self.equations:
                 setattr(equ, name, value)
 
-        super().__setattr__(name, value)
+        if name != "solved":
+            self.solved = False
 
-    def __str__(self):
-        if self.converged:
-            text_converged = f"converged {self.label} solution"
-        else:
-            text_converged = f"non-converged {self.label} guess"
-        if self.stable is None:
-            text_stable = ""
-        elif self.stable:
-            text_stable = "(stable)"
-        else:
-            text_stable = "(unstable)"
-        if len(self.x) < 5:
-            text_x = f"at {self.variable} = {self.x} "
-        else:
-            text_x = ""
-        return f"{text_converged} {text_x}after {self.num_iter}/{self.max_iterations} iterations {text_stable}"
+        super().__setattr__(name, value)
 
     def residual_function(
         self, update=False
@@ -259,7 +179,101 @@ class NewtonSolver:
 
         return jac
 
-    def reset(self, x0_new=None) -> None:
+    def determine_stability(self, update=False):
+        if self.equation_determining_stability is None:
+            return None, None
+        elif not self.solved:
+            raise RuntimeError("Equation not solved, stability not well-defined!")
+        else:
+            return self.equation_determining_stability.determine_stability(
+                update=update
+            )
+
+
+class NewtonSolver:
+    """
+    Implements Newton's method for solving nonlinear equations. Also supports optional stability analysis after convergence.
+
+    Definition of the underlying equation system:
+
+    * :py:func:`~skhippr.problems.newton.NewtonProblem.f_with_params`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.variable`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x0` (initial guess)
+    * ``<param>``, when passed to the constructor as optional keyword argument, becomes an attribute with the corresponding value and is passed as keyword argument to the residual function.
+
+    Newton solver parameters:
+
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.tolerance`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.max_iterations`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stability_method`
+
+    Attributes (updated during the solution process):
+
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.derivatives`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.converged`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stable`
+    * :py:attr:`~skhippr.problems.newton.NewtonProblem.eigenvalues`
+
+    Important class methods:
+
+    * :py:func:`~skhippr.problems.newton.NewtonProblem.solve`
+    * :py:func:`~skhippr.problems.newton.NewtonProblem.reset`
+
+    Attributes:
+    -----------
+    # TODO
+    num_iter : int
+        Number of iterations performed.
+    stability_method : :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod` or ``None``
+        Object encoding stability method. Defaults to ``None`` (no stability analysis performed).
+    stable : bool or None
+        Indicates whether the solution is stable (if stability analysis is performed). ``None`` if no stability analysis was performed.
+    eigenvalues : np.ndarray or None
+        Eigenvalues computed during stability analysis. ``None`` if no stability analysis was performed.
+    max_iterations : int
+        Maximum number of allowed iterations.
+    verbose : bool
+        If True, prints progress information.
+    tolerance : float
+        Convergence tolerance for the residual norm.
+
+    """
+
+    def __init__(
+        self,
+        tolerance: float = 1e-8,
+        max_iterations: int = 20,
+        verbose: bool = False,
+    ):
+
+        self.converged = False
+        self.num_iter: int = 0
+
+        # Parameters
+        self.max_iterations = max_iterations
+        self.verbose = verbose
+        self.tolerance = tolerance
+
+    # def __str__(self):
+    #     if self.converged:
+    #         text_converged = f"converged {self.label} solution"
+    #     else:
+    #         text_converged = f"non-converged {self.label} guess"
+    #     if self.stable is None:
+    #         text_stable = ""
+    #     elif self.stable:
+    #         text_stable = "(stable)"
+    #     else:
+    #         text_stable = "(unstable)"
+    #     if len(self.x) < 5:
+    #         text_x = f"at {self.variable} = {self.x} "
+    #     else:
+    #         text_x = ""
+    #     return f"{text_converged} {text_x}after {self.num_iter}/{self.max_iterations} iterations {text_stable}"
+
+    def reset(self) -> None:
         """
         Reset the state of the solver, optionally with a new initial guess.
 
@@ -275,27 +289,25 @@ class NewtonSolver:
 
         """
 
-        if x0_new is not None:
-            self.initial_guess = x0_new
-            self.vector_of_unknowns = x0_new
-
         self.converged = False
         self.num_iter = 0
 
-    def correction_step(self) -> None:
+    def correction_step(self, equation_system) -> None:
 
-        residual = self.check_converged(update=True)
-        if not self.converged:
-            delta_x = np.linalg.solve(self.jacobian(update=True), -residual)
-            self.vector_of_unknowns = self.vector_of_unknowns + delta_x
+        residual = self.check_converged(equation_system, update=True)
+        if not equation_system.solved:
+            delta_x = np.linalg.solve(equation_system.jacobian(update=True), -residual)
+            equation_system.vector_of_unknowns = (
+                equation_system.vector_of_unknowns + delta_x
+            )
 
-    def check_converged(self, update=True) -> None:
-        residual = self.residual_function(update=update)
+    def check_converged(self, equation_system, update=True) -> np.array:
+        residual = equation_system.residual_function(update=update)
         if np.linalg.norm(residual) < self.tolerance:
-            self.converged = True
+            equation_system.solved = True
         return residual
 
-    def solve(self):
+    def solve(self, equation_system):
         """
         Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.problems.newton.NewtonProblem.residual_function`.
 
@@ -307,35 +319,29 @@ class NewtonSolver:
         * Prints progress and convergence information if :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose` is ``True``.
         """
         if self.verbose:
-            print(f", Initial guess: x[-1]={self.vector_of_unknowns[-1]:.3g}")
+            print(
+                f", Initial guess: x[-1]={equation_system.vector_of_unknowns[-1]:.3g}"
+            )
 
-        while self.num_iter < self.max_iterations and not self.converged:
+        while self.num_iter < self.max_iterations and not equation_system.solved:
             self.num_iter += 1
             if self.verbose:
                 print(f"Newton iteration {self.num_iter:2d}", end="")  # , x = {x}")
 
-            self.correction_step()
+            self.correction_step(equation_system)
             if self.verbose:
                 print(
-                    f", |r| = {np.linalg.norm(self.residual_function(update=False)):8.3g}, x[-1]={self.vector_of_unknowns[-1]:.3g}"
+                    f", |r| = {np.linalg.norm(equation_system.residual_function(update=False)):8.3g}, x[-1]={equation_system.vector_of_unknowns[-1]:.3g}"
                 )
 
-            if self.converged and self.verbose:
+            if equation_system.solved and self.verbose:
                 print(f" Converged", end="")
                 if self.length_unknowns["total"] < 5:
                     print(f" to {self.parse_vector_of_unknowns()}")
                 else:
                     print("")
 
-        if self.converged:
-            self.determine_stability(update=True)
+        if equation_system.solved:
+            equation_system.determine_stability(update=True)
         elif self.verbose:
             print(f" Did not converge after {self.num_iter} iterations")
-
-    def determine_stability(self, update=False):
-        if self.equation_determining_stability is None:
-            return None, None
-        else:
-            return self.equation_determining_stability.determine_stability(
-                update=update
-            )

@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
 from skhippr.problems.continuation import pseudo_arclength_continuator
 
 
@@ -26,7 +26,7 @@ def main():
     radius = 2
 
     # Instantiate the problem class to be solved.
-    initial_problem = NewtonProblem(
+    initial_problem = NewtonSolver(
         residual_function=circle,
         initial_guess=np.array([0.9 * radius, 0]),
         variable="y",  # must correspond to an argument of residual function

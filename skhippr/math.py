@@ -1,9 +1,9 @@
 import numpy as np
-from skhippr.systems.AbstractSystems import AbstractEquationSystem
+from skhippr.systems.AbstractSystems import AbstractEquation
 
 
 def finite_difference_derivative(
-    equation: AbstractEquationSystem, variable, h_step=1e-4
+    equation: AbstractEquation, variable, h_step=1e-4
 ) -> np.ndarray:
 
     x_orig = getattr(equation, variable)

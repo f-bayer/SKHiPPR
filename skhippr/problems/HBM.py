@@ -3,7 +3,7 @@ import warnings
 from collections.abc import Callable
 import numpy as np
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
 
 from skhippr.Fourier import Fourier
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
-class HBMProblem(NewtonProblem):
+class HBMProblem(NewtonSolver):
     """
     HBMProblem encodes and finds a periodic solution of a non-autonomous
     ordinary differential equation (ODE) with periodic excitation using the Harmonic Balance Method (HBM).
@@ -201,7 +201,7 @@ class HBMProblem(NewtonProblem):
 
         """ Determine the ODE at the time samples."""
         try:  # vectorized formulation
-            sol = self.f_with_params(ts, x_samp)
+            sol = self.residual(ts, x_samp)
             fs_samp = sol[0]
             derivatives_samp = sol[1]
             assert fs_samp.shape == x_samp.shape
@@ -211,7 +211,7 @@ class HBMProblem(NewtonProblem):
             derivatives_samp = dict()
 
             for kk in range(self.fourier.L_DFT):
-                sol = self.f_with_params(ts[kk], x_samp[:, kk])
+                sol = self.residual(ts[kk], x_samp[:, kk])
                 f_samp = sol[0]
                 derivative = sol[1]
                 fs_samp[:, kk] = f_samp

@@ -2,13 +2,13 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from typing import Any, override
+from typing import override
 import numpy as np
 
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
-class AbstractEquationSystem(ABC):
+class AbstractEquation(ABC):
 
     def __init__(self, stability_method=None):
         super().__init__()
@@ -128,7 +128,7 @@ class AbstractEquationSystem(ABC):
             )
 
 
-class EquationSystem(AbstractEquationSystem):
+class EquationSystem(AbstractEquation):
     def __init__(
         self,
         residual_function,
@@ -156,7 +156,7 @@ class EquationSystem(AbstractEquationSystem):
 
 
 # still an abstract class
-class FirstOrderODE(AbstractEquationSystem):
+class FirstOrderODE(AbstractEquation):
     def __init__(self, autonomous: bool, n_dof: int, stability_method=None):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
         if stability_method is None:

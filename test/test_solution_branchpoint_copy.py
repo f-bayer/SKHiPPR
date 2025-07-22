@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from copy import copy
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
 from skhippr.problems.continuation import BranchPoint
 
 """ Test parameter access in BranchPoint objects"""
@@ -27,7 +27,7 @@ def circle_explicit(x, radius, theta, other):
 def prb():
     theta = 0
     radius = 1
-    problem = NewtonProblem(
+    problem = NewtonSolver(
         residual_function=circle_explicit,
         initial_guess=np.array([1.1, 0.1]),
         verbose=True,

@@ -2,11 +2,11 @@ import pytest
 import numpy as np
 
 from skhippr.problems.newton import NewtonSolver
-from skhippr.systems.AbstractSystems import AbstractEquationSystem
+from skhippr.systems.AbstractSystems import AbstractEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
-class TestEquationY(AbstractEquationSystem):
+class TestEquationY(AbstractEquation):
     def __init__(self, y, a):
         super().__init__()
         self.y = y
@@ -27,7 +27,7 @@ class TestEquationY(AbstractEquationSystem):
                 raise NotImplementedError
 
 
-class TestEquationB(AbstractEquationSystem):
+class TestEquationB(AbstractEquation):
     def __init__(self, a, b):
         super().__init__()
         self.a = a

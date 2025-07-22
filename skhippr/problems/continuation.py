@@ -35,11 +35,12 @@ from typing import override
 from copy import copy
 import numpy as np
 
-from skhippr.problems.newton import NewtonProblem
+from skhippr.problems.newton import NewtonSolver
+from skhippr.systems.AbstractSystems import AbstractEquation
 
 
 def pseudo_arclength_continuator(
-    initial_problem: NewtonProblem,
+    initial_problem: NewtonSolver,
     stepsize: float = None,
     stepsize_range: Iterable[float] = (1e-4, 1e-1),
     initial_direction=1,
@@ -149,7 +150,7 @@ def pseudo_arclength_continuator(
         print(stop_msg)
 
 
-class BranchPoint(NewtonProblem):
+class BranchPoint(NewtonSolver):
     """
     A :py:class:`~skhippr.problems.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
 
@@ -211,7 +212,7 @@ class BranchPoint(NewtonProblem):
 
     def __init__(
         self,
-        problem: NewtonProblem,
+        problem: NewtonSolver,
         x0: np.ndarray = None,
         key_param: str = None,
         value_param: float = None,
@@ -389,3 +390,8 @@ class BranchPoint(NewtonProblem):
         )
 
         return branch_point_next
+
+
+class ContinuationAnchor(AbstractEquation):
+    def __init__(self, equations):
+        super().__init__(None)
