@@ -18,10 +18,11 @@ class TestEquationY(AbstractEquationSystem):
     def closed_form_derivative(self, variable):
         match variable:
             case "y":
-                raise NotImplementedError
                 return np.array([[2 * self.y[0], -2], [1, -1]])
             case "a":
                 return self.a
+            case "b":
+                return np.array([[0], [0]])
             case _:
                 raise NotImplementedError
 
@@ -112,78 +113,98 @@ def test_solve_one_eq(setup, num_eqs):
     # assert not prb.stable
 
 
-def test_reset(prb):
-    prb.solve()
-    assert prb.converged
-    assert prb.num_iter > 0
+def test_reset(setup):
+    params, eq_y, eq_b = setup
+    solver = NewtonSolver(
+        [eq_y, eq_b],
+        ["y", "b"],
+        stability_method=None,
+        tolerance=params["tolerance"],
+        max_iterations=params["max_iter"],
+        verbose=True,
+    )
+    solver.solve()
+    assert solver.converged
+    assert solver.num_iter > 0
 
     # Perform manual reset
-    y_new = np.array([5.0, 0.0])
-    prb.reset(x0_new=y_new)
-    assert not prb.converged
-    assert prb.num_iter == 0
-    prb.solve()
-    assert prb.converged
+    y_new = np.array([5.0, 0.0, 2.0])
+    solver.reset(y_new)
+    assert not solver.converged
+    assert solver.num_iter == 0
 
-    # Expect that reset is performed if component of unknowns is manually updated
-    prb.y = np.array(y_new)
-    assert not prb.converged
-    assert prb.num_iter == 0
-    prb.solve()
-    assert prb.converged
+    # Check all the properties
+    assert np.array_equal(solver.y, y_new[:2])
+    assert solver.b == y_new[2]
 
-    # Expect that reset is performed if parameter is manually updated
-    prb.a = 3
-    assert not prb.converged
-    assert prb.num_iter == 0
-    prb.solve()
-    assert prb.converged
+    for eq in solver.equations:
+        assert np.array_equal(eq.y, y_new[:2])
+        assert eq.b == y_new[2]
+
+    solver.solve()
+    assert solver.converged
 
 
-def test_solution_getter(prb):
+def test_solver_getter(setup):
     # Ensure that the custom getter does not lead to a recursion loop
-    a = prb.a
-    y = prb.y
-    label = prb.label
-    try:
-        b = prb.this_attribute_does_not_exist
-        assert False, f"Expected an AttributeError, but got {b}"
-    except AttributeError:
-        # expected behavior
-        pass
+    params, eq_y, eq_b = setup
+    solver = NewtonSolver(
+        [eq_y, eq_b],
+        ["y", "b"],
+        stability_method=None,
+        tolerance=params["tolerance"],
+        max_iterations=params["max_iter"],
+        verbose=True,
+    )
+    solver.solve()
+    assert solver.converged
+    assert solver.num_iter > 0
+
+    b = solver.b
+    y = solver.y
+    label = solver.label
+
+    with pytest.raises(AttributeError):
+        val = solver.this_attribute_does_not_exist
 
 
-def test_solution_setter(prb, params):
-    # Ensure that the custom setter works
-    prb.useless_attribute = 1
+def test_solution_setter(setup):
+    params, eq_y, eq_b = setup
+    solver = NewtonSolver(
+        [eq_y, eq_b],
+        ["y", "b"],
+        stability_method=None,
+        tolerance=params["tolerance"],
+        max_iterations=params["max_iter"],
+        verbose=True,
+    )
+    solver.solve()
+    assert solver.converged
+    assert solver.num_iter > 0
 
-    a_update = 15
-    assert a_update != params["a_ref"]
+    solver.useless_attribute = 1
+    # Check that arbitrary attributes are NOT transferred to the equations
+    for eq in solver.equations:
+        with pytest.raises(AttributeError):
+            val = eq.useless_attribute
 
-    prb.solve()
-    prb.reset()
-    assert not prb.converged
-    assert prb.a == params["a_ref"]
-    assert prb.jacobians_dict[(prb.f_with_params, "a")] == params["a_ref"]
+    # Check that attribute updates directly to the equations do not transfer (how should they)
+    solver.equations[0].b = 3
+    solver.equations[1].b = 4
+    assert solver.b != solver.equations[1].b != solver.equations[0].b
 
-    prb.a = a_update
-    # Ensure that new parameter value is passed into function
-    _, derivatives = prb.f_with_params(prb.unknowns)
-    assert derivatives["a"] == a_update
+    # Check that updates to solver unknown transfer to all equations
+    solver.b = 5
+    assert solver.b == solver.equations[1].b == solver.equations[0].b
+    assert solver.vector_of_unknowns[-1] == solver.equations[0].b
 
-    # Ensure that updated parameter is used during function calls of solve()
-    prb.solve()
-    assert prb.jacobians_dict[(prb.f_with_params, "a")] == a_update
+    # Check that updates to solver for non-unknowns (which do exist) do not transfer to equations
+    solver.a = 42
+    assert solver.equations[0].a != solver.a != solver.equations[1].a
 
-    # Check if update of unknowns works as expected
-    assert prb.converged
-    y_new = np.array([15.0, 10.0])
-    assert all(y_new != prb.y)
-    prb.y = y_new
-    assert all(prb.y == y_new)
-    assert all(prb.unknowns == y_new)
-    res = prb.residual_function(recompute=True)
-    assert all(res == my_function(y=y_new, a=prb.a)[0])
+    # Check that updates to unknowns are reflected in all equations
+    solver.vector_of_unknowns = np.append(solver.vector_of_unknowns[:-1], 1)
+    assert 1 == solver.b == solver.equations[1].b == solver.equations[0].b
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING, Iterable
-from collections.abc import Callable
+from typing import TYPE_CHECKING
+from collections.abc import Callable, Iterable
 import numpy as np
 
 if TYPE_CHECKING:
@@ -129,7 +129,7 @@ class NewtonSolver:
             A 1-D array containing all unknowns concatenated along axis 0.
         """
         return np.concatenate(
-            [getattr(self.equations[0], unk) for unk in self.unknowns]
+            [np.atleast_1d(getattr(self.equations[0], unk)) for unk in self.unknowns]
         )
 
     @vector_of_unknowns.setter

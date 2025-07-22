@@ -133,7 +133,7 @@ class Vanderpol(FirstOrderODE):
             case "nu":
                 df_dnu = np.zeros_like(x)
                 df_dnu[1, ...] = (1 - x[0, ...] ** 2) * x[1, ...]
-                return df_dnu
+                return df_dnu[:, np.newaxis, ...]
             case _:
                 raise NotImplementedError(
                     f"Derivative w.r.t {variable} not implemented in closed form."
@@ -203,14 +203,14 @@ class Truss(FirstOrderODE):
             x = self.x
         df_dF = np.zeros_like(x)
         df_dF[1, ...] = 1 / self.m
-        return df_dF
+        return df_dF[:, np.newaxis, ...]
 
     def df_dc(self, x=None):
         if x is None:
             x = self.x
         df_dc = np.zeros_like(x)
         df_dc[1, ...] = -x[1, ...] / self.m
-        return df_dc
+        return df_dc[:, np.newaxis, ...]
 
     def df_dk(self, x=None):
         if x is None:
@@ -219,7 +219,7 @@ class Truss(FirstOrderODE):
         df_dk = np.zeros_like(x)
         df_dk[1, ...] = -1 / self.m * q
         df_dk[1, ...] += 1 / self.m * q * self.l_0 / np.sqrt(self.a**2 + q**2)
-        return df_dk
+        return df_dk[:, np.newaxis, ...]
 
     def df_dx(self, x=None):
         if x is None:

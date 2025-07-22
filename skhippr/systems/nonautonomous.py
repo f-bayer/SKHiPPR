@@ -93,7 +93,7 @@ class Duffing(FirstOrderODE):
         df_dal = np.zeros_like(x)
         df_dal[1, ...] = -x[0, ...]
 
-        return df_dal
+        return df_dal[:, np.newaxis, ...]
 
     def df_dbeta(self, t=None, x=None):
 
@@ -102,7 +102,7 @@ class Duffing(FirstOrderODE):
 
         df_dbe = np.zeros_like(x)
         df_dbe[1, ...] = -x[0, ...] ** 3
-        return df_dbe
+        return df_dbe[:, np.newaxis, ...]
 
     def df_ddelta(self, t=None, x=None):
 
@@ -111,7 +111,7 @@ class Duffing(FirstOrderODE):
         df_ddel = np.zeros_like(x)
         df_ddel[1, ...] = -x[1, ...]
 
-        return df_ddel
+        return df_ddel[:, np.newaxis, ...]
 
     def df_dF(self, t=None, x=None):
 
@@ -122,7 +122,7 @@ class Duffing(FirstOrderODE):
 
         df_dF = np.zeros_like(x)
         df_dF[1, ...] = np.cos(self.omega * t)
-        return df_dF
+        return df_dF[:, np.newaxis, ...]
 
     def df_dom(self, t=None, x=None):
 
@@ -133,4 +133,4 @@ class Duffing(FirstOrderODE):
 
         df_dom = np.zeros_like(x)
         df_dom[1, ...] = -self.F * t * np.sin(self.omega * t)
-        return df_dom
+        return df_dom[:, np.newaxis, ...]
