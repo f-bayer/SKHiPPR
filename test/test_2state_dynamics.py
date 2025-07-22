@@ -124,6 +124,7 @@ def test_derivatives(ode_setting):
     """Verify that all derivatives match finite difference derivative"""
     params, ode = ode_setting
     x = ode.x
+    f = ode.residual(update=True)
 
     # Check derivative w.r.t. x
     df_dx_shape_expected = (2, *x.shape)
@@ -138,6 +139,7 @@ def test_derivatives(ode_setting):
     ), f"df_dx does not match FD derivative with max error {np.max(np.abs(df_dx_fd - df_dx))}"
 
     # Check derivatives w.r.t scalar parameters
+    shape_expected = (x.shape[0], 1, *x.shape[1:])
     for variable in params:
 
         try:
@@ -147,8 +149,8 @@ def test_derivatives(ode_setting):
             continue
 
         assert (
-            df_dvar.shape == x.shape
-        ), f"Expected df_dmu to have shape {x.shape}, but got {df_dvar.shape}"
+            df_dvar.shape == shape_expected
+        ), f"Expected df_dmu to have shape {shape_expected}, but got {df_dvar.shape}"
 
         df_dvar_fd = ode.finite_difference_derivative(variable, h_step=1e-5)
         assert np.allclose(

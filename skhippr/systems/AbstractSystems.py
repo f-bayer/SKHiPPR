@@ -11,11 +11,14 @@ class AbstractEquationSystem(ABC):
     def __init__(self):
         super().__init__()
         self._derivative_dict = {}
+        self.residual_value = None
 
     def residual(self, update=False):
         if update:
             # compute the residual using the attributes
             self.residual_value = self.residual_function()
+        elif self.residual_value is None:
+            raise RuntimeError("Residual has not been computed yet!")
         return self.residual_value
 
     @abstractmethod
@@ -43,14 +46,12 @@ class AbstractEquationSystem(ABC):
             If True, updates the cached derivative with the newly computed value. Default is False.
         h_fd : float, optional
             Step size for finite difference approximation. Default is 1e-4.
-        **kwargs
-            Additional keyword arguments passed to the residual function.
 
         Returns
         -------
 
         np.ndarray
-            The Jacobian matrix of the residual with respect to the specified variable.
+            The partial derivative of the residual with respect to the specified variable.
 
         """
 
@@ -63,6 +64,15 @@ class AbstractEquationSystem(ABC):
         except NotImplementedError:
             # Fall back on finite differences.
             derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+
+        # Check sizes
+        cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
+        rows_expected = self.residual(update=False).shape[0]
+        others_expected = self.residual(update=False).shape[1:]
+        if derivative.shape != (rows_expected, cols_expected, *others_expected):
+            raise ValueError(
+                f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
+            )
 
         self._derivative_dict[variable] = derivative
 
@@ -77,12 +87,10 @@ class AbstractEquationSystem(ABC):
     def finite_difference_derivative(self, variable, h_step=1e-4) -> np.ndarray:
 
         x_orig = getattr(self, variable)
-        x = np.atleast_2d(x_orig)
+        x = np.atleast_1d(x_orig)
+        if x.ndim == 1:
+            x = x[:, np.newaxis]
         n = x.shape[0]
-        if n == 1 and x.shape[1] > 1:
-            x = x.T
-            n = x.shape[0]
-
         f = self.residual(update=True)
         delta = h_step * np.eye(n)
         derivative = np.zeros((f.shape[0], n, *f.shape[1:]), dtype=f.dtype)
@@ -92,7 +100,7 @@ class AbstractEquationSystem(ABC):
             derivative[:, k, ...] = (self.residual_function() - f) / h_step
 
         setattr(self, variable, x_orig)
-        return np.squeeze(derivative)
+        return derivative
 
 
 class EquationSystem(AbstractEquationSystem):

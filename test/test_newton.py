@@ -38,11 +38,11 @@ class TestEquationB(AbstractEquationSystem):
     def closed_form_derivative(self, variable):
         match variable:
             case "b":
-                return np.atleast_1d(1)
+                return np.atleast_2d(1)
             case "a":
-                return np.atleast_1d(-1)
+                return np.atleast_2d(-1)
             case "y":
-                return np.array([0, 0])
+                return np.array([[0, 0]])
             case _:
                 raise NotImplementedError
 
@@ -77,11 +77,18 @@ def test_solver_constructor(setup):
     assert solver.a == params["a_ref"]
 
 
-def test_solve_one_eq(setup):
-    params, equ_y, _ = setup
+@pytest.mark.parametrize("num_eqs", [1, 2])
+def test_solve_one_eq(setup, num_eqs):
+    params, equ_y, equ_b = setup
+    eqs = [equ_y]
+    unknowns = ["y"]
+    if num_eqs == 2:
+        eqs.append(equ_b)
+        unknowns.append("b")
+
     solver = NewtonSolver(
-        [equ_y],
-        ["y"],
+        eqs,
+        unknowns,
         stability_method=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
@@ -90,12 +97,18 @@ def test_solve_one_eq(setup):
     assert not solver.converged
     solver.solve()
     assert solver.converged
+
+    residual_expected = np.zeros(1 + num_eqs)
+    solution_expected = np.array([1.0, 1.0])
+    if num_eqs == 2:
+        solution_expected = np.append(solution_expected, params["a_ref"])
+
     assert np.allclose(
         solver.residual_function(update=False),
-        np.array([0, 0]),
+        residual_expected,
         atol=params["tolerance"],
     )
-    assert np.allclose(solver.vector_of_unknowns, np.array([1, 1]), atol=1e-4)
+    assert np.allclose(solver.vector_of_unknowns, solution_expected, atol=1e-4)
     # assert not prb.stable
 
 

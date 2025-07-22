@@ -239,28 +239,18 @@ class NewtonSolver:
     def jacobian(self, update=False, h_fd=1e-4):
         """Assemble the derivative of the residual w.r.t the unknowns.
         NOTE: If update is True, the equations are updated in order. I.e., if one equation relies on Jacobians of the previous equation, that should work.
-        TO DO: Check more thoroughly for sizing problems here.
-        TO DO: Vectorized evaluation in 3rd dimension
+
         """
         jac = np.vstack(
             [
-                np.hstack(
-                    [
-                        equ.derivative(unk, update=update, h_fd=h_fd)
-                        for unk in self.unknowns
-                    ]
-                )
+                np.hstack([equ.derivative(unk, update, h_fd) for unk in self.unknowns])
                 for equ in self.equations
             ]
         )
-        if jac.shape[0] != self.length_unknowns["total"]:
-            raise RuntimeError(
-                "Total number of rows in Jacobian is not length of unknowns!"
-            )
-        if jac.shape[1] != self.length_unknowns["total"]:
-            raise RuntimeError(
-                "Total number of columns in Jacobian is not length of unknowns!"
-            )
+
+        if jac.shape != (self.length_unknowns["total"], self.length_unknowns["total"]):
+            raise RuntimeError(f"Size mismatch in Jacobian, got {jac.shape}")
+
         return jac
 
     def reset(self, x0_new=None) -> None:
