@@ -151,7 +151,7 @@ class NewtonSolver:
             If `x` is not a 1-D array.
         """
 
-        unknowns_parsed = self.parse_vector_of_unknowns()
+        unknowns_parsed = self.parse_vector_of_unknowns(x)
         for unk, value in unknowns_parsed.items():
             # custom setter also sets the attribute in all equations
             setattr(self, unk, value)
@@ -292,7 +292,7 @@ class NewtonSolver:
 
         residual = self.check_converged(update=True)
         if not self.converged:
-            delta_x = np.linalg.solve(self.jacobian(), -residual)
+            delta_x = np.linalg.solve(self.jacobian(update=True), -residual)
             self.vector_of_unknowns = self.vector_of_unknowns + delta_x
 
     def check_converged(self, update=True) -> None:

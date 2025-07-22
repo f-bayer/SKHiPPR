@@ -18,6 +18,7 @@ class TestEquationY(AbstractEquationSystem):
     def closed_form_derivative(self, variable):
         match variable:
             case "y":
+                raise NotImplementedError
                 return np.array([[2 * self.y[0], -2], [1, -1]])
             case "a":
                 return self.a
@@ -90,9 +91,11 @@ def test_solve_one_eq(setup):
     solver.solve()
     assert solver.converged
     assert np.allclose(
-        solver.residual_function(recompute=False), np.array([0, 0]), atol=params["tol"]
+        solver.residual_function(update=False),
+        np.array([0, 0]),
+        atol=params["tolerance"],
     )
-    assert np.allclose(solver.unknowns, np.array([1, 1]), atol=1e-4)
+    assert np.allclose(solver.vector_of_unknowns, np.array([1, 1]), atol=1e-4)
     # assert not prb.stable
 
 
