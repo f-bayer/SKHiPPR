@@ -328,12 +328,14 @@ class NewtonSolver:
                     print("")
 
         if self.converged:
-            self.determine_stability()
+            self.determine_stability(update=True)
         elif self.verbose:
             print(f" Did not converge after {self.num_iter} iterations")
 
-    def determine_stability(self):
+    def determine_stability(self, update=False):
         if self.equation_determining_stability is None:
             return None, None
         else:
-            return self.equation_determining_stability.determine_stability()
+            return self.equation_determining_stability.determine_stability(
+                update=update
+            )
