@@ -22,6 +22,10 @@ class AbstractEquation(ABC):
         if update:
             # compute the residual using the attributes
             self.residual_value = self.residual_function()
+            if self.residual_value.ndim > 1:
+                raise ValueError(
+                    f"Residual must be a 1-D numpy array but has shape {self.residual_value.shape}"
+                )
         elif self.residual_value is None:
             raise RuntimeError("Residual has not been computed yet!")
         return self.residual_value
@@ -132,7 +136,7 @@ class Equation(AbstractEquation):
     def __init__(
         self,
         residual_function,
-        closed_form_derivative: dict[str, Callable],
+        closed_form_derivative: Callable,
         **parameters,
     ):
         super().__init__()
