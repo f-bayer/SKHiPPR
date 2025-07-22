@@ -16,13 +16,25 @@ class EquationSystem:
         self.init_unknowns()
         self.equation_determining_stability = equation_determining_stability
 
-        self.solved = False
+        # Initial residual evaluation
+        res = self.residual_function(update=True)
+        if np.max(np.abs(res)) == 0:
+            self.solved = True
+        else:
+            self.solved = False
 
     def init_unknowns(self):
         """Make sure that every Equation object (and self) has every unknown as attribute"""
         self.length_unknowns = {}
         for unk in self.unknowns:
-            equ_with_value = next(equ for equ in self.equations if hasattr(equ, unk))
+            try:
+                equ_with_value = next(
+                    equ for equ in self.equations if hasattr(equ, unk)
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Variable {unk} is not an attribute for any of the equations!"
+                )
             value = np.atleast_1d(getattr(equ_with_value, unk))
 
             if value.ndim > 1:
@@ -45,6 +57,12 @@ class EquationSystem:
             # custom setter also sets the attribute in all equations
             setattr(self, unk, value)
         self.length_unknowns["total"] = sum(self.length_unknowns.values())
+
+    @property
+    def well_posed(self):
+        return (
+            self.residual_function(update=False).size == self.length_unknowns["total"]
+        )
 
     @property
     def vector_of_unknowns(self):
@@ -122,7 +140,9 @@ class EquationSystem:
         ):
             return getattr(self.equations[0], name)
         else:
-            raise AttributeError(f"Attribute '{name}' not available")
+            raise AttributeError(
+                f"'{str(self.__class__)}' object has no attribute '{name}'"
+            )
 
     def __setattr__(self, name, value) -> None:
         """Custom attribute setter.
@@ -156,10 +176,6 @@ class EquationSystem:
         """
 
         res = np.concatenate([equ.residual(update=update) for equ in self.equations])
-        if res.size != self.length_unknowns["total"]:
-            raise RuntimeError(
-                f"Length {res.size} of residual is not number {self.length_unknowns['total']} of unknowns!"
-            )
         return res
 
     def jacobian(self, update=False, h_fd=1e-4):
@@ -318,6 +334,11 @@ class NewtonSolver:
         * Solution is stored in :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns`,constructed by the members of :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns_dict`
         * Prints progress and convergence information if :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose` is ``True``.
         """
+        if not equation_system.well_posed:
+            raise ValueError(
+                "Equation system is not well-posed: Number of unknowns and number of equations differ"
+            )
+
         if self.verbose:
             print(
                 f", Initial guess: x[-1]={equation_system.vector_of_unknowns[-1]:.3g}"
@@ -336,8 +357,8 @@ class NewtonSolver:
 
             if equation_system.solved and self.verbose:
                 print(f" Converged", end="")
-                if self.length_unknowns["total"] < 5:
-                    print(f" to {self.parse_vector_of_unknowns()}")
+                if equation_system.length_unknowns["total"] < 5:
+                    print(f" to {equation_system.parse_vector_of_unknowns()}")
                 else:
                     print("")
 

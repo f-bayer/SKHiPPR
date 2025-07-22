@@ -13,7 +13,6 @@ def test_f(ode_setting_vectorized):
     assert f.shape == x.shape, f"Expected f to have shape {x.shape}, but got {f.shape}"
 
 
-# TODO implement self.check_dimensions into subclasses
 def test_mismatched_ndof(ode_setting_vectorized):
     """
     Test the duffing function with mismatched n_dof.
