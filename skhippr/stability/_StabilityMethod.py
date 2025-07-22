@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from skhippr.problems.newton import NewtonProblem
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from skhippr.problems.newton import NewtonSolver
 
 
 class _StabilityMethod(ABC):
@@ -25,7 +28,7 @@ class _StabilityMethod(ABC):
         self.tol = tol
 
     @abstractmethod
-    def determine_eigenvalues(self, problem: NewtonProblem) -> np.ndarray:
+    def determine_eigenvalues(self, problem: "NewtonSolver") -> np.ndarray:
         """
         Determine the eigenvalues that govern the stability from a given :py:class:`~skhippr.problems.newton.NewtonProblem`.
 

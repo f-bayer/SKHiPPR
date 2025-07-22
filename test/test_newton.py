@@ -69,7 +69,7 @@ def test_solver_constructor(setup):
     solver = NewtonSolver(
         [equ_y, equ_b],
         ["y", "a"],
-        stability_method=None,
+        equation_determining_stability=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
         verbose=True,
@@ -90,7 +90,7 @@ def test_solve_one_eq(setup, num_eqs):
     solver = NewtonSolver(
         eqs,
         unknowns,
-        stability_method=None,
+        equation_determining_stability=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
         verbose=True,
@@ -118,7 +118,7 @@ def test_reset(setup):
     solver = NewtonSolver(
         [eq_y, eq_b],
         ["y", "b"],
-        stability_method=None,
+        equation_determining_stability=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
         verbose=True,
@@ -151,7 +151,7 @@ def test_solver_getter(setup):
     solver = NewtonSolver(
         [eq_y, eq_b],
         ["y", "b"],
-        stability_method=None,
+        equation_determining_stability=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
         verbose=True,
@@ -173,7 +173,7 @@ def test_solution_setter(setup):
     solver = NewtonSolver(
         [eq_y, eq_b],
         ["y", "b"],
-        stability_method=None,
+        equation_determining_stability=None,
         tolerance=params["tolerance"],
         max_iterations=params["max_iter"],
         verbose=True,

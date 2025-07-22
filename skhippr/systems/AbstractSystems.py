@@ -5,13 +5,18 @@ from collections.abc import Callable
 from typing import Any, override
 import numpy as np
 
+from skhippr.stability._StabilityMethod import StabilityEquilibrium
+
 
 class AbstractEquationSystem(ABC):
 
-    def __init__(self):
+    def __init__(self, stability_method=None):
         super().__init__()
         self._derivative_dict = {}
         self.residual_value = None
+        self.stability_method = stability_method
+        self.stable = None
+        self.eigenvalues = None
 
     def residual(self, update=False):
         if update:
@@ -102,6 +107,26 @@ class AbstractEquationSystem(ABC):
         setattr(self, variable, x_orig)
         return derivative
 
+    def determine_stability(self, update=False):
+        if self.stability_method is None:
+            raise AttributeError("Stability method not available")
+
+        if update:
+            eigenvalues = self.stability_method.determine_eigenvalues(self)
+            self.eigenvalues = eigenvalues
+            stable = self.stability_criterion(eigenvalues)
+            self.stable = stable
+
+        return self.stable, self.eigenvalues
+
+    def stability_criterion(self, eigenvalues):
+        if self.stability_method is None:
+            raise ValueError("No stability method available!")
+        else:
+            raise NotImplementedError(
+                "To be implemented in concrete subclasses if needed"
+            )
+
 
 class EquationSystem(AbstractEquationSystem):
     def __init__(
@@ -132,9 +157,11 @@ class EquationSystem(AbstractEquationSystem):
 
 # still an abstract class
 class FirstOrderODE(AbstractEquationSystem):
-    def __init__(self, autonomous: bool, n_dof: int):
+    def __init__(self, autonomous: bool, n_dof: int, stability_method=None):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
-        super().__init__()
+        if stability_method is None:
+            stability_method = StabilityEquilibrium(n_dof)
+        super().__init__(stability_method=stability_method)
         self.autonomous = autonomous
         self.n_dof = n_dof
 
@@ -168,6 +195,10 @@ class FirstOrderODE(AbstractEquationSystem):
     @override
     def residual_function(self):
         return self.dynamics()
+
+    @override
+    def stability_criterion(self, eigenvalues):
+        return np.all(np.real(eigenvalues) < self.stability_method.tol)
 
     def closed_form_derivative(self, variable, t=None, x=None):
         # Provide an interface which offers t and x
