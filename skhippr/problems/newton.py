@@ -63,7 +63,7 @@ class NewtonSolver:
         self,
         equations: Iterable[AbstractEquationSystem],
         unknowns: Iterable[str],
-        stability_method: "_StabilityMethod" = None,
+        equation_determining_stability: AbstractEquationSystem = None,
         tolerance: float = 1e-8,
         max_iterations: int = 20,
         verbose: bool = False,
@@ -79,9 +79,7 @@ class NewtonSolver:
         self.num_iter: int = 0
 
         # Stability
-        self.stability_method = stability_method
-        self.stable: bool = None  # type:ignore
-        self.eigenvalues: np.ndarray = None  # type:ignore
+        self.equation_determining_stability = equation_determining_stability
 
         # Parameters
         self.max_iterations = max_iterations
@@ -155,6 +153,14 @@ class NewtonSolver:
         for unk, value in unknowns_parsed.items():
             # custom setter also sets the attribute in all equations
             setattr(self, unk, value)
+
+    @property
+    def stable(self):
+        return self.equation_determining_stability.stable
+
+    @property
+    def eigenvalues(self):
+        return self.equation_determining_stability.eigenvalues
 
     def parse_vector_of_unknowns(self, x=None):
         if x is None:
@@ -275,8 +281,6 @@ class NewtonSolver:
 
         self.converged = False
         self.num_iter = 0
-        self.stable = None  # type:ignore
-        self.eigenvalues = None  # type:ignore
 
     def correction_step(self) -> None:
 
@@ -290,13 +294,6 @@ class NewtonSolver:
         if np.linalg.norm(residual) < self.tolerance:
             self.converged = True
         return residual
-
-    def determine_stability(self):
-        if self.stability_method is not None:
-            self.eigenvalues = self.stability_method.determine_eigenvalues(self)
-            self.stable = self.stability_method.determine_stability(
-                self.eigenvalues
-            )  # TODO sollte das nicht die Klasse 'Problem' machen?!
 
     def solve(self):
         """
@@ -334,3 +331,9 @@ class NewtonSolver:
             self.determine_stability()
         elif self.verbose:
             print(f" Did not converge after {self.num_iter} iterations")
+
+    def determine_stability(self):
+        if self.equation_determining_stability is None:
+            return None, None
+        else:
+            return self.equation_determining_stability.determine_stability()
