@@ -78,6 +78,9 @@ def test_solve(num_eqs, solver, equation_system):
     solver.solve(equation_system)
     assert equation_system.solved
 
+    assert solver.num_iter > 1
+    assert solver.num_iter <= solver.max_iterations
+
     residual_expected = np.zeros(1 + num_eqs)
     solution_expected = np.array([1.0, 1.0])
     if num_eqs == 2:
@@ -120,98 +123,85 @@ def test_badly_posed(equation_system):
         equation_system = EquationSystem([equ_y], ["c"])
 
 
-def test_reset(setup):
-    params, eq_y, eq_b = setup
-    solver = NewtonSolver(
-        [eq_y, eq_b],
-        ["y", "b"],
-        equation_determining_stability=None,
-        tolerance=params["tolerance"],
-        max_iterations=params["max_iter"],
-        verbose=True,
-    )
-    solver.solve()
-    assert solver.converged
-    assert solver.num_iter > 0
+def test_reset(equation_system, solver):
+    """We expect the solved property to reset if anything is changed"""
+    if not equation_system.solved:
+        solver.solve(equation_system)
+    assert equation_system.solved
 
-    # Perform manual reset
-    y_new = np.array([5.0, 0.0, 2.0])
-    solver.reset(y_new)
-    assert not solver.converged
-    assert solver.num_iter == 0
+    equation_system.b = equation_system.b
+    assert not equation_system.solved
+    solver.solve(equation_system)
+    assert equation_system.solved
+    assert solver.num_iter == 1  # b value was already correct
 
-    # Check all the properties
-    assert np.array_equal(solver.y, y_new[:2])
-    assert solver.b == y_new[2]
+    equation_system.b = 5
+    assert not equation_system.solved
+    assert equation_system.equations[0].b == 5
+    solver.solve(equation_system)
+    assert equation_system.solved
+    assert solver.num_iter > 1  # b value was not correct
 
-    for eq in solver.equations:
-        assert np.array_equal(eq.y, y_new[:2])
-        assert eq.b == y_new[2]
-
-    solver.solve()
-    assert solver.converged
+    # Change an attribute that does not have any effect
+    equation_system.c = 3
+    assert not equation_system.solved
 
 
-def test_solver_getter(setup):
+def test_equation_system_getter(equation_system):
     # Ensure that the custom getter does not lead to a recursion loop
-    params, eq_y, eq_b = setup
-    solver = NewtonSolver(
-        [eq_y, eq_b],
-        ["y", "b"],
-        equation_determining_stability=None,
-        tolerance=params["tolerance"],
-        max_iterations=params["max_iter"],
-        verbose=True,
-    )
-    solver.solve()
-    assert solver.converged
-    assert solver.num_iter > 0
 
-    b = solver.b
-    y = solver.y
-    label = solver.label
+    b = equation_system.b
+    y = equation_system.y
 
     with pytest.raises(AttributeError):
-        val = solver.this_attribute_does_not_exist
+        val = equation_system.this_attribute_does_not_exist
 
 
-def test_solution_setter(setup):
-    params, eq_y, eq_b = setup
-    solver = NewtonSolver(
-        [eq_y, eq_b],
-        ["y", "b"],
-        equation_determining_stability=None,
-        tolerance=params["tolerance"],
-        max_iterations=params["max_iter"],
-        verbose=True,
-    )
-    solver.solve()
-    assert solver.converged
-    assert solver.num_iter > 0
+def test_equation_system_setter(equation_system):
 
-    solver.useless_attribute = 1
+    equation_system.useless_attribute = 1
     # Check that arbitrary attributes are NOT transferred to the equations
-    for eq in solver.equations:
+    for eq in equation_system.equations:
         with pytest.raises(AttributeError):
             val = eq.useless_attribute
 
-    # Check that attribute updates directly to the equations do not transfer (how should they)
-    solver.equations[0].b = 3
-    solver.equations[1].b = 4
-    assert solver.b != solver.equations[1].b != solver.equations[0].b
+    # Check that attribute updates directly to the equations do not transfer
+    equation_system.b = 2
+    equation_system.equations[0].b = 3
+    equation_system.equations[1].b = 4
+    assert (
+        equation_system.b
+        != equation_system.equations[1].b
+        != equation_system.equations[0].b
+    )
 
-    # Check that updates to solver unknown transfer to all equations
-    solver.b = 5
-    assert solver.b == solver.equations[1].b == solver.equations[0].b
-    assert solver.vector_of_unknowns[-1] == solver.equations[0].b
+    # Check that updates to system unknown transfer to all equations
+    equation_system.b = 5
+    assert (
+        equation_system.b
+        == equation_system.equations[1].b
+        == equation_system.equations[0].b
+    )
+    assert equation_system.vector_of_unknowns[-1] == equation_system.equations[0].b
 
     # Check that updates to solver for non-unknowns (which do exist) do not transfer to equations
-    solver.a = 42
-    assert solver.equations[0].a != solver.a != solver.equations[1].a
+    equation_system.a = 42
+    assert (
+        equation_system.equations[0].a
+        != equation_system.a
+        != equation_system.equations[1].a
+    )
 
     # Check that updates to unknowns are reflected in all equations
-    solver.vector_of_unknowns = np.append(solver.vector_of_unknowns[:-1], 1)
-    assert 1 == solver.b == solver.equations[1].b == solver.equations[0].b
+    equation_system.vector_of_unknowns = np.append(
+        equation_system.vector_of_unknowns[:-1], 1
+    )
+    assert (
+        1
+        == equation_system.b
+        == equation_system.equations[1].b
+        == equation_system.equations[0].b
+    )
 
 
 if __name__ == "__main__":

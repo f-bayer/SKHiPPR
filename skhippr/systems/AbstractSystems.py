@@ -128,7 +128,7 @@ class AbstractEquation(ABC):
             )
 
 
-class EquationSystem(AbstractEquation):
+class Equation(AbstractEquation):
     def __init__(
         self,
         residual_function,

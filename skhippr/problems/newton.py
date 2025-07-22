@@ -339,10 +339,10 @@ class NewtonSolver:
                 "Equation system is not well-posed: Number of unknowns and number of equations differ"
             )
 
+        self.reset()
+
         if self.verbose:
-            print(
-                f", Initial guess: x[-1]={equation_system.vector_of_unknowns[-1]:.3g}"
-            )
+            print(f"Initial guess: x[-1]={equation_system.vector_of_unknowns[-1]:.3g}")
 
         while self.num_iter < self.max_iterations and not equation_system.solved:
             self.num_iter += 1
