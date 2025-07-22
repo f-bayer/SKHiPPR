@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from copy import copy
 import numpy as np
 
 from skhippr.systems.AbstractSystems import AbstractEquation
@@ -204,6 +205,19 @@ class EquationSystem:
             return self.equation_determining_stability.determine_stability(
                 update=update
             )
+
+    def duplicate(self):
+        equations = [copy(equ) for equ in self.equations]
+        if self.equation_determining_stability is None:
+            equation_determining_stability = None
+        else:
+            idx_stab = self.equations.index(self.equation_determining_stability)
+            equation_determining_stability = equations[idx_stab]
+
+        other = copy(self)
+        other.equations = equations
+        other.equation_determining_stability = equation_determining_stability
+        return other
 
 
 class NewtonSolver:

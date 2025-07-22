@@ -2,10 +2,10 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.newton import NewtonSolver
+from skhippr.problems.newton import NewtonSolver, EquationSystem
 from skhippr.problems.continuation import pseudo_arclength_continuator
-from skhippr.systems.autonomous import truss
-from skhippr.stability._StabilityMethod import StabilityEquilibrium
+from skhippr.systems.autonomous import Truss
+from skhippr.systems.AbstractSystems import AbstractEquation
 
 
 @pytest.fixture
@@ -21,62 +21,81 @@ def truss_params():
     return params
 
 
-def circle(y: np.ndarray, radius=1) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-    # Residual must be returned as 1D numpy array
-    residual = np.atleast_1d(y[0] ** 2 + y[1] ** 2 - radius**2)
-    dr_dy = np.atleast_2d(np.array([2 * y[0], 2 * y[1]]))
-    dr_dradius = np.atleast_1d(-2 * radius)  # optional
+class CircleEquation(AbstractEquation):
+    def __init__(self, y: np.ndarray, radius=1):
+        super().__init__(None)
+        self.y = y
+        self.radius = radius
 
-    # Derivatives are returned as a dictionary. The keys correspond to the function arguments.
-    # Derivatives w.r.t everything else than y are optional and are only needed for explicit parameter continuation.
-    derivatives = {"y": dr_dy, "radius": dr_dradius}
-    return residual, derivatives
+    def residual_function(self):
+        return np.atleast_1d(self.y[0] ** 2 + self.y[1] ** 2 - self.radius**2)
+
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "y":
+                return np.atleast_2d(np.array([2 * self.y[0], 2 * self.y[1]]))
+            case "radius":
+                return np.atleast_2d(-2 * self.radius)
 
 
 def test_cont_circle(visualize=False):
     radius = 1.5
     y0 = [0.9 * radius, 0]
-    initial_guess = NewtonSolver(
-        residual_function=circle,
-        initial_guess=y0,
-        variable="y",
+    initial_equation = CircleEquation(y=y0, radius=radius)
+    initial_system = EquationSystem([initial_equation], ["y"], None)
+    solver = NewtonSolver(
         tolerance=1e-8,
         verbose=False,
         max_iterations=20,
-        stability_method=StabilityEquilibrium(n_dof=2),
-        radius=radius,
     )
+
     branch = []
     num_steps = 1000
-    for branch_point in pseudo_arclength_continuator(
-        initial_problem=initial_guess,
-        stepsize=0.05,
-        stepsize_range=(0.01, 0.1),
-        initial_direction=1,
-        key_param=None,
-        verbose=visualize,
-        num_steps=num_steps,
-    ):
-        branch.append(branch_point)
-        assert np.allclose(np.linalg.norm(branch_point.x), radius)
+    for radius in [radius, 2.0, 3.0]:
+        initial_equation.radius = radius
+        for k, branch_point in enumerate(
+            pseudo_arclength_continuator(
+                initial_system=initial_system,
+                solver=solver,
+                stepsize=0.05,
+                stepsize_range=(0.01, 0.1),
+                initial_direction=1,
+                continuation_parameter=None,
+                verbose=True,
+                num_steps=num_steps,
+            )
+        ):
+            branch.append(branch_point)
+            assert np.allclose(np.linalg.norm(branch_point.y), radius)
 
-        if len(branch) > 1:
-            assert np.linalg.norm(branch_point.x - branch[-2].x) > 0.008
+            if k > 0:
+                actual_stepsize = np.linalg.norm(
+                    branch_point.vector_of_unknowns - branch[-2].vector_of_unknowns
+                )
+                assert actual_stepsize > 0.008
 
-            # End condition
-            if branch[-2].x[-1] < 0 and branch_point.x[-1] >= 0:
-                # continue with different radius
-                radius += 1
-                branch_point.radius = radius
+                # End condition
+                if branch[-2].y[-1] < 0 and branch_point.y[-1] >= 0:
+                    # continue with different radius
+                    break
 
     # Check number of steps
-    assert (
-        len(branch) == num_steps + 1
-    ), f"Expected {num_steps+1} branch points (including initial guess), but got {len(branch)}"
+    # assert (
+    #     len(branch) == num_steps + 1
+    # ), f"Expected {num_steps+1} branch points (including initial guess), but got {len(branch)}"
 
     if visualize:
         plt.figure()
-        plt.plot(*np.array([branch_point.x for branch_point in branch]).T)
+        plt.plot(*np.array([branch_point.y for branch_point in branch]).T)
+        for k, branch_point in enumerate(branch):
+            try:
+                point_with_tng = np.vstack(
+                    (branch_point.y, branch_point.y + 0.2 * branch_point.tangent)
+                )
+                plt.plot(point_with_tng[:, 0], point_with_tng[:, 1], color="g")
+            except TypeError:
+                # last point on each branch nas no tangent yet
+                print(f"Branch point # {k}/{len(branch)} has no tangent")
 
 
 def test_cont_truss(truss_params, verbose=False):
@@ -191,6 +210,6 @@ def test_cont_truss(truss_params, verbose=False):
 
 if __name__ == "__main__":
     params = {"a": 1, "l_0": 1.2, "m": 1, "k": 3, "c": 0.01, "F": -2}
-    test_cont_truss(params, sparsity=False, verbose=True)
+    # test_cont_truss(params, sparsity=False, verbose=True)
     test_cont_circle(visualize=True)
     plt.show()

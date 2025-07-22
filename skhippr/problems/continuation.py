@@ -31,21 +31,19 @@ skhippr.problems.newton.NewtonProblem
 """
 
 from collections.abc import Iterable, Iterator
-from typing import override
-from copy import copy
 import numpy as np
 
-from skhippr.problems.newton import NewtonSolver
+from skhippr.problems.newton import NewtonSolver, EquationSystem
 from skhippr.systems.AbstractSystems import AbstractEquation
 
 
 def pseudo_arclength_continuator(
-    initial_problem: NewtonSolver,
+    initial_system: EquationSystem,
+    solver: NewtonSolver,
     stepsize: float = None,
     stepsize_range: Iterable[float] = (1e-4, 1e-1),
     initial_direction=1,
-    key_param=None,
-    value_param=None,
+    continuation_parameter=None,
     verbose=False,
     num_steps: int = 1000,
 ) -> Iterator["BranchPoint"]:
@@ -100,17 +98,16 @@ def pseudo_arclength_continuator(
         stepsize = stepsize_range[0]
 
     initial_point = BranchPoint(
-        problem=initial_problem,
-        key_param=key_param,
-        value_param=value_param,
-        anchor=initial_direction,
+        underlying_system=initial_system,
+        continuation_parameter=continuation_parameter,
+        initial_direction=initial_direction,
     )
 
-    initial_point.solve()
-    if not initial_point.converged:
+    solver.solve(initial_point)
+    if not initial_point.solved:
         raise RuntimeError("Initial guess did not converge!")
     elif verbose:
-        print(f"Initial guess converged after {initial_point.num_iter} steps.")
+        print(f"Initial guess converged after {solver.num_iter} steps.")
 
     yield initial_point
     last_point = initial_point
@@ -123,14 +120,17 @@ def pseudo_arclength_continuator(
 
         next_point = last_point.predict(stepsize=stepsize)
 
-        if verbose and key_param is not None:
-            print(f"{key_param}_pred = {getattr(next_point, key_param):.2f}", end=" ")
+        if verbose and continuation_parameter is not None:
+            print(
+                f"{continuation_parameter}_pred = {getattr(next_point, continuation_parameter):.2f}",
+                end=" ",
+            )
 
-        next_point.solve()
+        solver.solve(next_point)
 
-        if next_point.converged:
+        if next_point.solved:
             if verbose:
-                print(f"success after {next_point.num_iter} steps.")
+                print(f"success after {solver.num_iter} steps.")
             yield next_point
             k += 1
 
@@ -150,7 +150,7 @@ def pseudo_arclength_continuator(
         print(stop_msg)
 
 
-class BranchPoint(NewtonSolver):
+class BranchPoint(EquationSystem):
     """
     A :py:class:`~skhippr.problems.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
 
@@ -212,133 +212,34 @@ class BranchPoint(NewtonSolver):
 
     def __init__(
         self,
-        problem: NewtonSolver,
-        x0: np.ndarray = None,
-        key_param: str = None,
-        value_param: float = None,
-        anchor: np.ndarray | float = 1,
+        underlying_system: EquationSystem,
+        continuation_parameter: str = None,
+        initial_direction=1,
     ):
-        variable = problem.variable
 
-        if x0 is None:
-            x0 = problem.x
-            if key_param:
-                if value_param:
-                    x0 = np.append(x0, value_param)
-                else:
-                    x0 = np.append(x0, getattr(problem, key_param))
+        anchor_equation = ContinuationAnchor(
+            underlying_system,
+            continuation_parameter,
+            initial_direction=initial_direction,
+        )
 
-        # if x0 is NOT None, we expect that it is already of extended length
-
-        if key_param is not None:
-            variable = f"{variable}_extended"
-
-        self._problem = problem
-        self._problem.reset()
-        self._problem.key_param = key_param
+        unknowns = underlying_system.unknowns
+        if continuation_parameter is not None:
+            unknowns = unknowns + [continuation_parameter]
 
         super().__init__(
-            residual_function=None,
-            initial_guess=x0,
-            variable=variable,
-            stability_method=problem.stability_method,
-            tolerance=problem.tolerance,
-            max_iterations=problem.max_iterations,
-            verbose=problem.verbose,
+            equations=underlying_system.equations + [anchor_equation],
+            unknowns=unknowns,
+            equation_determining_stability=underlying_system.equation_determining_stability,
         )
-
-        self.label = f"{self._problem.label} branch point"
-
-        if np.isscalar(anchor):
-            self.anchor = np.zeros_like(self.x)
-            self.anchor[-1] = anchor
-        else:
-            self.anchor = anchor
         self.tangent = None
-
-    def __getattr__(self, name):
-        """
-        Provides dynamic attribute access for the instance.
-        If the requested attribute `name` is not found on the current instance,
-        this method attempts to retrieve it from the wrapped `_problem` object.
-        If `_problem` does not have the attribute either, an AttributeError is raised.
-        """
-        # Wrap the _problem object to provide direct access to its attributes and methods.
-        # self.__getattr__(name) is ONLY called if self.name throws an AttributeError.
-        if "_problem" in self.__dict__:
-            try:
-                value = getattr(self._problem, name)
-                return value
-            except AttributeError:
-                pass
-
-        raise AttributeError(
-            f"Neither the branch point nor its reference problem have an attribute '{name}'."
-        )
-
-    def __setattr__(self, name, value):
-        """
-        Custom attribute setter that delegates most attribute assignments to the wrapped '_problem' object.
-        - If the attribute name is one of ("_problem", "anchor", "tangent", "variable", "x"), it is set directly on the current instance.
-        - If the attribute name is one of ("_list_params", "f"), the assignment is ignored. This is relevant for the constructor.
-        - For all other attribute names, the assignment is delegated.
-        """
-        # Defer almost all parameters to the _problem
-        if name in ("_problem", "anchor", "tangent", "variable", "x"):
-            super().__setattr__(name, value)
-        elif name in ("_list_params", "f"):
-            pass
-        else:
-            setattr(self._problem, name, value)
-
-    @property
-    def x(self):
-        if self.key_param:
-            return np.append(self._problem.x, getattr(self._problem, self.key_param))
-        else:
-            return self._problem.x
-
-    @x.setter
-    def x(self, value):
-        if self.key_param:
-            self._problem.x = value[:-1]
-            setattr(self._problem, self.key_param, value[-1])
-        else:
-            self._problem.x = value
-
-    def copy_problem(self) -> "BranchPoint":
-        """Returns a shallow copy of ``self._problem`` with disconnected parameters."""
-        return copy(self._problem)
-
-    @override
-    def residual_function(self) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """
-        Returns the residual and its derivatives for the augmented problem, including the anchor equation.
-
-        Appends a 0 to the residual of the underlying problem and adds the anchor equation to the Jacobian.
-        If applicable (explicit continuation), also adds the derivative w.r.t the continuation parameter to the Jacobian.
-
-        """
-        residual, derivatives = self._problem.residual_function()
-        dr_dx = derivatives[self._problem.variable]
-
-        # append anchor equation
-        residual = np.append(residual, 0)
-
-        # add derivative wrt parameter to Jacobian
-        if self.key_param is not None:
-            dr_dx = np.hstack((dr_dx, derivatives[self.key_param][:, np.newaxis]))
-
-        # add anchor to Jacobian
-        derivatives[self.variable] = np.vstack((dr_dx, self.anchor))
-        return residual, derivatives
 
     def determine_tangent(self):
         """
         Compute and normalize the tangent vector at the branch point.
 
         This method checks if the current solution has converged. If not, it raises a ``RuntimeError``.
-        It then constructs the tangent vector by solving a linear system. The resulting normalized tangent vector forms an acute angle with the previous tantent vector. It is stored in the ``self.tangent`` attribute.
+        It then constructs the tangent vector by solving a linear system. The resulting normalized tangent vector forms an acute angle with the previous tangent vector. It is stored in the ``self.tangent`` attribute.
 
         Raises
         -------
@@ -347,16 +248,17 @@ class BranchPoint(NewtonSolver):
             If the solution has not converged and the tangent would thus be meaningless.
 
         """
-        if not self.converged:
-            raise RuntimeError("Cannot determine tangent: solution not converged.")
+        if not self.solved:
+            raise RuntimeError(
+                "Cannot determine tangent at branch point: Branch point not reached (system not solved)."
+            )
 
-        dr_dx_full = self.derivatives[self.variable]
-        residual_tangent = np.zeros_like(self.x)
-        residual_tangent[-1] = 1
-
-        # Solve for the tangent vector
-        tangent = np.linalg.solve(dr_dx_full, residual_tangent)
+        jac = self.jacobian(update=False)
+        rhs = np.zeros(jac.shape[0])
+        rhs[-1] = 1
+        tangent = np.linalg.solve(jac, rhs)
         self.tangent = tangent / np.linalg.norm(tangent)
+        return self.tangent
 
     def predict(self, stepsize: float) -> "BranchPoint":
         """
@@ -376,22 +278,60 @@ class BranchPoint(NewtonSolver):
 
         Notes
         -----
-        The solution is shallow-copied to avoid modifying the state of the current point during future Newton iterations of the next point.
+        The system is shallow-copied to avoid modifying the state of the current point during future Newton iterations of the next point.
         """
         if self.tangent is None:
             self.determine_tangent()
 
-        branch_point_next = BranchPoint(
-            problem=self.copy_problem(),
-            x0=self.x + stepsize * self.tangent,
-            key_param=self.key_param,
-            value_param=None,
-            anchor=self.tangent,
+        branch_point_next = self.duplicate()
+        branch_point_next.equations[-1].initialize_anchor(previous_tangent=self.tangent)
+        branch_point_next.vector_of_unknowns = (
+            self.vector_of_unknowns + stepsize * self.tangent
         )
+        branch_point_next.tangent = None
 
         return branch_point_next
 
 
 class ContinuationAnchor(AbstractEquation):
-    def __init__(self, equations):
+    def __init__(
+        self,
+        equation_system,
+        continuation_parameter=None,
+        previous_tangent=None,
+        initial_direction=1,
+    ):
         super().__init__(None)
+        self.equation_system = equation_system
+        self.continuation_parameter = continuation_parameter
+
+        if previous_tangent is not None:
+            self.initialize_anchor(previous_tangent)
+        elif initial_direction is not None:
+            self.initialize_anchor_with_direction(initial_direction)
+        # otherwise (during prediction), the initialization must be called manually
+
+    def initialize_anchor(self, previous_tangent):
+        self.anchor = self.equation_system.parse_vector_of_unknowns(
+            previous_tangent.flatten()
+        )
+
+    def initialize_anchor_with_direction(self, initial_direction):
+
+        anchor = np.zeros(self.equation_system.length_unknowns["total"])
+
+        self.initialize_anchor(anchor)
+
+        if self.continuation_parameter is not None:
+            self.anchor[self.continuation_parameter] = np.atleast_1d(initial_direction)
+        else:
+            self.anchor[self.equation_system.unknowns[-1]][-1] = initial_direction
+
+    def residual_function(self):
+        return np.atleast_1d(0)
+
+    def closed_form_derivative(self, variable):
+        try:
+            return self.anchor[variable][np.newaxis, :]
+        except KeyError:
+            raise NotImplementedError
