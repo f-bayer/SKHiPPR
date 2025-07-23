@@ -213,7 +213,7 @@ class FirstOrderODE(AbstractEquation):
             return super().derivative(variable, update, h_fd)
         # provide an interface which offers t and x
         try:
-            return self.closed_form_derivative(variable, t, x)
+            derivative = self.closed_form_derivative(variable, t, x)
         except NotImplementedError:
             t_old = self.t
             x_old = self.x
@@ -225,7 +225,8 @@ class FirstOrderODE(AbstractEquation):
             self.t = t_old
             self.x = x_old
 
-            return derivative
+        self._derivative_dict[variable] = derivative
+        return derivative
 
     def closed_form_derivative(self, variable, t=None, x=None):
         # Provide an interface which offers t and x
