@@ -73,8 +73,9 @@ def test_HBM_equation(solver, fourier, period_k, visualize=False):
     assert np.allclose(x_hbm, x_shoot, atol=1e-1)
 
 
+@pytest.mark.parametrize("initial_error", (0, 0.05))
 @pytest.mark.parametrize("autonomous", [False, True])
-def test_HBMSystem(solver, fourier, autonomous, visualize=False):
+def test_HBMSystem(solver, fourier, autonomous, initial_error, visualize=False):
 
     x_0 = np.array([2.1, 0.0])
     if autonomous:
@@ -94,7 +95,8 @@ def test_HBMSystem(solver, fourier, autonomous, visualize=False):
 
     t_eval = fourier.time_samples(omega, periods=1)
     x_shoot = shooting_system.equations[0].x_time(t_eval=t_eval)
-    X0 = fourier.DFT(x_shoot + 0 * np.random.rand(*x_shoot.shape))
+    X0 = fourier.DFT(x_shoot)
+    X0 += initial_error * np.random.rand(*X0.shape)
 
     hbm_system = HBMSystem(
         ode=ode,
