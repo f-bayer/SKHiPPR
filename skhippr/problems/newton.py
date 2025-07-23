@@ -373,7 +373,10 @@ class NewtonSolver:
         while self.num_iter < self.max_iterations and not equation_system.solved:
             self.num_iter += 1
             if self.verbose:
-                print(f"Newton iteration {self.num_iter:2d}", end="")  # , x = {x}")
+                print(
+                    f"Newton iteration {self.num_iter:2d}, x = {equation_system.vector_of_unknowns}",
+                    end="",
+                )
 
             self.correction_step(equation_system)
             if self.verbose:

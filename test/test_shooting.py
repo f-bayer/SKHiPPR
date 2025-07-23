@@ -3,14 +3,14 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
-# from skhippr.systems.autonomous import vanderpol
+from skhippr.systems.autonomous import Vanderpol
 from skhippr.systems.nonautonomous import Duffing
-from skhippr.problems.shooting import ShootingBVP
+from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.problems.newton import NewtonSolver
 
 
 @pytest.mark.parametrize("period_k", [1, 5])
-def test_shooting_duffing(solver, period_k, visualize=False):
+def test_shooting_equation(solver, period_k, visualize=False):
 
     x_0 = np.array([1.0, 0.0])
 
@@ -92,6 +92,23 @@ def test_shooting_duffing(solver, period_k, visualize=False):
     if visualize:
         plt.plot(x_time[0, :], x_time[1, :], "r--", label="Shooting solution")
         plt.legend()
+
+
+@pytest.mark.parametrize("autonomous", (False, True))
+def test_shooting_system(solver, autonomous):
+
+    x_0 = np.array([2.1, 0.0])
+    if autonomous:
+        ode = Vanderpol(t=0, x=x_0, nu=0.8)
+        T = 2 * np.pi
+    else:
+        ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        T = 2 * np.pi / ode.omega
+
+    shooting_system = ShootingSystem(ode=ode, T=T, period_k=1, atol=1e-7, rtol=1e-7)
+    solver.solve(shooting_system)
+    assert shooting_system.solved
+    assert shooting_system.stable
 
 
 def test_shooting_vanderpol():

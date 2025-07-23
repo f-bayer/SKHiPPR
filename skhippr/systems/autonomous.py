@@ -42,10 +42,11 @@ class Vanderpol(FirstOrderODE):
         If the requested derivative variable is not recognized.
     """
 
-    def __init__(self, x: np.ndarray, nu: float):
+    def __init__(self, x: np.ndarray, nu: float, t=0):
         super().__init__(autonomous=True, n_dof=2)
         self.nu = nu
         self.x = x
+        self.t = t
 
     @override
     def dynamics(self, t=None, x=None):

@@ -7,6 +7,7 @@ from scipy.integrate import solve_ivp
 
 from skhippr.systems.AbstractSystems import AbstractEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
+from skhippr.problems.newton import EquationSystem
 
 
 class ShootingBVP(AbstractEquation):
@@ -88,15 +89,20 @@ class ShootingBVP(AbstractEquation):
 
     @override
     def closed_form_derivative(self, variable):
-        if variable != "x":
-            raise NotImplementedError(
-                "Finite differences more efficient for shooting problem"
-            )
-
-        _, _, Phi_t = self.integrate_with_fundamental_matrix(
-            x_0=self.x, t=self.t_0 + self.period_k * self.T
-        )
-        return Phi_t[:, :, -1] - np.eye(Phi_t.shape[0])
+        match variable:
+            case "x":
+                _, _, Phi_t = self.integrate_with_fundamental_matrix(
+                    x_0=self.x, t=self.t_0 + self.period_k * self.T
+                )
+                return Phi_t[:, :, -1] - np.eye(Phi_t.shape[0])
+            case "T":
+                return self.ode.dynamics(
+                    t=self.t_0 + self.T, x=self.residual(update=False) + self.x
+                )[:, np.newaxis]
+            case _:
+                raise NotImplementedError(
+                    "Finite differences more efficient for shooting problem"
+                )
 
     @override
     def stability_criterion(self, eigenvalues):
@@ -132,9 +138,9 @@ class ShootingBVP(AbstractEquation):
 
         sol = solve_ivp(
             fun=self.ode.dynamics,
-            t_span=(0, self.period_k * self.T),
+            t_span=np.array((0, self.period_k * np.squeeze(self.T))),
             y0=self.x,
-            t_eval=t_eval,
+            t_eval=np.insert(np.squeeze(t_eval), 0, 0),
             **self.kwargs_odesolver,
         )
         return sol.y
@@ -211,3 +217,40 @@ class ShootingBVP(AbstractEquation):
         dz_dt = np.hstack((dx_dt, dPhi_dt.ravel(order="F")))
 
         return dz_dt
+
+
+class ShootingPhaseAnchor(AbstractEquation):
+    def __init__(self, ode, x):
+        super().__init__(None)
+        self.ode = ode
+        self.x = x
+
+    def residual_function(self):
+        return np.atleast_1d(0)
+
+    def closed_form_derivative(self, variable):
+        if variable == "x":
+            return self.ode.dynamics(x=self.x)[np.newaxis, :]
+        else:
+            return np.atleast_2d(0)
+
+
+class ShootingSystem(EquationSystem):
+    def __init__(
+        self,
+        ode: Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
+        T: float,
+        period_k: int = 1,
+        **kwargs_odesolver,
+    ):
+        bvp = ShootingBVP(ode, T, period_k, **kwargs_odesolver)
+        equations = [bvp]
+        unknowns = ["x"]
+
+        if ode.autonomous:
+            equations.append(ShootingPhaseAnchor(ode, bvp.x))
+            unknowns.append("T")
+
+        super().__init__(
+            equations=equations, unknowns=unknowns, equation_determining_stability=bvp
+        )
