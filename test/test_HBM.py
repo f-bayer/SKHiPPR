@@ -4,77 +4,70 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from skhippr.problems.shooting import shooting
-from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingProblem
+from skhippr.problems.HBM import HBMEquation  # , HBMProblem_autonomous
+from skhippr.problems.shooting import ShootingBVP
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import duffing
-from skhippr.systems.autonomous import vanderpol
+from skhippr.systems.nonautonomous import Duffing
+from skhippr.problems.newton import NewtonSolver
+
+# from skhippr.systems.autonomous import vanderpol
 
 
 @pytest.mark.parametrize("period_k", [1, 5])
-def test_HBM_duffing(fourier, params_duffing, period_k, visualize=False):
+def test_HBM_duffing(solver, fourier, period_k, visualize=False):
 
     if visualize:
         print("Duffing oscillator")
 
-    params = params_duffing[period_k]
-    omega = params["omega"]
+    x_0 = np.array([1.0, 0.0])
 
-    """ Compute periodic solution using shooting """
-    # Find period-5 solution using shooting method
-    ode_kwargs = {"atol": 1e-7, "rtol": 1e-7}
-    sol_shoot = ShootingProblem(
-        f=duffing,
-        x0=[1.0, 0.0],
-        T=2 * period_k * np.pi / omega,
-        kwargs_odesolver=ode_kwargs,
-        parameters=params,
-        period_k=period_k,
-    )
-    sol_shoot.solve()
-    assert sol_shoot.converged
+    match period_k:
+        case 1:
+            ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        case 5:
+            ode = Duffing(t=0, x=x_0, alpha=-1, beta=1, F=0.37, delta=0.3, omega=1.2)
+        case _:
+            raise ValueError(f"Unknown value '{period_k}' for period-k solution")
+
+    T = 2 * np.pi / ode.omega
+
+    # Reference: Find periodic solution using shooting method
+    shooting = ShootingBVP(ode, T=T, period_k=period_k, atol=1e-7, rtol=1e-7)
+
+    solver.solve_equation(shooting, "x")
 
     """ Compute periodic solution using HBM """
-    t_eval = fourier.time_samples(omega, periods=period_k)[::period_k]
-    x_shoot = sol_shoot.x_time(t_eval=t_eval)
+    t_eval = fourier.time_samples(ode.omega, periods=period_k)[::period_k]
+    x_shoot = shooting.x_time(t_eval=t_eval)
     X0 = fourier.DFT(x_shoot + np.random.rand(*x_shoot.shape) * 1e-1)
 
-    HBMsol = HBMEquation(
-        f=duffing,
-        initial_guess=X0,
-        omega=omega,
+    hbm = HBMEquation(
+        ode=ode,
+        omega=ode.omega,
         fourier=fourier,
-        variable="x",
-        stability_method=None,
-        tolerance=1e-8,
-        max_iterations=30,
-        verbose=visualize,
+        initial_guess=X0,
         period_k=period_k,
-        parameters_f=params,
+        stability_method=None,
     )
 
     if visualize:
-        print(HBMsol)
+        print(hbm)
 
-    HBMsol.solve()
+    solver.solve_equation(hbm, "X")
 
     if visualize:
-        print(HBMsol)
-
-    assert HBMsol.converged
+        print(hbm)
 
     # Assert that the HBM solution is indeed a solution
 
-    x_shoot = sol_shoot.x_time(t_eval=t_eval)
-    x_hbm = HBMsol.x_time()
+    x_hbm = hbm.x_time()
     if visualize:
         plt.figure()
         plt.plot(x_shoot[0, :], x_shoot[1, :], label="ODE")
         plt.plot(np.real(x_hbm[0, :]), np.real(x_hbm[1, :]), "--", label="HBM")
         plt.legend()
         plt.title(
-            f"{'real' if fourier.real_formulation else 'complex'} Duffing \n {HBMsol}"
+            f"{'real' if fourier.real_formulation else 'complex'} Duffing \n {hbm}"
         )
 
     # assert np.allclose(x_hbm, x_shoot, atol=1e-1)
@@ -142,4 +135,8 @@ def test_HBM_aut(fourier, visualize=True):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    my_solver = NewtonSolver(verbose=True)
+    my_fourier = Fourier(N_HBM=15, L_DFT=128, n_dof=2, real_formulation=True)
+    for period_k in [1, 5]:
+        test_HBM_duffing(my_solver, my_fourier, period_k, visualize=True)
+    plt.show()

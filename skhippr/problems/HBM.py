@@ -95,12 +95,11 @@ class HBMEquation(AbstractEquation):
         -----------
         TO DOOOOO
         """
-
+        super().__init__(stability_method=stability_method)
         self.ode = ode
         self.fourier = fourier
         self.factor_k = 1 / period_k
         self.omega = omega
-        self.stability_method = stability_method
 
         # DFT initial guess if required
         if initial_guess is None:

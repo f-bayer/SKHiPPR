@@ -197,7 +197,10 @@ class EquationSystem:
         return jac
 
     def determine_stability(self, update=False):
-        if self.equation_determining_stability is None:
+        if (
+            self.equation_determining_stability is None
+            or self.equation_determining_stability.stability_method is None
+        ):
             return None, None
         elif not self.solved:
             raise RuntimeError("Equation not solved, stability not well-defined!")
