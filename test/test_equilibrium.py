@@ -2,41 +2,39 @@ import numpy as np
 import pytest
 from skhippr.systems.nonautonomous import Duffing
 from skhippr.systems.autonomous import Vanderpol, Truss
-from skhippr.problems.newton import NewtonSolver
+from skhippr.problems.newton import NewtonSolver, EquationSystem
 
 
-def test_solution(ode_setting):
+def test_solution(solver, ode_setting):
     # All considered test cases except Duffing have an equilibrium at zero
     _, ode = ode_setting
 
     if isinstance(ode, Duffing):
         ode.F = 0  # remove forcing
 
-    solver = NewtonSolver(
+    equ_sys = EquationSystem(
         equations=[ode],
         unknowns=["x"],
         equation_determining_stability=None,
-        verbose=True,
     )
 
-    solver.solve()
-    assert solver.converged
+    solver.solve(equ_sys)
+    assert equ_sys.solved
 
 
-def test_stability(ode_setting):
+def test_stability(solver, ode_setting):
     _, ode = ode_setting
-    solver = NewtonSolver(
+    equ_sys = EquationSystem(
         equations=[ode],
         unknowns=["x"],
         equation_determining_stability=ode,
-        verbose=True,
     )
-    solver.solve()
+    solver.solve(equ_sys)
 
-    print(solver.stable)
+    print(ode.stable)
 
     if isinstance(ode, Vanderpol):
-        assert not solver.stable
+        assert not ode.stable
 
     if isinstance(ode, Truss):
         if np.max(np.abs(ode.x)) > 0.1:

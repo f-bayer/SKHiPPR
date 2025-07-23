@@ -21,15 +21,6 @@ def truss_params():
     return params
 
 
-@pytest.fixture
-def solver():
-    return NewtonSolver(
-        tolerance=1e-8,
-        verbose=False,
-        max_iterations=20,
-    )
-
-
 class CircleEquation(AbstractEquation):
     def __init__(self, y: np.ndarray, radius=1):
         super().__init__(None)

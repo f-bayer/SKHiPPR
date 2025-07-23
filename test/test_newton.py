@@ -1,9 +1,8 @@
 import pytest
 import numpy as np
 
-from skhippr.problems.newton import NewtonSolver, EquationSystem
+from skhippr.problems.newton import EquationSystem
 from skhippr.systems.AbstractSystems import AbstractEquation
-from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
 class TestEquationY(AbstractEquation):
@@ -46,11 +45,6 @@ class TestEquationB(AbstractEquation):
                 return np.array([[0, 0]])
             case _:
                 raise NotImplementedError
-
-
-@pytest.fixture
-def solver():
-    return NewtonSolver(tolerance=1e-8, max_iterations=20, verbose=True)
 
 
 @pytest.fixture

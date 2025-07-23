@@ -40,9 +40,9 @@ def test_mismatched_ndof(ode_setting_vectorized):
     ode.x = x_old
 
 
-def test_derivatives(ode_setting_vectorized):
+def test_derivatives(ode_setting):
     """Verify that all derivatives match finite difference derivative"""
-    params, ode = ode_setting_vectorized
+    params, ode = ode_setting
     x = ode.x
     f = ode.residual(update=True)
 

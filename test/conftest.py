@@ -11,6 +11,7 @@ from skhippr.systems.ltp import (
     TruncatedMeissner,
     ShirleyODE,
 )
+from skhippr.problems.newton import NewtonSolver
 
 
 @pytest.fixture(scope="session", params=[1, 100])
@@ -89,6 +90,11 @@ def ode_setting(request):
         case "Shirley":
             params = {"E_alpha": 0.7, "E_beta": 1.5, "b": 2, "omega": 1}
             return params, ShirleyODE(t, x, **params)
+
+
+@pytest.fixture
+def solver():
+    return NewtonSolver(tolerance=1e-8, max_iterations=20, verbose=True)
 
 
 @pytest.fixture(
