@@ -115,7 +115,7 @@ class ShootingBVP(AbstractEquation):
             idx_freedom_of_phase = np.argmin(abs(floquet_multipliers - 1))
             floquet_multipliers = np.delete(floquet_multipliers, idx_freedom_of_phase)
 
-        return np.all(np.abs(eigenvalues)) < self.stability_method.tol
+        return np.all(np.abs(floquet_multipliers) < 1 + self.stability_method.tol)
 
     def x_time(self, t_eval=None):
         """

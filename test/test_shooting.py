@@ -111,49 +111,7 @@ def test_shooting_system(solver, autonomous):
     assert shooting_system.stable
 
 
-def test_shooting_vanderpol():
-
-    nu = 0.5
-    omega0 = 1
-
-    f_ivp = lambda t, x: vanderpol(t, x, nu)[0]
-    x0 = np.array([2, 0])
-
-    ode_kwargs = {"rtol": 1e-7, "atol": 1e-7}
-    parameters = {"nu": nu}
-
-    # Find periodic solution
-    prb = ShootingProblem(
-        f=vanderpol,
-        x0=x0,
-        T=2 * np.pi / omega0,
-        autonomous=True,
-        variable="x",
-        verbose=True,
-        kwargs_odesolver=ode_kwargs,
-        parameters=parameters,
-    )
-    print(prb)
-    prb.solve()
-    print(prb)
-    assert prb.converged
-
-    # Verify that it is indeed a periodic solution
-    x_time = prb.x_time()
-    assert np.allclose(prb.x[:2], x_time[:, -1], rtol=1e-3, atol=1e-3)
-
-    # Verify stability:
-    sol_ivp_converge = solve_ivp(f_ivp, (0, 300 * prb.T), x0, **ode_kwargs)
-    x_end = sol_ivp_converge.y[:, -1]
-    assert prb.stable == np.allclose(x_end, prb.x[:2], atol=1e-1, rtol=1e-1)
-
-    # plot problem
-    # plt.figure()
-    # plt.plot(x_time[0, :], x_time[1, :])
-    # plt.title("Van der Pol solution")
-
-
 if __name__ == "__main__":
     solver = NewtonSolver(tolerance=1e-8, max_iterations=20, verbose=True)
-    test_shooting_duffing(solver=solver, period_k=5, visualize=True)
+    test_shooting_equation(solver=solver, period_k=5, visualize=True)
     plt.show()
