@@ -205,7 +205,12 @@ class FirstOrderODE(AbstractEquation):
         return np.all(np.real(eigenvalues) < self.stability_method.tol)
 
     @override
-    def derivative(self, variable, t=None, x=None):
+    def derivative(self, variable, update=False, h_fd=1e-4, t=None, x=None):
+        if t is not None or x is not None:
+            update = True
+
+        if not update:
+            return super().derivative(variable, update, h_fd)
         # provide an interface which offers t and x
         try:
             return self.closed_form_derivative(variable, t, x)
@@ -216,7 +221,7 @@ class FirstOrderODE(AbstractEquation):
             self.t = t
             self.x = x
 
-            derivative = super().derivative()
+            derivative = super().derivative(variable, update, h_fd)
             self.t = t_old
             self.x = x_old
 
