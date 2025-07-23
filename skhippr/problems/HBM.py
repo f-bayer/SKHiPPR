@@ -210,6 +210,7 @@ class HBMEquation(AbstractEquation):
         return derivative
 
     def dR_domega(self, X=None):
+        raise NotImplementedError
         if X is None:
             X = self.X
         dR_dom = -self.fourier.factors_derivative * X
@@ -504,10 +505,14 @@ class HBMPhaseAnchor(AbstractEquation):
         self.idx_anchor = self._determine_anchor(fourier, harmo, dof)
         self.anchor = np.zeros((1, X.size), dtype=X.dtype)
         self.anchor[0, self.idx_anchor[0]] = -1
+        # self.phase_required = self.X[self.idx_anchor[0]] / self.X[self.idx_anchor[1]]
 
     def residual_function(self):
         # anchor equation (phase may not change):
         # delta X[anchor[0]] = X[anchor[0]]/X[anchor[1]] * delta X[anchor[1]]
+
+        # phase = self.X[self.idx_anchor[0]] / self.X[self.idx_anchor[1]]
+        # return phase - self.phase_required
         return np.atleast_1d(0)
 
     def closed_form_derivative(self, variable):
