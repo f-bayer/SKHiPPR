@@ -3,33 +3,67 @@ import numpy as np
 from copy import copy
 from skhippr.problems.newton import NewtonSolver
 from skhippr.problems.continuation import BranchPoint
+from skhippr.systems.AbstractSystems import AbstractEquation
 
 """ Test parameter access in BranchPoint objects"""
 
 
-def circle_explicit(x, radius, theta, other):
-    r = np.array([x[0] ** 2 + x[1] ** 2 - radius**2, x[1] - x[0] * np.tan(theta)])
-    dr_dx = np.array([[2 * x[0], 2 * x[1]], [-np.tan(theta), 1]])
-    dr_drad = np.array([-2 * radius, 0])
-    dr_dtheta = np.array([0, 1 / (np.cos(theta) ** 2)])
-    derivatives = {
-        "x": dr_dx,
-        "radius": dr_drad,
-        "theta": dr_dtheta,
-        "other": other,
-        "other2": other[2],
-    }
+class CircleExplicit(AbstractEquation):
+    def __init__(self, x, radius, theta, other):
+        super().__init__(stability_method=None)
+        self.x = x
+        self.radius = radius
+        self.theta = theta
+        self.other = other
 
-    return r, derivatives
+    def residual_function(self):
+        return np.array(
+            [
+                self.x[0] ** 2 + self.x[1] ** 2 - self.radius**2,
+                self.x[1] * np.cos(self.theta) - self.x[0] * np.sin(self.theta),
+            ]
+        )
 
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "x":
+                return np.array(
+                    [
+                        [2 * self.x[0], 2 * self.x[1]],
+                        [-np.sin(self.theta), np.cos(self.theta)],
+                    ]
+                )
+            case "radius":
+                return np.array([[-2 * self.radius], [0]])
+            case "theta":
+                return np.array(
+                    [
+                        [0],
+                        [
+                            -self.x[1] * np.sin(self.theta)
+                            - self.x[0] * np.cos(self.theta)
+                        ],
+                    ]
+                )
+            case "other":
+                return self.other
+            case "other2":
+                return self.other[2]
+            case _:
+                raise NotImplementedError
+
+@pytest.
 
 @pytest.fixture
-def prb():
+def circle(solver):
     theta = 0
     radius = 1
+    circ = CircleExplicit(
+        x=np.array([1.1, 0.1]), radius=radius, theta=theta, other=(100, 10, 0)
+    )
     problem = NewtonSolver(
         residual_function=circle_explicit,
-        initial_guess=np.array([1.1, 0.1]),
+        initial_guess=np.array(),
         verbose=True,
         radius=radius,
         theta=theta,
