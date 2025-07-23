@@ -43,7 +43,7 @@ import csv
 
 from skhippr.systems.ltp import mathieu, meissner, meissner_g
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMProblem, HBMProblem_autonomous
+from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
 from skhippr.problems.shooting import ShootingProblem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
@@ -129,7 +129,7 @@ def analyze_N_convergence(
     variable="y",
     autonomous=False,
     initial_guess=None,
-) -> HBMProblem:
+) -> HBMEquation:
     """
     Analyze the convergence of the Koopman-Hill projection with increasing number of harmonics (N_HBM)
     in the context of a Hill-type problem.
@@ -377,7 +377,7 @@ def setup_hbm_problem(
             parameters_f=params_default,
         )
     else:
-        hbm = HBMProblem(
+        hbm = HBMEquation(
             f=f,
             omega=params_default["omega"],
             initial_guess=X_init,

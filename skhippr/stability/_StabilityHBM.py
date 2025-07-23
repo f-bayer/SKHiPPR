@@ -4,7 +4,7 @@ import warnings
 
 from skhippr.Fourier import Fourier
 from skhippr.stability._StabilityMethod import _StabilityMethod
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 
 
 class _StabilityHBM(_StabilityMethod):
@@ -36,7 +36,7 @@ class _StabilityHBM(_StabilityMethod):
 
     @abstractmethod
     def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
+        self, t_over_period: float, problem: HBMEquation
     ) -> np.ndarray:
         """
         Compute the fundamental matrix at a given normalized time for a specified periodic solution.
@@ -56,7 +56,7 @@ class _StabilityHBM(_StabilityMethod):
         """
         ...
 
-    def determine_eigenvalues(self, problem: HBMProblem) -> np.ndarray:  # type:ignore
+    def determine_eigenvalues(self, problem: HBMEquation) -> np.ndarray:  # type:ignore
         """
         Determine the Floquet multipliers of the periodic solution (eigenvalues of the monodromy matrix) for the periodic solution encoded in the given :py:class:`~skhippr.problems.HBM.HBMProblem`.
 

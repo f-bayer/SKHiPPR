@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from skhippr.Fourier import Fourier
 
 # --- HBM solver ---
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 
 # --- Stability method ---
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -113,7 +113,7 @@ def main():
     x0_samples = np.array([np.cos(omega * ts), -omega * np.sin(omega * ts)])
     X0 = fourier.DFT(x0_samples)
 
-    initial_problem = HBMProblem(
+    initial_problem = HBMEquation(
         f=system_function,
         omega=omega,
         initial_guess=X0,

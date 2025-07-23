@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
@@ -58,11 +58,11 @@ class ClassicalHill(_StabilityHBM):
                 f"Unknown sorting method {sorting_method}. Allowed values: 'imaginary', 'symmetry'."
             )
 
-    def fundamental_matrix(self, t_over_period: float, problem: HBMProblem):
+    def fundamental_matrix(self, t_over_period: float, problem: HBMEquation):
         raise NotImplementedError("Not implemented yet for classical Hill")
 
     def hill_EVP(
-        self, problem: HBMProblem, visualize: bool = False
+        self, problem: HBMEquation, visualize: bool = False
     ) -> tuple[np.ndarray, np.ndarray]:
         """
         Solves the eigenvalue problem for the Hill matrix and performs sorting to identify the Floquet exponents.
@@ -128,7 +128,7 @@ class ClassicalHill(_StabilityHBM):
         return floquet_exponents, eigenvectors
 
     @override
-    def determine_eigenvalues(self, problem: HBMProblem) -> np.ndarray:
+    def determine_eigenvalues(self, problem: HBMEquation) -> np.ndarray:
         """
         Determine the eigenvalues (Floquet multipliers) for the given periodic solution.
 

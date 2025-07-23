@@ -37,12 +37,12 @@ from pytest import param
 from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import duffing
 from skhippr.problems.shooting import ShootingProblem
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 
 def Phi_t_ref(
-    ts, problem_ref: HBMProblem, ode_kwargs: dict[str, float] = None
+    ts, problem_ref: HBMEquation, ode_kwargs: dict[str, float] = None
 ) -> tuple[np.ndarray, list[np.ndarray]]:
     """
     Computes the reference fundamental matrix solution using shooting at a given set of time samples.
@@ -100,7 +100,9 @@ def Phi_t_ref(
     return x_time, Phi_ts
 
 
-def errors_koopman_hill(ts, N_HBM, problem_ref: HBMProblem, Phi_ref, params_decay=None):
+def errors_koopman_hill(
+    ts, N_HBM, problem_ref: HBMEquation, Phi_ref, params_decay=None
+):
     """
     Computes the numerical and theoretical error bounds for the fundamental solution matrix
     of a system solved using the Koopman-Hill projection method within the Harmonic Balance Method (HBM) framework.
@@ -127,7 +129,7 @@ def errors_koopman_hill(ts, N_HBM, problem_ref: HBMProblem, Phi_ref, params_deca
     # Set up problem
     fourier = problem_ref.fourier.__replace__(N_HBM=N_HBM)
     params = problem_ref.get_params()
-    problem = HBMProblem(
+    problem = HBMEquation(
         f=duffing,
         initial_guess=fourier.DFT(problem_ref.x_time()),
         fourier=fourier,
@@ -298,7 +300,7 @@ def plot_N_over_t(ts, E_des, problem_ref, Phi_ref, params_decay):
 if __name__ == "__main__":
     params = {"alpha": 0.5, "beta": 3, "delta": 0.05, "F": 0.1, "omega": 0.3}
     fourier_ref = Fourier(N_HBM=40, L_DFT=512, n_dof=2, real_formulation=True)
-    problem_ref = HBMProblem(
+    problem_ref = HBMEquation(
         duffing,
         np.zeros(fourier_ref.n_dof * (2 * fourier_ref.N_HBM + 1)),
         params["omega"],

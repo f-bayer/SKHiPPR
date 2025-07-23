@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # from skhippr.problems.shooting import shooting
-from skhippr.problems.HBM import HBMProblem, HBMProblem_autonomous
+from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
 from skhippr.problems.shooting import ShootingProblem
 from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import duffing
@@ -40,7 +40,7 @@ def test_HBM_duffing(fourier, params_duffing, period_k, visualize=False):
     x_shoot = sol_shoot.x_time(t_eval=t_eval)
     X0 = fourier.DFT(x_shoot + np.random.rand(*x_shoot.shape) * 1e-1)
 
-    HBMsol = HBMProblem(
+    HBMsol = HBMEquation(
         f=duffing,
         initial_guess=X0,
         omega=omega,

@@ -5,7 +5,7 @@ from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import duffing
 
 from skhippr.problems.shooting import ShootingProblem
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.problems.continuation import pseudo_arclength_continuator
 
 
@@ -127,7 +127,7 @@ def frc_HBM(params, sol_init):
     fourier = Fourier(N_HBM, L_DFT, 2, True)
 
     X0 = fourier.DFT(sol_init.x_time(t_eval=fourier.time_samples(omega=sol_init.omega)))
-    HBM_init = HBMProblem(
+    HBM_init = HBMEquation(
         f=duffing,
         initial_guess=X0,
         omega=sol_init.omega,

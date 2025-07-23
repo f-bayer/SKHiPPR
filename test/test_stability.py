@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
 
-from skhippr.problems.HBM import HBMProblem, HBMProblem_autonomous
+from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
 from skhippr.problems.shooting import ShootingProblem
 
 from skhippr.systems.nonautonomous import duffing
@@ -77,7 +77,7 @@ def test_stability(
     if autonomous:
         factory_HBM = HBMProblem_autonomous
     else:
-        factory_HBM = HBMProblem
+        factory_HBM = HBMEquation
 
     sol_HBM = factory_HBM(
         f=f,

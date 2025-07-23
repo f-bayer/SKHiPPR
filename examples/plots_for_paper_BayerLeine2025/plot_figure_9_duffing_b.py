@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 
 from skhippr.systems.nonautonomous import duffing
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 from skhippr.Fourier import Fourier
@@ -70,7 +70,7 @@ def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=
         x_init = np.vstack([np.cos(taus), -params_duffing["omega"] * np.sin(taus)])
 
     # Create and solve HBM problem
-    prb = HBMProblem(
+    prb = HBMEquation(
         f=duffing,
         fourier=fourier,
         stability_method=KoopmanHillProjection(fourier),
@@ -106,7 +106,7 @@ def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=
     # Solution of linear system (beta = 0) for reference
     params_linear = copy(params_duffing)
     params_linear["beta"] = 0
-    prb_linear = prb = HBMProblem(
+    prb_linear = prb = HBMEquation(
         f=duffing,
         fourier=fourier,
         stability_method=KoopmanHillProjection(fourier),
@@ -125,7 +125,7 @@ def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=
     return lines, prb.x_time()
 
 
-def determine_J_norms(prb: HBMProblem, threshold: float = 1e-15):
+def determine_J_norms(prb: HBMEquation, threshold: float = 1e-15):
     """
     Computes the norms of the Fourier coefficients of the Jacobian in an HBMProblem.
     This function extracts the Fourier coefficient matrices from the provided
@@ -221,7 +221,7 @@ def plot_lines(
         ax.plot(x_vals, y_vals, label=f"{k}: b = {b:.2f}, a={a:.2f}")
 
 
-def plot_period(problem: HBMProblem, ax=None, **kwargs):
+def plot_period(problem: HBMEquation, ax=None, **kwargs):
     """
     Plots the phase plot of a given HBMProblem instance.
 

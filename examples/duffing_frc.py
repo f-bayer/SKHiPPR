@@ -16,7 +16,7 @@ from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import duffing
 
 # --- HBM solver ---
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 
 # --- Stability method ---
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -75,7 +75,7 @@ def main():
         "beta": 0.2,
         "delta": 0.1,
     }
-    initial_problem = HBMProblem(
+    initial_problem = HBMEquation(
         f=duffing,
         omega=omega_min,
         initial_guess=X0,
@@ -115,7 +115,7 @@ def main():
 
 
 def initial_force_response(
-    initial_problem: HBMProblem, F_min: float, F_max: float, verbose=True
+    initial_problem: HBMEquation, F_min: float, F_max: float, verbose=True
 ) -> list[BranchPoint]:
     """
     Continue the force response curve starting from the initial solution.
@@ -292,7 +292,7 @@ def plot_3D_frc(
     return ax
 
 
-def visualize_solution(problem: HBMProblem):
+def visualize_solution(problem: HBMEquation):
     """
     Visualizes and analyzes properties of one solved :py:class:`~skhippr.problems.HBM.HBMProblem`.
 

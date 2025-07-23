@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import deque
 
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.systems.nonautonomous import duffing
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 
@@ -21,7 +21,7 @@ def initial_problem(fourier, params_duffing):
     x0_samples = np.vstack((-np.cos(omega_0 * ts), omega_0 * np.sin(omega_0 * ts)))
     X0 = fourier.DFT(x0_samples)
 
-    return HBMProblem(
+    return HBMEquation(
         f=duffing,
         initial_guess=X0,
         omega=params["omega"],

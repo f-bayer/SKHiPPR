@@ -3,8 +3,7 @@ import warnings
 from collections.abc import Callable
 import numpy as np
 
-from skhippr.problems.newton import NewtonSolver
-
+from skhippr.systems.AbstractSystems import AbstractEquation
 from skhippr.Fourier import Fourier
 
 # Imports only needed for type hinting
@@ -12,10 +11,10 @@ if TYPE_CHECKING:
     from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
-class HBMProblem(NewtonSolver):
+class HBMEquation(AbstractEquation):
     """
-    HBMProblem encodes and finds a periodic solution of a non-autonomous
-    ordinary differential equation (ODE) with periodic excitation using the Harmonic Balance Method (HBM).
+    HBMEquation encodes the harmonic balance equations fto find a periodic solution of a non-autonomous
+    ordinary differential equation (ODE) with periodic excitation.
 
     This class transports a non-autonomous ODE into the frequency domain using a :py:class:`~skhippr.Fourier.Fourier` configuration. The resulting nonlinear harmonic balance equations in the frequency domain are then solved using the methods of the parent :py:class:`~skhippr.problems.newton.NewtonProblem` class.
 
@@ -493,7 +492,7 @@ class HBMProblem(NewtonSolver):
         return E_bound
 
 
-class HBMProblem_autonomous(HBMProblem):
+class HBMProblem_autonomous(HBMEquation):
     """
     This is a subclass of :py:class:`~skhippr.problems.HBM.HBMProblem` for finding periodic solutions of *autonomous* systems.
 

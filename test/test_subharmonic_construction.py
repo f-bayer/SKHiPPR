@@ -3,7 +3,7 @@ import numpy as np
 from copy import replace
 
 from skhippr.systems.nonautonomous import duffing
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
     KoopmanHillSubharmonic,
@@ -54,7 +54,7 @@ def test_subharmonic_hill_matrix(fourier, params_duffing):
     def f(t, x, **parameters):
         return duffing(t, x, omega=omega, **parameters)
 
-    prb = HBMProblem(
+    prb = HBMEquation(
         fourier=fourier,
         f=f,
         initial_guess=fourier.DFT(x0),
@@ -75,7 +75,7 @@ def test_subharmonic_hill_matrix(fourier, params_duffing):
     fourier_subh = replace(fourier, N_HBM=2 * fourier.N_HBM, L_DFT=2 * fourier.L_DFT)
     X0_subh = fourier_subh.DFT(np.hstack((x_time, x_time)))
 
-    sol_subh = HBMProblem(
+    sol_subh = HBMEquation(
         fourier=fourier_subh,
         f=f,
         initial_guess=X0_subh,

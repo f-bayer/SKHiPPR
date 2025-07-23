@@ -4,7 +4,7 @@ from scipy import sparse
 from scipy.linalg import expm
 
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
@@ -68,7 +68,7 @@ class KoopmanHillProjection(_StabilityHBM):
             self.C = self.C @ self.fourier.T_to_cplx_from_real
 
     def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
+        self, t_over_period: float, problem: HBMEquation
     ) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using direct Koopman-Hill projection.
@@ -276,7 +276,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         self.C_subh = -np.kron(C0[:, 1:], eye)
 
     def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
+        self, t_over_period: float, problem: HBMEquation
     ) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using subharmonic Koopman-Hill projection.
@@ -360,7 +360,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         if C is None:
             C = self.C_time(t_over_period)
 
-    def hill_subh(self, problem: HBMProblem) -> np.ndarray:
+    def hill_subh(self, problem: HBMEquation) -> np.ndarray:
         """
         Constructs the subharmonic Hill matrix for the given HBM problem.
 

@@ -5,7 +5,7 @@ from math import lcm
 from copy import replace
 from scipy import fft
 
-from skhippr.problems.HBM import HBMProblem
+from skhippr.problems.HBM import HBMEquation
 from skhippr.stability._StabilityHBM import _StabilityHBM
 from skhippr.Fourier import Fourier
 
@@ -98,7 +98,7 @@ class SinglePassRK(_StabilityHBM):
         )  # normalized step size: one period is at tau=1
 
     def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
+        self, t_over_period: float, problem: HBMEquation
     ) -> np.ndarray:
         """
         Computes the fundamental matrix for a given normalized time.
