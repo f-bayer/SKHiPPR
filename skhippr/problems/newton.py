@@ -337,6 +337,15 @@ class NewtonSolver:
             equation_system.solved = True
         return residual
 
+    def solve_equation(self, equation: AbstractEquation, unknown: str):
+        system = EquationSystem([equation], [unknown], equation)
+        self.solve(system)
+        if not system.solved:
+            raise RuntimeError(
+                f"Could not solve {equation} within {self.num_iter} iterations."
+            )
+        return system
+
     def solve(self, equation_system):
         """
         Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.problems.newton.NewtonProblem.residual_function`.

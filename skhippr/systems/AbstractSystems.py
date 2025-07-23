@@ -204,6 +204,24 @@ class FirstOrderODE(AbstractEquation):
     def stability_criterion(self, eigenvalues):
         return np.all(np.real(eigenvalues) < self.stability_method.tol)
 
+    @override
+    def derivative(self, variable, t=None, x=None):
+        # provide an interface which offers t and x
+        try:
+            return self.closed_form_derivative(variable, t, x)
+        except NotImplementedError:
+            t_old = self.t
+            x_old = self.x
+
+            self.t = t
+            self.x = x
+
+            derivative = super().derivative()
+            self.t = t_old
+            self.x = x_old
+
+            return derivative
+
     def closed_form_derivative(self, variable, t=None, x=None):
         # Provide an interface which offers t and x
         return super().closed_form_derivative(variable)

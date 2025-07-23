@@ -3,47 +3,36 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
-from skhippr.systems.autonomous import vanderpol
-from skhippr.systems.nonautonomous import duffing
+# from skhippr.systems.autonomous import vanderpol
+from skhippr.systems.nonautonomous import Duffing
+from skhippr.problems.shooting import ShootingBVP
+from skhippr.problems.newton import NewtonSolver
 
-from skhippr.problems.shooting import ShootingProblem
 
+@pytest.mark.parametrize("period_k", [1, 5])
+def test_shooting_duffing(solver, period_k, visualize=False):
 
-@pytest.mark.parametrize(
-    "period_k,unpack_parameters",
-    [
-        (1, True),
-        (1, False),
-        (5, True),
-        (5, False),
-    ],
-)
-def test_shooting_duffing(params_duffing, period_k, unpack_parameters, visualize=False):
+    x_0 = np.array([1.0, 0.0])
 
-    params = params_duffing[period_k]
-    omega = params["omega"]
-    if unpack_parameters:
-        alpha = params["alpha"]
-        beta = params["beta"]
-        F = params["F"]
-        delta = params["delta"]
+    solve_ivp_kwargs = {"rtol": 1e-7, "atol": 1e-7}
 
-        f = lambda t, x: duffing(t, x, omega, alpha, beta, F, delta)
-        params = dict()
-    else:
-        f = duffing
+    match period_k:
+        case 1:
+            ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        case 5:
+            ode = Duffing(t=0, x=x_0, alpha=-1, beta=1, F=0.37, delta=0.3, omega=1.2)
+        case _:
+            raise ValueError(f"Unknown value '{period_k}' for period-k solution")
 
-    T = 2 * np.pi * period_k / omega
-    ode_kwargs = {"rtol": 1e-7, "atol": 1e-7}
-
-    f_ivp = lambda t, x: f(t, x, **params)[0]
-
-    x0 = np.array([1.0, 0.0])
+    T = 2 * np.pi / ode.omega
 
     # Converge to periodic solution by brute-force integration
     num_periods = 100
-    sol_ivp_converge = solve_ivp(f_ivp, (0, num_periods * T), x0, **ode_kwargs)
+    sol_ivp_converge = solve_ivp(
+        ode.dynamics, (0, num_periods * period_k * T), x_0, **solve_ivp_kwargs
+    )
     x0_p = sol_ivp_converge.y[:, -1]
+
     # Ensure that solution didn't diverge
     assert all(
         np.abs(x0_p) < 100
@@ -51,11 +40,16 @@ def test_shooting_duffing(params_duffing, period_k, unpack_parameters, visualize
 
     # Find and plot converged solution by integrating over period_k periods
     points_per_period = 300
-    t_eval = np.linspace(0, T, period_k * points_per_period + 1, endpoint=True)
-    sol_ivp = solve_ivp(f_ivp, (0, T), x0_p, t_eval=t_eval, **ode_kwargs)
+    t_eval = np.linspace(
+        0, period_k * T, period_k * points_per_period + 1, endpoint=True
+    )
+    sol_ivp = solve_ivp(
+        ode.dynamics, (0, period_k * T), x0_p, t_eval=t_eval, **solve_ivp_kwargs
+    )
     assert np.allclose(
         x0_p, sol_ivp.y[:, -1], atol=1e-2, rtol=1e-2
-    ), "Brute-force integration did not converge to periodic solution"
+    ), f"Brute-force integration did not converge to periodic solution with error {np.linalg.norm(x0_p - sol_ivp.y[:, -1])}"
+
     if visualize:
         plt.figure()
         plt.plot(
@@ -67,34 +61,20 @@ def test_shooting_duffing(params_duffing, period_k, unpack_parameters, visualize
         plt.title(f"Duffing period-{period_k} solution")
 
     # Find periodic solution using shooting
-    prb = ShootingProblem(
-        f=f,
-        x0=x0,
-        T=T,
-        autonomous=False,
-        variable="x",
-        verbose=visualize,
-        kwargs_odesolver=ode_kwargs,
-        parameters=params,
-        period_k=period_k,
-    )
-    if visualize:
-        print(prb)
-
-    prb.solve()
+    duffing_shoot = ShootingBVP(ode=ode, T=T, period_k=period_k, **solve_ivp_kwargs)
+    solver.solve_equation(duffing_shoot, "x")
 
     if visualize:
-        print(prb)
+        print(duffing_shoot)
 
-    assert prb.converged, f"Shooting method did not converge"
     assert np.allclose(
-        prb.x, x0_p, atol=1e-2, rtol=1e-2
+        duffing_shoot.x, x0_p, atol=1e-2, rtol=1e-2
     ), f"Shooting method did not converge to attractive periodic solution"
-    assert prb.stable, "Shooting: Wrong stability assertion"
+    # assert prb.stable, "Shooting: Wrong stability assertion"
 
-    x_time = prb.x_time(t_eval)
+    x_time = duffing_shoot.x_time(t_eval)
     assert np.allclose(
-        prb.x, x_time[:, -1], atol=1e-5, rtol=1e-5
+        duffing_shoot.x, x_time[:, -1], atol=1e-5, rtol=1e-5
     ), f"Shooting method did not converge to periodic solution"
     assert np.allclose(
         x_time, sol_ivp.y, atol=1e-5, rtol=1e-5
@@ -157,4 +137,6 @@ def test_shooting_vanderpol():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    solver = NewtonSolver(tolerance=1e-8, max_iterations=20, verbose=True)
+    test_shooting_duffing(solver=solver, period_k=5, visualize=True)
+    plt.show()

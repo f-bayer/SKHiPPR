@@ -1,17 +1,17 @@
 """Shooting method for finding periodic solutions."""
 
 from typing import override, Any
-from collections.abc import Callable, Iterable
+from collections.abc import Callable
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from skhippr.problems.newton import NewtonSolver
+from skhippr.systems.AbstractSystems import AbstractEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
 
-class ShootingProblem(NewtonSolver):
+class ShootingBVP(AbstractEquation):
     """
-    ShootingProblem implements the shooting method for finding periodic solutions of ODEs.
+    ShootingBVP implements the boundary value problem with shooting method for finding periodic solutions of nonautonomous ODEs.
 
     This class extends :py:class:`~skhippr.problems.newton.NewtonProblem` to solve the boundary value problem given by integrating the initial value problem over a period using ``scipy.integrate.solve_ivp`` and matching the state at start and end time.
     It supports both autonomous and non-autonomous systems, and can compute stability via Floquet multipliers.
@@ -49,58 +49,19 @@ class ShootingProblem(NewtonSolver):
 
     def __init__(
         self,
-        f: Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
-        x0: np.ndarray,
+        ode: Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
         T: float,
-        autonomous: bool = False,
-        variable: str = "x",
-        tolerance: float = 1e-8,
-        max_iterations: int = 20,
-        verbose: bool = False,
-        kwargs_odesolver: dict[str, Any] = None,
-        parameters=None,
         period_k: int = 1,
+        **kwargs_odesolver,
     ):
-
-        if kwargs_odesolver == None:
-            kwargs_odesolver = dict()
-        if parameters is None:
-            parameters = dict()
+        super().__init__(stability_method=StabilityEquilibrium(ode.n_dof))
+        self.ode = ode
+        self.T = T
+        self.period_k = period_k
+        self.x = ode.x
+        self.t_0 = ode.t
 
         self.kwargs_odesolver = kwargs_odesolver
-        self.n_dof = len(x0)
-        self.autonomous = autonomous
-        self.period_k = period_k
-
-        if autonomous:
-            x0 = np.append(x0, T)
-
-        super().__init__(
-            residual_function=f,
-            initial_guess=x0,
-            variable=variable,
-            stability_method=StabilityEquilibrium(n_dof=self.n_dof),
-            tolerance=tolerance,
-            max_iterations=max_iterations,
-            verbose=verbose,
-            **parameters,
-        )
-        self.label = "shooting"
-        self._T = T
-        self.key_param = None
-
-    @property
-    def T(self):
-        if self.autonomous:
-            return self.x[-1]
-        else:
-            return self._T
-
-    @T.setter
-    def T(self, value):
-        if self.autonomous:
-            raise AttributeError("T is part of unknowns and can not be set!")
-        self._T = value
 
     @property
     def omega(self):
@@ -108,11 +69,7 @@ class ShootingProblem(NewtonSolver):
 
     @omega.setter
     def omega(self, value):
-        if self.autonomous:
-            raise AttributeError(
-                "T is part of unknowns, thus omega= 2*pi/T can not be set!"
-            )
-        self._T = 2 * np.pi * self.period_k / value
+        self.T = 2 * np.pi * self.period_k / value
 
     @override
     def residual_function(self):
@@ -126,35 +83,33 @@ class ShootingProblem(NewtonSolver):
         tuple[np.ndarray, dict[str, np.ndarray]]
             the residual and the derivative dictionary
         """
-        if self.autonomous:
-            return self._shooting_residual_aut()
-        else:
-            return self._shooting_residual_nonaut(self.x)
+        x_T = self.x_time(t_eval=[self.t_0 + self.period_k * self.T])
+        return x_T[:, -1] - self.x
 
-    def determine_stability(self):
-        """
-        Determines the stability of the periodic solution by analyzing the Floquet multipliers.
+    @override
+    def closed_form_derivative(self, variable):
+        if variable != "x":
+            raise NotImplementedError(
+                "Finite differences more efficient for shooting problem"
+            )
 
-        This method computes the monodromy matrix from the Jacobian matrix
-        and determines if the system is stable based on its eigenvalues.
-        It then updates the ``self.stable`` attribute to indicate system stability.
+        _, _, Phi_t = self.integrate_with_fundamental_matrix(
+            x_0=self.x, t=self.t_0 + self.period_k * self.T
+        )
+        return Phi_t[:, :, -1] - np.eye(Phi_t.shape[0])
 
-        Notes
-        -----
+    @override
+    def stability_criterion(self, eigenvalues):
+        # eigenvalues are eigenvalues of Jacobian Phi_T - I.
+        # Floquet multipliers are eigs of Phi_T (i.e., eigenvalues + 1)
+        # Stable if all Floquet multipliers lie inside unit circle.
 
-        For autonomous systems, the Floquet multiplier
-        corresponding to the freedom of phase is excluded from the stability check.
-        """
+        floquet_multipliers = eigenvalues + 1
+        if self.ode.autonomous:
+            idx_freedom_of_phase = np.argmin(abs(floquet_multipliers - 1))
+            floquet_multipliers = np.delete(floquet_multipliers, idx_freedom_of_phase)
 
-        # Jacobian is Phi_T - eye --> Floquet multipliers are eigenvalues of jacobian + 1
-        super().determine_stability()
-        self.eigenvalues += 1
-        if self.autonomous:
-            idx_freedom_of_phase = np.argmin(abs(self.eigenvalues - 1))
-            floquet_multipliers = np.delete(self.eigenvalues, idx_freedom_of_phase)
-        else:
-            floquet_multipliers = self.eigenvalues
-        self.stable = all(np.abs(floquet_multipliers) <= 1)
+        return np.all(np.abs(eigenvalues)) < self.stability_method.tol
 
     def x_time(self, t_eval=None):
         """
@@ -173,84 +128,19 @@ class ShootingProblem(NewtonSolver):
         """
 
         if t_eval is None:
-            t_eval = np.linspace(0, self.T, 150)
+            t_eval = np.linspace(self.t_0, self.t_0 + self.period_k * self.T, 150)
+
         sol = solve_ivp(
-            lambda t, x: self.residual(t, x)[0],
-            (0, self.T),
-            self.x[: self.n_dof],
+            fun=self.ode.dynamics,
+            t_span=(0, self.period_k * self.T),
+            y0=self.x,
             t_eval=t_eval,
             **self.kwargs_odesolver,
         )
         return sol.y
 
-    def _shooting_residual_nonaut(
-        self, x0, stepsize=1e-4
-    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-
-        # _, x, Phi, dx_dmu = self.integrate_with_fundamental_matrix(x0, t=self.T)
-        _, x, Phi = self.integrate_with_fundamental_matrix(x0, t=self.T)
-        r = x[:, -1].ravel() - x0
-        dr_dx0 = Phi[:, :, -1] - np.eye(len(x0))
-
-        derivatives = dict()
-        derivatives[self.variable] = dr_dx0
-
-        f_T, _ = self.residual(self.T, x[:, -1])
-        derivatives["T"] = f_T.squeeze()
-
-        if self.key_param:
-            # Approximate the derivative using finite differences
-            param = getattr(self, self.key_param) + stepsize
-
-            # Special case T
-            if self.key_param == "T":
-                T = param
-                key_param = "omega"
-                param = 2 * np.pi / param
-            else:
-                key_param = self.key_param
-                T = self.T
-
-            x_pert = solve_ivp(
-                lambda t, x: self.residual(t, x, **{key_param: param})[0],
-                (0, T),
-                x0,
-                **self.kwargs_odesolver,
-            ).y
-            derivatives[self.key_param] = (
-                x_pert[:, -1].ravel() - x[:, -1].ravel()
-            ) / stepsize
-
-        # if self.key_param:
-        #     if self.key_param == "T":
-        #         derivatives["T"] += dx_dmu
-        #     else:
-        #         derivatives[self.key_param] = dx_dmu
-        return r, derivatives
-
-    def _shooting_residual_aut(self):
-        x0 = self.x[:-1]
-        r, derivatives = self._shooting_residual_nonaut(x0)
-        # Anchor equation: Updates should be orthogonal to f(0, x0)
-        r = np.append(r, 0)
-        dr_dx = np.vstack(
-            (
-                np.hstack(
-                    (derivatives[self.variable], derivatives["T"][:, np.newaxis])
-                ),
-                np.hstack((self.residual(0, x0)[0][np.newaxis, :], [[0]])),
-            )
-        )
-
-        for key in derivatives:
-            if key == self.variable:
-                derivatives[key] = dr_dx
-            else:
-                derivatives[key] = np.append(derivatives[key], 0)
-        return r, derivatives
-
     def integrate_with_fundamental_matrix(
-        self, x0: np.ndarray, t: float, **kwargs
+        self, x_0: np.ndarray = None, t: float = None
     ) -> tuple[float, np.ndarray, np.ndarray]:
         """
         Integrates the system dynamics along with its fundamental matrix.
@@ -283,70 +173,41 @@ class ShootingProblem(NewtonSolver):
         -----
         The method integrates both the state and the fundamental matrix by augmenting the state vector with the flattened fundamental matrix and integrating both simultaneously.
         """
-        z0 = np.hstack((x0, np.eye(len(x0)).flatten(order="F")))
-        # if self.key_param:
-        #     z0 = np.hstack((z0, np.zeros(len(x0))))
+
+        if x_0 is None:
+            x_0 = self.x
+
+        if t is None:
+            t = self.t_0 + self.period_k * self.T
+
+        z_0 = np.hstack((x_0, np.eye(len(x_0)).flatten(order="F")))
         sol = solve_ivp(
-            lambda t, z: self._dynamics_x_phi_T_param(t, z, **kwargs),
-            (0, t),
-            z0,
+            self._dynamics_x_phi_T,
+            (self.t_0, t),
+            z_0,
             **self.kwargs_odesolver,
         )
-        x = sol.y[: len(x0), :]
+        x = sol.y[: len(x_0), :]
         fundamental_matrix = np.reshape(
-            sol.y[len(x0) : (len(x0) + 1) * len(x0), :],
-            (len(x0), len(x0), -1),
+            sol.y[len(x_0) : (len(x_0) + 1) * len(x_0), :],
+            (len(x_0), len(x_0), -1),
             order="F",
         )
-        # if self.key_param:
-        #     dx_dmu = (
-        #         fundamental_matrix[:, :, -1].squeeze()
-        #         @ sol.y[(len(x0) + 1) * len(x0) :, -1]
-        #     )
-        # else:
-        #     dx_dmu = None
 
-        return sol.t, x, fundamental_matrix  # , dx_dmu
+        return sol.t, x, fundamental_matrix
 
-    def _dynamics_x_phi_T_param(self, t: float, z: np.ndarray, **kwargs) -> np.ndarray:
-        x = z[: self.n_dof]
+    def _dynamics_x_phi_T(self, t: float, z: np.ndarray) -> np.ndarray:
+        x = z[: self.ode.n_dof]
         Phi = np.reshape(
-            z[self.n_dof : (self.n_dof + 1) * self.n_dof],
-            shape=(self.n_dof, self.n_dof),
+            z[self.ode.n_dof : (self.ode.n_dof + 1) * self.ode.n_dof],
+            shape=(self.ode.n_dof, self.ode.n_dof),
             order="F",
         )
 
-        f, derivatives = self.residual(t, x, **kwargs)
-        dx_dt = f
-        df_dx = derivatives[self.variable]
+        dx_dt = self.ode.dynamics(t=t, x=x)
+        df_dx = self.ode.derivative(variable="x", t=t, x=x)
         dPhi_dt = df_dx @ Phi
 
         dz_dt = np.hstack((dx_dt, dPhi_dt.ravel(order="F")))
 
-        # if self.key_param:
-        #     # dxdmu = z[(self.n_dof + 1) * self.n_dof :]
-        #     dxdmu_dt = np.linalg.solve(Phi, derivatives[self.key_param])
-        #     dz_dt = np.hstack((dz_dt, dxdmu_dt.squeeze()))
-
         return dz_dt
-
-
-def finite_difference_fundamental_matrix(
-    f: Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
-    x0: np.ndarray,
-    t: float,
-    h: float = 1e-3,
-    **kwargs_odesolver,
-) -> np.ndarray:
-    "Approximate the monodromy matrix using finite difference for comparison purposes."
-
-    sol = solve_ivp(f, t_span=(0, t), y0=x0, **kwargs_odesolver)
-    x_t = sol.y[:, -1]
-    Phi_t = np.zeros(shape=(len(x0), len(x0)))
-    for k in range(len(x0)):
-        y0 = np.zeros_like(x0)
-        y0[k] = h
-
-        sol = solve_ivp(f, t_span=(0, t), y0=x0 + y0, **kwargs_odesolver)
-        Phi_t[:, k] = (sol.y[:, -1] - x_t) / h
-    return Phi_t
