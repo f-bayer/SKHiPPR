@@ -212,8 +212,8 @@ class HBMEquation(AbstractEquation):
     def dR_domega(self, X=None):
         if X is None:
             X = self.X
-
-        return -self.fourier.derivative_matrix * X
+        dR_dom = -self.fourier.factors_derivative * X
+        return dR_dom[:, np.newaxis]
 
     def dR_dvar(self, variable, X=None):
 
@@ -528,7 +528,7 @@ class HBMPhaseAnchor(AbstractEquation):
             # -tan(phi) = c_k/s_k = const -->  delta c = c_k/s_k * delta s
             idx_anchor = [
                 harmo * fourier.n_dof + dof,
-                (harmo + fourier.N_HBM) * self.fourier.n_dof + dof,
+                (harmo + fourier.N_HBM) * fourier.n_dof + dof,
             ]
         else:
             # exp(i*phi) = X+/X- = const -->  delta X+ = X+/X- * delta X-
