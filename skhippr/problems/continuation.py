@@ -122,7 +122,7 @@ def pseudo_arclength_continuator(
 
         if verbose and continuation_parameter is not None:
             print(
-                f"{continuation_parameter}_pred = {getattr(next_point, continuation_parameter):.2f}",
+                f"{continuation_parameter}_pred = {np.squeeze(getattr(next_point, continuation_parameter)):.2f}",
                 end=" ",
             )
 

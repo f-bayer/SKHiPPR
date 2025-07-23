@@ -174,7 +174,8 @@ class Truss(FirstOrderODE):
         f[0, ...] = q_dot
         f[1, ...] = -self.k / self.m * q
         f[1, ...] += self.k / self.m * q * self.l_0 / np.sqrt(self.a**2 + q**2)
-        f[1, ...] += self.F / self.m - self.c / self.m * q_dot
+        f[1, ...] = f[1, ...] + self.F / self.m - self.c / self.m * q_dot
+
         return f
 
     def closed_form_derivative(self, variable, t=None, x=None):
