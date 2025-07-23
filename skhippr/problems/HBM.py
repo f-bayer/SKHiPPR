@@ -5,6 +5,7 @@ import numpy as np
 
 from skhippr.systems.AbstractSystems import AbstractEquation, FirstOrderODE
 from skhippr.Fourier import Fourier
+from skhippr.problems.newton import EquationSystem
 
 # Imports only needed for type hinting
 if TYPE_CHECKING:
@@ -460,156 +461,84 @@ class HBMEquation(AbstractEquation):
         return E_bound
 
 
-class HBMProblem_autonomous(HBMEquation):
-    """
-    This is a subclass of :py:class:`~skhippr.problems.HBM.HBMProblem` for finding periodic solutions of *autonomous* systems.
-
-    An additional anchor equation is used to fix the phase of a selected harmonic and degree of freedom,
-    allowing for the treatment of autonomous systems where the phase is otherwise undetermined.
-
-    The following attributes are added/modified compared to the parent :py:class:`~skhippr.problems.HBM.HBMProblem`:
-
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.x` has one entry more: The last entry is the (unknown) frequency of the periodic solution.
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.omega` returns the last entry of :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.x`, which can change during Newton updates.
-    * :py:func:`~skhippr.problems.HBM.HBMProblem_autonomous.residual_function` now has an appended zero. The corresponding Jacobian contains the anchor, which fixes the phase during updates.
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.idx_anchor` is determined by the arguments ``harmo_anchor`` and ``dof_anchor`` and fixes the harmonic whose phase cannot change during updates.
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.stable` considers the presence of the Freedom of Phase Floquet multiplier at 1. and excludes it from the stability criterion.
-
-    """
-
+class HBMSystem(EquationSystem):
     def __init__(
         self,
-        f: Callable[[np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
-        initial_guess: np.ndarray,
-        omega: float,
-        fourier: Fourier,
-        variable: str = "x",
-        stability_method=None,
-        tolerance: float = 1e-8,
-        max_iterations: int = 20,
-        verbose: bool = False,
+        ode,
+        omega,
+        fourier,
+        initial_guess: np.ndarray = None,
+        period_k: float = 1,
+        stability_method: "_StabilityHBM" = None,
         harmo_anchor: int = 1,
         dof_anchor: int = 0,
-        parameters_f: dict[str, Any] = None,
     ):
-        super().__init__(
-            f=f,
-            initial_guess=initial_guess,
-            omega=omega,
-            fourier=fourier,
-            variable=variable,
+        hbm = HBMEquation(
+            ode,
+            omega,
+            fourier,
+            initial_guess,
+            period_k,
             stability_method=stability_method,
-            tolerance=tolerance,
-            max_iterations=max_iterations,
-            verbose=verbose,
-            period_k=1,
-            parameters_f=parameters_f,
         )
-        self.idx_anchor = self._determine_anchor(harmo_anchor, dof_anchor)
-        self.label = "autonomous HBM"
 
-    @property
-    def omega(self):
-        return self.x[-1]
+        equations = [hbm]
+        unknowns = ["X"]
 
-    @omega.setter
-    def omega(self, value):
-        if len(self.x) == (2 * self.fourier.N_HBM + 1) * self.fourier.n_dof:
-            # during initialization we set omega as the last element of x
-            self.x = np.append(self.x, value)
-        else:
-            raise AttributeError(
-                "property 'omega' of 'HBMProblem_autonomous' is read-only after initialization"
+        if ode.autonomous:
+            unknowns.append("omega")
+            anchor_equation = HBMPhaseAnchor(
+                fourier=hbm.fourier, X=hbm.X, harmo=harmo_anchor, dof=dof_anchor
             )
+            equations.append(anchor_equation)
 
-    @override
-    def determine_stability(self):
-        super().determine_stability()
-        if self.stability_method is not None:
-            floquet_multipliers = self.eigenvalues
-            idx_freedom_of_phase = np.argmin(abs(floquet_multipliers - 1))
-            floquet_multipliers = np.delete(floquet_multipliers, idx_freedom_of_phase)
-            self.stable = np.all(
-                np.abs(floquet_multipliers) < 1 + self.stability_method.tol
-            )
+        super().__init__(
+            equations=equations, unknowns=unknowns, equation_determining_stability=hbm
+        )
 
-    @override
-    def residual_function(self, x=None) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """
-        Computes the residual vector and its derivatives for the current problem,
-        including an anchor equation to constrain the phase.
 
-        Parameters
-        ----------
-        x : np.ndarray, optional
-            The input variable vector. If None, uses ``self.x``.
+class HBMPhaseAnchor(AbstractEquation):
+    def __init__(self, fourier, X, harmo, dof):
+        super().__init__(None)
+        self.X = X
+        self.idx_anchor = self._determine_anchor(fourier, harmo, dof)
+        self.anchor = np.zeros((1, X.size), dtype=X.dtype)
+        self.anchor[0, self.idx_anchor[0]] = -1
 
-        Returns
-        -------
-
-        R : np.ndarray
-            The residual vector. HBM residual with an additional 0 appended.
-        derivatives : dict of str to np.ndarray
-            Dictionary mapping variable names to their derivatives with respect to ``x``.
-            The derivatives for the anchor equation are included, and the ``"omega"`` key is removed.
-        """
-
-        if x is None:
-            x = self.x
-
-        R, derivatives = super().residual_function(x[:-1])
-
-        X_ext = self.x
+    def residual_function(self):
         # anchor equation (phase may not change):
         # delta X[anchor[0]] = X[anchor[0]]/X[anchor[1]] * delta X[anchor[1]]
+        return np.atleast_1d(0)
 
-        anchor = np.zeros((1, X_ext.size), dtype=X_ext.dtype)
-        anchor[0, self.idx_anchor[0]] = -1
-        anchor[0, self.idx_anchor[1]] = (
-            X_ext[self.idx_anchor[0]] / X_ext[self.idx_anchor[1]]
-        )
-        dR_dX = np.vstack(
-            (
-                np.hstack(
-                    (
-                        derivatives[self.variable],
-                        derivatives["omega"][:, np.newaxis],
-                    )
-                ),
-                anchor,
+    def closed_form_derivative(self, variable):
+        if variable == "X":
+            self.anchor[0, self.idx_anchor[1]] = (
+                self.X[self.idx_anchor[0]] / self.X[self.idx_anchor[1]]
             )
-        )
+            return self.anchor
+        else:
+            return np.atleast_2d(0)
 
-        derivatives[self.variable] = dR_dX
-        del derivatives["omega"]
-
-        R = np.append(R, 0)
-        for key in derivatives:
-            if len(derivatives[key].shape) == 1:
-                derivatives[key] = np.append(derivatives[key], 0)
-
-        return R, derivatives
-
-    def _determine_anchor(self, harmo: int = 1, dof: int = 0) -> np.ndarray:
+    def _determine_anchor(self, fourier, harmo: int = 1, dof: int = 0) -> np.ndarray:
         """Determine the index of the anchor equation.
         The anchor equation ensures that the phase of the  harmo-th harmonic
         and the dof-th degree of freedom does not change during HBM solution for autonomous systems.
         """
-        if self.fourier.real_formulation:
+        if fourier.real_formulation:
             # -tan(phi) = c_k/s_k = const -->  delta c = c_k/s_k * delta s
             idx_anchor = [
-                harmo * self.fourier.n_dof + dof,
-                (harmo + self.fourier.N_HBM) * self.fourier.n_dof + dof,
+                harmo * fourier.n_dof + dof,
+                (harmo + fourier.N_HBM) * self.fourier.n_dof + dof,
             ]
         else:
             # exp(i*phi) = X+/X- = const -->  delta X+ = X+/X- * delta X-
             idx_anchor = [
-                (self.fourier.N_HBM + harmo) * self.fourier.n_dof + dof,
-                (self.fourier.N_HBM - harmo) * self.fourier.n_dof + dof,
+                (fourier.N_HBM + harmo) * fourier.n_dof + dof,
+                (fourier.N_HBM - harmo) * fourier.n_dof + dof,
             ]
 
-        # Avoid large numbers and division by zero
-        if abs(self.x[idx_anchor[1]]) < (1e-4 * abs(self.x[idx_anchor[0]])):
+        # Avoid division by zero
+        if abs(self.X[idx_anchor[1]]) < (1e-4 * abs(self.X[idx_anchor[0]])):
             idx_anchor.reverse()
 
         return np.array(idx_anchor)

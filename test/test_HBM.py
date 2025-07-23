@@ -14,7 +14,7 @@ from skhippr.problems.newton import NewtonSolver
 
 
 @pytest.mark.parametrize("period_k", [1, 5])
-def test_HBM_duffing(solver, fourier, period_k, visualize=False):
+def test_HBM_equation(solver, fourier, period_k, visualize=False):
 
     if visualize:
         print("Duffing oscillator")
@@ -59,7 +59,6 @@ def test_HBM_duffing(solver, fourier, period_k, visualize=False):
         print(hbm)
 
     # Assert that the HBM solution is indeed a solution
-
     x_hbm = hbm.x_time()
     if visualize:
         plt.figure()
@@ -70,7 +69,7 @@ def test_HBM_duffing(solver, fourier, period_k, visualize=False):
             f"{'real' if fourier.real_formulation else 'complex'} Duffing \n {hbm}"
         )
 
-    # assert np.allclose(x_hbm, x_shoot, atol=1e-1)
+    assert np.allclose(x_hbm, x_shoot, atol=1e-1)
 
 
 def test_HBM_aut(fourier, visualize=True):
@@ -138,5 +137,5 @@ if __name__ == "__main__":
     my_solver = NewtonSolver(verbose=True)
     my_fourier = Fourier(N_HBM=15, L_DFT=128, n_dof=2, real_formulation=True)
     for period_k in [1, 5]:
-        test_HBM_duffing(my_solver, my_fourier, period_k, visualize=True)
+        test_HBM_equation(my_solver, my_fourier, period_k, visualize=True)
     plt.show()
