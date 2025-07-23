@@ -4,10 +4,11 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.HBM import HBMEquation  # , HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingBVP
+from skhippr.problems.HBM import HBMEquation, HBMSystem
+from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import Duffing
+from skhippr.systems.autonomous import Vanderpol
 from skhippr.problems.newton import NewtonSolver
 
 # from skhippr.systems.autonomous import vanderpol
@@ -72,70 +73,52 @@ def test_HBM_equation(solver, fourier, period_k, visualize=False):
     assert np.allclose(x_hbm, x_shoot, atol=1e-1)
 
 
-def test_HBM_aut(fourier, visualize=True):
+@pytest.mark.parametrize("autonomous", [False, True])
+def test_HBMSystem(solver, fourier, autonomous, visualize=False):
 
-    params = {"nu": 1}
-    omega0 = 1.0
+    x_0 = np.array([2.1, 0.0])
+    if autonomous:
+        ode = Vanderpol(t=0, x=x_0, nu=0.8)
+        T = 2 * np.pi
+    else:
+        ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        T = 2 * np.pi / ode.omega
 
-    print("Van der Pol oscillator")
+    # Shooting system for reference
+    shooting_system = ShootingSystem(ode=ode, T=T, period_k=1, atol=1e-7, rtol=1e-7)
+    shooting_system.T = T
+    solver.solve(shooting_system)
+    assert shooting_system.solved
 
-    """ Compute periodic solution using HBM """
-    t0 = fourier.time_samples(omega0)
-    x0_hbm = np.vstack((np.cos(omega0 * t0), -omega0 * np.sin(omega0 * t0)))
+    omega = 2 * np.pi / shooting_system.T
 
-    sol_HBM = HBMProblem_autonomous(
-        f=vanderpol,
-        initial_guess=x0_hbm,
-        omega=omega0,
+    t_eval = fourier.time_samples(omega, periods=1)
+    x_shoot = shooting_system.equations[0].x_time(t_eval=t_eval)
+    X0 = fourier.DFT(x_shoot + np.random.rand(*x_shoot.shape))
+
+    hbm_system = HBMSystem(
+        ode=ode,
+        omega=2 * np.pi / T,
         fourier=fourier,
-        verbose=True,
-        parameters_f=params,
+        initial_guess=X0,
+        stability_method=None,
     )
-    print(sol_HBM)
-    sol_HBM.solve()
-    print(sol_HBM)
-    assert sol_HBM.converged
-    x_p_hbm = sol_HBM.x_time()
 
-    # Solve the shooting problem for reference
-    sol_shoot = ShootingProblem(
-        f=vanderpol,
-        x0=np.real(x_p_hbm[:, 0]),
-        T=2 * np.pi / np.real(sol_HBM.omega),
-        autonomous=True,
-        variable="x",
-        verbose=visualize,
-        kwargs_odesolver={"atol": 1e-7, "rtol": 1e-7},
-        parameters=params,
-    )
-    x_p_shoot = sol_shoot.x_time(fourier.time_samples(np.real(sol_HBM.omega)))
-    try:
-        assert np.allclose(x_p_hbm, x_p_shoot, atol=1e-1, rtol=1e-1)
-    except AssertionError as AE:
-        if visualize:
-            plt.figure()
-            plt.plot(fourier.time_samples(sol_HBM.omega), x_p_hbm.T, label="HBM")
-            plt.plot(
-                fourier.time_samples(sol_HBM.omega), x_p_shoot.T, "--", label="Shooting"
-            )
-            plt.show()
-            pass
-        raise AE
+    solver.solve(hbm_system)
+    assert hbm_system.solved
 
     if visualize:
-        print(f"Max imaginary part: {max(abs(np.imag(x_p_hbm[0,:])))}")
         plt.figure()
-        plt.plot(x_p_shoot[0, :], x_p_shoot[1, :], label="ODE")
-        plt.plot(x_p_hbm[0, :], x_p_hbm[1, :], "--", label="HBM")
-        plt.legend()
-        plt.title(
-            f"{'real' if fourier.real_formulation else 'complex'} van der Pol \n {sol_HBM}"
-        )
+        x_time = hbm_system.equations[0].x_time()
+        plt.plot(x_time[0, :], x_time[1, :], label="hbm")
+        plt.plot(x_shoot[0, :], x_shoot[1, :], "--", label="shooting")
+    assert np.allclose(hbm_system.equations[0].x_time(), x_shoot, atol=1e-2, rtol=1e-2)
 
 
 if __name__ == "__main__":
     my_solver = NewtonSolver(verbose=True)
     my_fourier = Fourier(N_HBM=15, L_DFT=128, n_dof=2, real_formulation=True)
-    for period_k in [1, 5]:
-        test_HBM_equation(my_solver, my_fourier, period_k, visualize=True)
+    # for period_k in [1, 5]:
+    # test_HBM_equation(my_solver, my_fourier, period_k, visualize=True)
+    test_HBMSystem(my_solver, my_fourier, autonomous=False, visualize=True)
     plt.show()

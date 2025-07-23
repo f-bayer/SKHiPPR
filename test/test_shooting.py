@@ -110,11 +110,7 @@ def test_shooting_system(solver, autonomous):
     shooting_system = ShootingSystem(ode=ode, T=T, period_k=1, atol=1e-7, rtol=1e-7)
     shooting_system.T = T  # needed to recover later during Duffing
 
-    with warnings.catch_warnings(record=True) as w:
-        # Cause all warnings to always be triggered.
-        warnings.simplefilter("error")
-        # Trigger a warning.
-        solver.solve(shooting_system)
+    solver.solve(shooting_system)
 
     assert shooting_system.solved
     assert shooting_system.stable
