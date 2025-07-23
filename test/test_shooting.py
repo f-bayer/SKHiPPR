@@ -8,6 +8,8 @@ from skhippr.systems.nonautonomous import Duffing
 from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.problems.newton import NewtonSolver
 
+import warnings
+
 
 @pytest.mark.parametrize("period_k", [1, 5])
 def test_shooting_equation(solver, period_k, visualize=False):
@@ -106,9 +108,26 @@ def test_shooting_system(solver, autonomous):
         T = 2 * np.pi / ode.omega
 
     shooting_system = ShootingSystem(ode=ode, T=T, period_k=1, atol=1e-7, rtol=1e-7)
-    solver.solve(shooting_system)
+    shooting_system.T = T  # needed to recover later during Duffing
+
+    with warnings.catch_warnings(record=True) as w:
+        # Cause all warnings to always be triggered.
+        warnings.simplefilter("error")
+        # Trigger a warning.
+        solver.solve(shooting_system)
+
     assert shooting_system.solved
     assert shooting_system.stable
+
+    # Verify that the solution is indeed a periodic solution
+    sol = solve_ivp(
+        ode.dynamics,
+        (0, np.squeeze(shooting_system.T)),
+        shooting_system.x,
+        atol=1e-7,
+        rtol=1e-7,
+    )
+    assert np.allclose(sol.y[:, 0], sol.y[:, -1], atol=1e-5, rtol=1e-5)
 
 
 if __name__ == "__main__":

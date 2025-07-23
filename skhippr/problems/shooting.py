@@ -84,7 +84,7 @@ class ShootingBVP(AbstractEquation):
         tuple[np.ndarray, dict[str, np.ndarray]]
             the residual and the derivative dictionary
         """
-        x_T = self.x_time(t_eval=[self.t_0 + self.period_k * self.T])
+        x_T = self.x_time(t_eval=self.t_0 + self.period_k * self.T)
         return x_T[:, -1] - self.x
 
     @override
@@ -136,11 +136,14 @@ class ShootingBVP(AbstractEquation):
         if t_eval is None:
             t_eval = np.linspace(self.t_0, self.t_0 + self.period_k * self.T, 150)
 
+        if np.squeeze(t_eval).size == 1:
+            t_eval = np.insert(np.squeeze(t_eval), 0, 0)
+
         sol = solve_ivp(
             fun=self.ode.dynamics,
             t_span=np.array((0, self.period_k * np.squeeze(self.T))),
             y0=self.x,
-            t_eval=np.insert(np.squeeze(t_eval), 0, 0),
+            t_eval=t_eval,
             **self.kwargs_odesolver,
         )
         return sol.y
@@ -186,10 +189,12 @@ class ShootingBVP(AbstractEquation):
         if t is None:
             t = self.t_0 + self.period_k * self.T
 
+        t_span = np.insert(np.squeeze(t), 0, 0)
+
         z_0 = np.hstack((x_0, np.eye(len(x_0)).flatten(order="F")))
         sol = solve_ivp(
             self._dynamics_x_phi_T,
-            (self.t_0, t),
+            t_span,
             z_0,
             **self.kwargs_odesolver,
         )
