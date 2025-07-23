@@ -3,7 +3,7 @@ import warnings
 from collections.abc import Callable
 import numpy as np
 
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.systems.AbstractSystems import AbstractEquation, FirstOrderODE
 from skhippr.Fourier import Fourier
 
 # Imports only needed for type hinting
@@ -82,77 +82,31 @@ class HBMEquation(AbstractEquation):
 
     def __init__(
         self,
-        f: Callable[..., tuple[np.ndarray, dict[str, np.ndarray]]],
-        initial_guess: np.ndarray,
+        ode: FirstOrderODE,
         omega: float,
         fourier: Fourier,
-        variable: str = "x",
-        stability_method: "_StabilityHBM" = None,
-        tolerance: float = 1e-8,
-        max_iterations: int = 20,
-        verbose: bool = False,
+        initial_guess: np.ndarray = None,
         period_k: float = 1,
-        parameters_f: dict[str, Any] = None,
+        stability_method: "_StabilityHBM" = None,
     ):
         """
-        Initialize the HBM instance.
+        Initialize the HBM equations.
         Parameters:
         -----------
-        f : Callable[[float, np.ndarray, ...], tuple[np.ndarray, dict[str, np.ndarray]]]
-            The ODE function to be solved.
-            Should take as first two arguments time t and state vector, then parameters as named arguments.
-            Should return the residual and its derivatives (at minimum with respect to state vector and continuation parameter(s)).
-        initial_guess : np.ndarray
-            Initial guess for the solution in the frequency domain or time domain.
-        omega : float
-            Fundamental frequency of the excitation.
-        fourier : Fourier
-            Discrete Fourier Transform configuration object. Encodes number of harmonics and length of FFT.
-        variable : str, optional
-            Name of the state variable of f (default is "x").
-        stability_method : "_StabilityHBM", optional
-            Method for stability analysis (default is None).
-        tolerance : float, optional
-            Convergence tolerance for the Newton solver (default is 1e-8).
-        max_iterations : int, optional
-            Maximum number of Newton iterations (default is 20).
-        verbose : bool, optional
-            If True, enables verbose output (default is False).
-        period_k : float, optional
-            The solver searches of periodic solutions whose period time is
-            period_k times the period time of the excitation (default is 1).
-        parameters_f : dict[str, Any], optional
-            Additional parameters passed to the ODE function (default is None).
-            Must contain any eventually desired continuation parameters, can contain more.
-
-        Notes:
-        ------
-            - If `initial_guess` has more than one dimension, it is assumed to be in time domain and transformed.
-            - Any additional parameters for the ode function can be provided via `parameters_f`.
+        TO DOOOOO
         """
 
-        # DFT initial guess if required
-        if len(initial_guess.shape) > 1:
-            initial_guess = fourier.DFT(initial_guess)
-
-        if parameters_f is None:
-            parameters_f = dict()
-
-        super().__init__(
-            residual_function=f,
-            initial_guess=initial_guess,
-            variable=variable,
-            stability_method=stability_method,
-            tolerance=tolerance,
-            max_iterations=max_iterations,
-            verbose=verbose,
-            **parameters_f,
-        )
-
+        self.ode = ode
         self.fourier = fourier
         self.factor_k = 1 / period_k
         self.omega = omega
-        self.label = "HBM"
+        self.stability_method = stability_method
+
+        # DFT initial guess if required
+        if initial_guess is None:
+            initial_guess = self.fourier.DFT(ode.x)
+
+        self.X = initial_guess
 
     """ Methods related to solving the HBM problem."""
 
@@ -171,17 +125,16 @@ class HBMEquation(AbstractEquation):
             The time-domain signal obtained by applying the inverse DFT to :py:attr:`~skhippr.problems.HBM.HBMProblem.x`.
         """
 
-        return self.fourier.inv_DFT(self.x)
+        return self.fourier.inv_DFT(self.X)
 
-    @override
-    def residual_function(self, x=None) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    def aft(self, X=None) -> tuple[np.ndarray, dict[str, np.ndarray]]:
         """
         Compute the HBM residual and its derivatives using the AFT (Alternating Frequency/Time) method.
 
         Parameters
         ----------
-        x : np.ndarray, optional
-            State vector in the frequency domain. If None, uses self.x.
+        X : np.ndarray, optional
+            State vector in the frequency domain. If None, uses self.X.
 
         Returns
         -------
@@ -192,91 +145,107 @@ class HBMEquation(AbstractEquation):
             Includes both frequency-domain (``"<key>"``) and time-sampled (``"<key>_samp"``) derivatives.
         """
 
-        if x is None:
-            x = self.x
+        if X is None:
+            X = self.X
 
-        x_samp = self.fourier.inv_DFT(x)
+        x_samp = self.fourier.inv_DFT(X)
         ts = self.fourier.time_samples(self.omega_solution)
 
         """ Determine the ODE at the time samples."""
-        try:  # vectorized formulation
-            sol = self.residual(ts, x_samp)
-            fs_samp = sol[0]
-            derivatives_samp = sol[1]
-            assert fs_samp.shape == x_samp.shape
+        # vectorized formulation
+        try:
+            fs_samp = self.ode.dynamics(t=ts, x=x_samp)
         except:
-            # iterate through time samples
+            # vectorization impossible, iterate through time samples
             fs_samp = np.zeros_like(x_samp)
-            derivatives_samp = dict()
+            for k in range(x_samp.shape[1]):
+                fs_samp[:, k, ...] = self.ode.dynamics(ts[k], x_samp[:, k, ...])
 
-            for kk in range(self.fourier.L_DFT):
-                sol = self.residual(ts[kk], x_samp[:, kk])
-                f_samp = sol[0]
-                derivative = sol[1]
-                fs_samp[:, kk] = f_samp
-
-                for key, df_dkey in derivative.items():
-                    if kk == 0:
-                        derivatives_samp[key] = np.zeros(
-                            (*df_dkey.shape, self.fourier.L_DFT)
-                        )
-                    derivatives_samp[key][..., kk] = df_dkey
-
-        """ Construct residual and derivatives """
+        """Construct residual"""
         R = self.fourier.DFT(fs_samp) - self.fourier.derivative_coeffs(
-            x, self.omega_solution
-        )
-        derivatives = dict()
-        for key, df_dkey_samp in derivatives_samp.items():
-            derivatives[f"{key}_samp"] = df_dkey_samp
-            if len(df_dkey_samp.shape) <= 2:
-                derivatives[key] = self.fourier.DFT(df_dkey_samp)
-            else:
-                derivatives[key] = self.fourier.matrix_DFT(df_dkey_samp)
-
-        """ Add derivative components due to second term"""
-        derivatives[self.variable] -= (
-            self.omega_solution * self.fourier.derivative_matrix
-        )
-        derivatives["omega"] = (
-            derivatives.get("omega", 0)
-            - self.factor_k * self.fourier.derivative_matrix @ x
+            X, self.omega_solution
         )
 
-        return R, derivatives
+        return R
+
+    @override
+    def residual_function(self):
+        return self.aft(self.X)
+
+    def closed_form_derivative(self, variable):
+        if variable == "X":
+            return self.dR_dX(self.X)
+        elif variable == "omega":
+            return self.dR_domega(self.X)
+        else:
+            return self.dR_dvar(variable, self.X)
+
+    def dR_dX(self, X=None):
+
+        # Sample the derivatives of the ode
+        if X is None:
+            X = self.X
+
+        x_samp = self.fourier.inv_DFT(X)
+        ts = self.fourier.time_samples(self.omega_solution)
+
+        try:
+            Js = self.ode.closed_form_derivative(variable="x", t=ts, x=x_samp)
+        except NotImplementedError:
+            # use finite differences
+            self.ode.t = ts
+            self.ode.x = x_samp
+            Js = self.ode.derivative(variable="x")
+        except:
+            # Vectorization not working, determine sample by sample
+            Js = np.zeros((x_samp.shape[0], *x_samp.shape))
+            for k, t in enumerate(ts):
+                Js[:, :, k, ...] = self.ode.closed_form_derivative(
+                    "x", t, np.squeeze(x_samp[:, k])
+                )
+
+        derivative = self.fourier.matrix_DFT(Js)
+        derivative -= self.omega_solution * self.fourier.derivative_matrix
+
+        return derivative
+
+    def dR_domega(self, X=None):
+        if X is None:
+            X = self.X
+
+        return -self.fourier.derivative_matrix * X
+
+    def dR_dvar(self, variable, X=None):
+
+        # Sample the derivatives of the ode
+        if X is None:
+            X = self.X
+
+        x_samp = self.fourier.inv_DFT(X)
+        ts = self.fourier.time_samples(self.omega_solution)
+
+        try:
+            derivatives_time = self.ode.closed_form_derivative(
+                variable=variable, t=ts, x=x_samp
+            )
+        except NotImplementedError:
+            # use finite differences
+            self.ode.t = ts
+            self.ode.x = x_samp
+            derivatives_time = self.ode.derivative(variable=variable, update=True)
+        except:
+            # Vectorization not working, determine sample by sample
+            derivatives_time = np.zeros_like(x_samp)
+            for k, t in enumerate(ts):
+                derivatives_time[:, k, ...] = self.ode.closed_form_derivative(
+                    variable, t, np.squeeze(x_samp[:, k])
+                )
+
+        return self.fourier.DFT(derivatives_time)
 
     def hill_matrix(self, real_formulation: bool = None) -> np.ndarray:
-        """
 
-        Returns the Hill matrix of the HBM problem as needed for stability analysis.
-
-        Parameters
-        ----------
-
-        real_formulation : bool, optional
-            If specified, determines whether the returned Hill matrix should be in the real-valued
-            or complex-valued formulation. If not provided, uses the solver's formulation.
-
-        Returns
-        -------
-
-        np.ndarray
-            The Hill matrix in either real or complex formulation, depending on the argument.
-
-        Raises
-        ------
-
-        RuntimeError
-            If the HBM problem has not been solved and Hill matrix would thus be meaningless.
-        """
-
-        if self.derivatives is None:
-            raise RuntimeError("HBM was not solved, dR_dX not available")
-
-        H = self.derivatives[self.variable][
-            : (2 * self.fourier.N_HBM + 1) * self.fourier.n_dof,
-            : (2 * self.fourier.N_HBM + 1) * self.fourier.n_dof,
-        ]
+        H = self.derivative("X", update=False)
 
         # Transform between real and complex formulation
         if real_formulation is not None:
