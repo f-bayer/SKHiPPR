@@ -189,7 +189,7 @@ class ShootingBVP(AbstractEquation):
         if t is None:
             t = self.t_0 + self.period_k * self.T
 
-        t_span = np.insert(np.squeeze(t), 0, 0)
+        t_span = np.insert(np.squeeze(t), 0, self.ode.t)
 
         z_0 = np.hstack((x_0, np.eye(len(x_0)).flatten(order="F")))
         sol = solve_ivp(

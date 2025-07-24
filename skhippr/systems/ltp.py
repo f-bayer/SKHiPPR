@@ -66,7 +66,7 @@ class HillLTI(HillODE):
     def __init__(self, t, x, a=0, b=1, damping=0, omega=1):
         super().__init__(t, x, lambda t: 1, a, b, omega, damping)
 
-    def fundamental_matrix(self, t, t_0=0) -> np.ndarray:
+    def fundamental_matrix(self, t, t_0=None) -> np.ndarray:
         """
         Compute the fundamental matrix of the linear time-invariant (LTI) Hill system using the matrix exponential.
 
@@ -82,6 +82,9 @@ class HillLTI(HillODE):
         Notes:
             The matrix exponential is computed using `scipy.linalg.expm`.
         """
+        if t_0 is None:
+            t_0 = self.t
+
         A = self.derivative("x")
         return expm(A * (t - t_0))
 
@@ -102,10 +105,18 @@ class SmoothedMeissner(HillODE):
             cos = np.cos(t)
             return cos / np.sqrt(cos**2 + self.smoothing * np.sin(t) ** 2)
 
-    def fundamental_matrix(self, t_0: float, t_end: float) -> np.ndarray:
+    def fundamental_matrix(self, t_end: float, t_0: float = None) -> np.ndarray:
         if self.smoothing != 0:
             raise ValueError(
                 "Fundamental matrix in closed form only available for un-smoothed Meissner equation!"
+            )
+
+        if t_0 is None:
+            t_0 = self.t
+
+        if t_end < t_0:
+            raise ValueError(
+                f"End time t_end ({t_end}) cannot be smaller than initial time t_0 {(t_0)}"
             )
 
         # Meissner fundamental matrix pieced together by LTI fundamental matrices
