@@ -314,20 +314,27 @@ class ContinuationAnchor(AbstractEquation):
         # otherwise (during prediction), the initialization must be called manually
 
     def initialize_anchor(self, previous_tangent):
-        self.anchor = self.equation_system.parse_vector_of_unknowns(
-            previous_tangent.flatten()
-        )
+        if self.continuation_parameter is None:
+            self.anchor = self.equation_system.parse_vector_of_unknowns(
+                previous_tangent
+            )
+        else:
+            self.anchor = self.equation_system.parse_vector_of_unknowns(
+                previous_tangent[:-1].flatten()
+            )
+            self.anchor[self.continuation_parameter] = np.atleast_1d(
+                previous_tangent[-1]
+            )
 
     def initialize_anchor_with_direction(self, initial_direction):
 
         anchor = np.zeros(self.equation_system.length_unknowns["total"])
+        if self.continuation_parameter is None:
+            anchor[-1] = initial_direction
+        else:
+            anchor = np.append(anchor, initial_direction)
 
         self.initialize_anchor(anchor)
-
-        if self.continuation_parameter is not None:
-            self.anchor[self.continuation_parameter] = np.atleast_1d(initial_direction)
-        else:
-            self.anchor[self.equation_system.unknowns[-1]][-1] = initial_direction
 
     def residual_function(self):
         return np.atleast_1d(0)

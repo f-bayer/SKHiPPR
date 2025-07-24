@@ -84,7 +84,7 @@ def test_FRC_validity(solver, initial_system, initial_direction):
     assert initial_system.solved
     assert initial_system.equations[0].omega == omega
 
-    num_steps = 2
+    num_steps = 3
     branch = []
 
     for branch_point in pseudo_arclength_continuator(
@@ -107,10 +107,11 @@ def test_FRC_validity(solver, initial_system, initial_direction):
         assert bp.solved
 
         # Verify that parameters are correct and going in correct direction
+        assert np.imag(bp.omega) < 1e-15
         if k == 0:
             assert bp.omega == omega
         else:
-            assert initial_direction * (bp.omega - branch[k - 1].omega) > 0
+            assert np.real(initial_direction * (bp.omega - branch[k - 1].omega)) > 0
 
         # Verify that the point on the branch is indeed a solution, i.e., dx/dt == f
 

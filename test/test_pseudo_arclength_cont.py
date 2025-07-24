@@ -244,5 +244,5 @@ if __name__ == "__main__":
         max_iterations=20,
     )
     test_cont_truss(my_solver, params, verbose=True)
-    # test_cont_circle(my_solver, visualize=True)
+    test_cont_circle(my_solver, visualize=True)
     plt.show()
