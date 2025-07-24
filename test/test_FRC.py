@@ -114,19 +114,18 @@ def test_FRC_validity(solver, initial_system, initial_direction):
             assert np.real(initial_direction * (bp.omega - branch[k - 1].omega)) > 0
 
         # Verify that the point on the branch is indeed a solution, i.e., dx/dt == f
+        hbm = bp.equations[0]
+        ts = hbm.fourier.time_samples(hbm.omega)
+        xs = hbm.x_time()
+        fs = hbm.ode.dynamics(t=ts, x=xs)
 
-        # ode_copy = copy(initial_system.ode)
-        # omega = bp.omega
-        # ts = bp.fourier.time_samples(bp.omega)
-        # xs = bp.x_time()
-        # fs, _ = duffing(ts, xs, **params)
-        # dx_dts = bp.fourier.differentiate(xs, omega=bp.omega)
-        # dx_dts_approx = (xs[:, 1:] - xs[:, :-1]) / (ts[1] - ts[0])
+        dx_dts = hbm.fourier.differentiate(xs, omega=hbm.omega)
+        dx_dts_approx = (xs[:, 1:] - xs[:, :-1]) / (ts[1] - ts[0])
 
-        # assert np.allclose(fs, dx_dts, rtol=1e-6, atol=1e-6)
-        # assert np.allclose(
-        #     0.5 * (fs[:, 1:] + fs[:, :-1]), dx_dts_approx, rtol=1e-1, atol=1e-1
-        # )
+        assert np.allclose(fs, dx_dts, rtol=1e-6, atol=1e-6)
+        assert np.allclose(
+            0.5 * (fs[:, 1:] + fs[:, :-1]), dx_dts_approx, rtol=1e-1, atol=1e-1
+        )
 
 
 if __name__ == "__main__":
