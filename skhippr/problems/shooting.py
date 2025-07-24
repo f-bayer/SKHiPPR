@@ -5,12 +5,12 @@ from collections.abc import Callable
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.systems.AbstractSystems import AbstractEquation, AbstractCycleEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 from skhippr.problems.newton import EquationSystem
 
 
-class ShootingBVP(AbstractEquation):
+class ShootingBVP(AbstractCycleEquation):
     """
     ShootingBVP implements the boundary value problem with shooting method for finding periodic solutions of nonautonomous ODEs.
 
@@ -55,22 +55,14 @@ class ShootingBVP(AbstractEquation):
         period_k: int = 1,
         **kwargs_odesolver,
     ):
-        super().__init__(stability_method=StabilityEquilibrium(ode.n_dof))
-        self.ode = ode
-        self.T = T
-        self.period_k = period_k
-        self.x = ode.x
+        super().__init__(
+            ode=ode,
+            omega=2 * np.pi / T,
+            period_k=period_k,
+            stability_method=StabilityEquilibrium(ode.n_dof),
+        )
         self.t_0 = ode.t
-
         self.kwargs_odesolver = kwargs_odesolver
-
-    @property
-    def omega(self):
-        return 2 * np.pi * self.period_k / self.T
-
-    @omega.setter
-    def omega(self, value):
-        self.T = 2 * np.pi * self.period_k / value
 
     @override
     def residual_function(self):
@@ -84,7 +76,7 @@ class ShootingBVP(AbstractEquation):
         tuple[np.ndarray, dict[str, np.ndarray]]
             the residual and the derivative dictionary
         """
-        x_T = self.x_time(t_eval=self.t_0 + self.period_k * self.T)
+        x_T = self.x_time(t_eval=self.t_0 + self.T_solution)
         return x_T[:, -1] - self.x
 
     @override
@@ -92,12 +84,12 @@ class ShootingBVP(AbstractEquation):
         match variable:
             case "x":
                 _, _, Phi_t = self.integrate_with_fundamental_matrix(
-                    x_0=self.x, t=self.t_0 + self.period_k * self.T
+                    x_0=self.x, t=self.t_0 + self.T_solution
                 )
                 return Phi_t[:, :, -1] - np.eye(Phi_t.shape[0])
             case "T":
                 return self.ode.dynamics(
-                    t=self.t_0 + self.T, x=self.residual(update=False) + self.x
+                    t=self.t_0 + self.T_solution, x=self.residual(update=False) + self.x
                 )[:, np.newaxis]
             case _:
                 raise NotImplementedError(
@@ -134,14 +126,14 @@ class ShootingBVP(AbstractEquation):
         """
 
         if t_eval is None:
-            t_eval = np.linspace(self.t_0, self.t_0 + self.period_k * self.T, 150)
+            t_eval = np.linspace(self.t_0, self.t_0 + self.T_solution, 150)
 
         if np.squeeze(t_eval).size == 1:
             t_eval = np.insert(np.squeeze(t_eval), 0, 0)
 
         sol = solve_ivp(
             fun=self.ode.dynamics,
-            t_span=np.array((0, self.period_k * np.squeeze(self.T))),
+            t_span=np.array((0, np.squeeze(self.T_solution))),
             y0=self.x,
             t_eval=t_eval,
             **self.kwargs_odesolver,
@@ -187,9 +179,9 @@ class ShootingBVP(AbstractEquation):
             x_0 = self.x
 
         if t is None:
-            t = self.t_0 + self.period_k * self.T
+            t = self.t_0 + self.T_solution
 
-        t_span = np.insert(np.squeeze(t), 0, self.ode.t)
+        t_span = np.insert(np.squeeze(t), 0, self.t_0)
 
         z_0 = np.hstack((x_0, np.eye(len(x_0)).flatten(order="F")))
         sol = solve_ivp(

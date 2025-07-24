@@ -3,7 +3,11 @@ import warnings
 from collections.abc import Callable
 import numpy as np
 
-from skhippr.systems.AbstractSystems import AbstractEquation, FirstOrderODE
+from skhippr.systems.AbstractSystems import (
+    AbstractEquation,
+    AbstractCycleEquation,
+    FirstOrderODE,
+)
 from skhippr.Fourier import Fourier
 from skhippr.problems.newton import EquationSystem
 
@@ -12,9 +16,9 @@ if TYPE_CHECKING:
     from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
-class HBMEquation(AbstractEquation):
+class HBMEquation(AbstractCycleEquation):
     """
-    HBMEquation encodes the harmonic balance equations fto find a periodic solution of a non-autonomous
+    HBMEquation encodes the harmonic balance equations to find a periodic solution of a non-autonomous
     ordinary differential equation (ODE) with periodic excitation.
 
     This class transports a non-autonomous ODE into the frequency domain using a :py:class:`~skhippr.Fourier.Fourier` configuration. The resulting nonlinear harmonic balance equations in the frequency domain are then solved using the methods of the parent :py:class:`~skhippr.problems.newton.NewtonProblem` class.
@@ -96,24 +100,16 @@ class HBMEquation(AbstractEquation):
         -----------
         TO DOOOOO
         """
-        super().__init__(stability_method=stability_method)
-        self.ode = ode
+        super().__init__(
+            ode=ode, omega=omega, period_k=period_k, stability_method=stability_method
+        )
         self.fourier = fourier
-        self.factor_k = 1 / period_k
-        self.omega = omega
 
         # DFT initial guess if required
         if initial_guess is None:
             initial_guess = self.fourier.DFT(ode.x)
 
         self.X = initial_guess
-
-    """ Methods related to solving the HBM problem."""
-
-    @property
-    def omega_solution(self):
-        "Returns the angular frequency of the periodic solution (factor_k times the excitation frequency)."
-        return self.omega * self.factor_k
 
     def x_time(self):
         """

@@ -233,12 +233,12 @@ class FirstOrderODE(AbstractEquation):
         return super().closed_form_derivative(variable)
 
 
-class AbstractCycleEquation(ABC, AbstractEquation):
+class AbstractCycleEquation(AbstractEquation):
     def __init__(
         self, ode: FirstOrderODE, omega=None, period_k=1, stability_method=None
     ):
-        super().__init__(stability_method)
         self.ode = ode
+        super().__init__(stability_method)
 
         if omega is not None:
             ode.omega = omega
