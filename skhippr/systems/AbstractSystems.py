@@ -71,14 +71,14 @@ class AbstractEquation(ABC):
             return self._derivative_dict[variable]
 
         ############ DEBUGGING always use finite differences
-        # if variable in ("X", "omega"):
-        #     derivative = self.finite_difference_derivative(variable, h_step=h_fd)
-        #     print(
-        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
-        #     )
-        #     warnings.warn(
-        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
-        #     )
+        if variable in ("X", "omega"):
+            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+            print(
+                f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+            )
+            warnings.warn(
+                f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+            )
 
         try:
             derivative = self.closed_form_derivative(variable)

@@ -2,90 +2,90 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import duffing
+from skhippr.systems.nonautonomous import Duffing
 
-from skhippr.problems.shooting import ShootingProblem
-from skhippr.problems.HBM import HBMEquation
+from skhippr.problems.shooting import ShootingSystem
+from skhippr.problems.HBM import HBMSystem
 from skhippr.problems.continuation import pseudo_arclength_continuator
+from skhippr.problems.newton import NewtonSolver
 
 
-def shooting_frc():
+def shooting_frc(solver=None, visualize=True):
 
-    params = {
-        "alpha": 1,
-        "beta": 0.04,
-        "F": 1,
-        "delta": 0.1,
-        "omega": 3,
-    }
-    T0 = 2 * np.pi / params["omega"]
-
-    ode_kwargs = {"rtol": 1e-7, "atol": 1e-7}
+    if solver is None:
+        solver = NewtonSolver(verbose=True)
 
     x0 = np.array([1.0, 0.0])
+    ode = Duffing(t=0, x=x0, omega=3, alpha=1, beta=0.04, F=1, delta=0.1)
+    T0 = 2 * np.pi / ode.omega
 
-    prb = ShootingProblem(
-        f=duffing,
-        x0=x0,
-        T=T0,
-        autonomous=False,
-        variable="x",
-        verbose=False,
-        kwargs_odesolver=ode_kwargs,
-        parameters=params,
-    )
-    prb.solve()
-    assert prb.converged
-    print(prb)
+    initial_system = ShootingSystem(ode, T=T0, period_k=1, atol=1e-7, rtol=1e-7)
+
+    solver.solve(initial_system)
+    assert initial_system.solved
 
     omega_range = (0.1, 3)
-    print("HBM reference")
-    frc_ref = frc_HBM(params, prb)
-    print("HBM reference done.")
-    frc = []
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection="3d")
 
-    tangent_old = 0
+    # print("HBM reference")
+    # t_init = np.linspace(0, 2 * np.pi / ode.omega, 150, endpoint=False)
+    # x_init = initial_system.equations[0].x_time(t_init)
+    # frc_ref = frc_HBM(solver, ode, x_init=x_init)
+    # print("HBM reference done.")
+
+    frc = []
+    if visualize:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+
+    # solver.verbose = False
     for branch_point in pseudo_arclength_continuator(
-        initial_problem=prb,
+        initial_system=initial_system,
+        solver=solver,
         stepsize=0.05,
-        initial_direction=1,
-        num_steps=1000,
-        key_param="T",
-        value_param=T0,
         stepsize_range=(0.01, 0.1),
+        initial_direction=1,
+        continuation_parameter="T",
         verbose=True,
+        num_steps=1000,
     ):
         frc.append(branch_point)
         branch_point.determine_tangent()
-        x_tng = branch_point.x + 0.1 * branch_point.tangent
 
-        Ts = (branch_point.T, x_tng[-1])
-        amp_1 = (branch_point.x[0], x_tng[0])
-        amp_2 = (branch_point.x[1], x_tng[1])
-        ax.plot(Ts, amp_1, amp_2, "gray")
-        ax.plot(
-            branch_point.initial_guess[-1],
-            branch_point.initial_guess[0],
-            branch_point.initial_guess[1],
-            "r+",
-        )
+        if visualize:
+            x_tng = branch_point.vector_of_unknowns + 0.1 * branch_point.tangent
+            Ts = (np.squeeze(branch_point.T), x_tng[-1])
+            amp_1 = (branch_point.x[0], x_tng[0])
+            amp_2 = (branch_point.x[1], x_tng[1])
+            ax.plot(Ts, amp_1, amp_2, "gray")
+            ax.plot(Ts[0], amp_1[0], amp_2[0], ".", color="red")
+            pass
 
-        if len(frc) > 1:
-            assert (
-                abs(
-                    np.inner(
-                        branch_point.x - branch_point.initial_guess, frc[-2].tangent
-                    )
-                )
-                < 1e-3
-            )
+        # ax.plot(
+        #     solver.initial_guess[-1],
+        #     solver.initial_guess[0],
+        #     solver.initial_guess[1],
+        #     "r+",
+        # )
 
-        if branch_point.omega < omega_range[0] or branch_point.omega > omega_range[1]:
+        # if len(frc) > 1:
+        #     assert (
+        #         abs(
+        #             np.inner(
+        #                 branch_point.x - branch_point.initial_guess, frc[-2].tangent
+        #             )
+        #         )
+        #         < 1e-3
+        #     )
+
+        if (
+            branch_point.equations[0].omega < omega_range[0]
+            or branch_point.equations[0].omega > omega_range[1]
+        ):
             break
 
     print("Continuation terminated.")
+
+    return
 
     Ts = [branch_point.T for branch_point in frc]
     omegas = [branch_point.omega for branch_point in frc]
@@ -120,30 +120,24 @@ def shooting_frc():
     pass
 
 
-def frc_HBM(params, sol_init):
+def frc_HBM(solver, ode, x_init):
     """Reference FRC determined using HBM"""
     N_HBM = 25
-    L_DFT = 150
+    L_DFT = x_init.shape[1]
     fourier = Fourier(N_HBM, L_DFT, 2, True)
 
-    X0 = fourier.DFT(sol_init.x_time(t_eval=fourier.time_samples(omega=sol_init.omega)))
-    HBM_init = HBMEquation(
-        f=duffing,
-        initial_guess=X0,
-        omega=sol_init.omega,
-        fourier=fourier,
-        parameters_f=params,
-    )
-    HBM_init.solve()
-    assert HBM_init.converged
+    X0 = fourier.DFT(x_init)
+    HBM_init = HBMSystem(ode, ode.omega, fourier, X0, 1, None)
+    solver.solve(HBM_init)
+    assert HBM_init.solved
 
     frc = list(
         pseudo_arclength_continuator(
-            initial_problem=HBM_init,
+            initial_system=HBM_init,
+            solver=solver,
             stepsize=0.4,
             stepsize_range=(0.05, 0.6),
-            key_param="omega",
-            value_param=HBM_init.omega,
+            continuation_parameter="omega",
             verbose=True,
             num_steps=80,
             initial_direction=-1,
@@ -154,5 +148,5 @@ def frc_HBM(params, sol_init):
 
 
 if __name__ == "__main__":
-    shooting_frc()
+    shooting_frc(solver=None, visualize=True)
     plt.show()

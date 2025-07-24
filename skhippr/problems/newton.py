@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from copy import copy
 import numpy as np
+import matplotlib.pyplot as plt
 
 from skhippr.systems.AbstractSystems import AbstractEquation
 
@@ -364,7 +365,7 @@ class NewtonSolver:
             raise ValueError(
                 "Equation system is not well-posed: Number of unknowns and number of equations differ"
             )
-
+        visualize = False
         self.reset()
 
         if self.verbose:
@@ -377,7 +378,32 @@ class NewtonSolver:
                     f"Newton iteration {self.num_iter:2d}", end=""
                 )  # , x = {equation_system.vector_of_unknowns}", end="")
 
+            if visualize:
+                print("visualizing")
+                ax = plt.gca()
+                ax.plot(
+                    equation_system.vector_of_unknowns[-1],
+                    equation_system.vector_of_unknowns[0],
+                    equation_system.vector_of_unknowns[1],
+                    ".",
+                    color="blue",
+                )
+                pass
+
             self.correction_step(equation_system)
+
+            if visualize:
+                print("visualizing")
+                ax = plt.gca()
+                ax.plot(
+                    equation_system.vector_of_unknowns[-1],
+                    equation_system.vector_of_unknowns[0],
+                    equation_system.vector_of_unknowns[1],
+                    ".",
+                    color="green",
+                )
+                pass
+
             if self.verbose:
                 print(
                     f", |r| = {np.linalg.norm(equation_system.residual_function(update=False)):8.3g}, x[-1]={equation_system.vector_of_unknowns[-1]:.3g}"
