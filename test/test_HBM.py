@@ -11,8 +11,6 @@ from skhippr.systems.nonautonomous import Duffing
 from skhippr.systems.autonomous import Vanderpol
 from skhippr.problems.newton import NewtonSolver
 
-# from skhippr.systems.autonomous import vanderpol
-
 
 @pytest.mark.parametrize("period_k", [1, 5])
 def test_HBM_equation(solver, fourier, period_k, visualize=False):
