@@ -34,6 +34,21 @@ def ode_setting_vectorized(request, ode_setting):
     return params, ode
 
 
+@pytest.fixture(scope="session", params=[1, 5])
+def duffing_ode(request):
+    period_k = request.param
+    x_0 = np.array([1.0, 0.0])
+
+    match period_k:
+        case 1:
+            ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        case 5:
+            ode = Duffing(t=0, x=x_0, alpha=-1, beta=1, F=0.37, delta=0.3, omega=1.2)
+        case _:
+            raise ValueError(f"Unknown value '{period_k}' for period-k solution")
+    return period_k, ode
+
+
 @pytest.fixture(
     scope="session",
     params=[

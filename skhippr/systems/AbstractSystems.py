@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import override
 import numpy as np
+from copy import copy
 
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
@@ -191,7 +192,7 @@ class FirstOrderODE(AbstractEquation):
             raise ValueError(
                 f"{x} must be 1-D or have exactly one column if t is scalar"
             )
-        if t is not None and not np.isscalar(t) and x.shape[1] != len(t):
+        if t is not None and np.squeeze(t).size > 1 and x.shape[1] != len(t):
             raise ValueError(
                 f"t and x have incompatible sizes: {t.shape} vs. {x.shape}"
             )
@@ -289,3 +290,12 @@ class AbstractCycleEquation(AbstractEquation):
 
         else:
             super().__setattr__(name, value)
+
+    def __copy__(self):
+        # Shallow-copy everything manually without calling copy
+        cls = self.__class__
+        eq_other = cls.__new__(cls)
+        eq_other.__dict__.update(self.__dict__)
+        # Copy the ode as well
+        eq_other.ode = copy(self.ode)
+        return eq_other

@@ -258,6 +258,8 @@ class BranchPoint(EquationSystem):
         rhs[-1] = 1
         tangent = np.linalg.solve(jac, rhs)
         self.tangent = tangent / np.linalg.norm(tangent)
+        # adding the tangent does not remove solution integrity
+        self.solved = True
         return self.tangent
 
     def predict(self, stepsize: float) -> "BranchPoint":
