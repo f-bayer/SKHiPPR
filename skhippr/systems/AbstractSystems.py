@@ -5,6 +5,7 @@ from collections.abc import Callable
 from typing import override
 import numpy as np
 from copy import copy
+import warnings
 
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 
@@ -68,6 +69,16 @@ class AbstractEquation(ABC):
         # use cached derivative?
         if not update and variable in self._derivative_dict:
             return self._derivative_dict[variable]
+
+        ############ DEBUGGING always use finite differences
+        # if variable in ("X", "omega"):
+        #     derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+        #     print(
+        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+        #     )
+        #     warnings.warn(
+        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+        #     )
 
         try:
             derivative = self.closed_form_derivative(variable)

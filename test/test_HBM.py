@@ -13,20 +13,11 @@ from skhippr.problems.newton import NewtonSolver
 
 
 @pytest.mark.parametrize("period_k", [1, 5])
-def test_HBM_equation(solver, fourier, period_k, visualize=False):
+def test_HBM_equation(solver, duffing_ode, fourier, period_k, visualize=False):
 
+    period_k, ode = duffing_ode
     if visualize:
         print("Duffing oscillator")
-
-    x_0 = np.array([1.0, 0.0])
-
-    match period_k:
-        case 1:
-            ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
-        case 5:
-            ode = Duffing(t=0, x=x_0, alpha=-1, beta=1, F=0.37, delta=0.3, omega=1.2)
-        case _:
-            raise ValueError(f"Unknown value '{period_k}' for period-k solution")
 
     T = 2 * np.pi / ode.omega
 
@@ -119,7 +110,11 @@ def test_HBMSystem(solver, fourier, autonomous, initial_error, visualize=False):
 if __name__ == "__main__":
     my_solver = NewtonSolver(verbose=True)
     my_fourier = Fourier(N_HBM=15, L_DFT=128, n_dof=2, real_formulation=True)
-    # for period_k in [1, 5]:
-    # test_HBM_equation(my_solver, my_fourier, period_k, visualize=True)
-    test_HBMSystem(my_solver, my_fourier, autonomous=True, visualize=True)
+    for period_k in [1, 5]:
+        test_HBM_equation(
+            my_solver, None, fourier=my_fourier, period_k=period_k, visualize=True
+        )
+    test_HBMSystem(
+        my_solver, my_fourier, autonomous=True, visualize=True, initial_error=0.05
+    )
     plt.show()
