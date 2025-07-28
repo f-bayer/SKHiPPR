@@ -33,11 +33,11 @@ def shooting_frc(solver=None, visualize=True):
     else:
         ax = None
 
-    print("HBM reference")
-    t_init = np.linspace(0, 2 * np.pi / ode.omega, 150, endpoint=False)
-    x_init = initial_system.equations[0].x_time(t_init)
-    frc_ref = frc_HBM(solver, ode, x_init=x_init, ax=ax)
-    print("HBM reference done.")
+    # print("HBM reference")
+    # t_init = np.linspace(0, 2 * np.pi / ode.omega, 150, endpoint=False)
+    # x_init = initial_system.equations[0].x_time(t_init)
+    # frc_ref = frc_HBM(solver, ode, x_init=x_init, ax=ax)
+    # print("HBM reference done.")
 
     # solver.verbose = False
     for branch_point in pseudo_arclength_continuator(

@@ -88,9 +88,15 @@ class ShootingBVP(AbstractCycleEquation):
                 )
                 return Phi_t[:, :, -1] - np.eye(Phi_t.shape[0])
             case "T":
-                return self.ode.dynamics(
-                    t=self.t_0 + self.T_solution, x=self.residual(update=False) + self.x
-                )[:, np.newaxis]
+                if self.ode.autonomous:
+                    return self.ode.dynamics(
+                        t=self.t_0 + np.squeeze(self.T_solution),
+                        x=self.residual(update=False) + self.x,
+                    )[:, np.newaxis]
+                else:
+                    raise NotImplementedError(
+                        "Period is parameter of ode; default to FD"
+                    )
             case _:
                 raise NotImplementedError(
                     "Finite differences more efficient for shooting problem"

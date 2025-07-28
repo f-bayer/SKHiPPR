@@ -113,7 +113,7 @@ class AbstractEquation(ABC):
         return derivative
 
     def closed_form_derivative(self, variable):
-        # Can be overridden in subclasses to return
+        # Can be overridden in subclasses to return a numpy array
         raise NotImplementedError(
             f"Closed-form derivative of residual w.r.t {variable} not implemented."
         )
@@ -351,7 +351,7 @@ class AbstractCycleEquation(AbstractEquation):
 
     @override
     def derivative(self, variable, update=False, h_fd=0.0001):
-        # return super().derivative(variable, update, h_fd)
+        return super().derivative(variable, update, h_fd)
         ######### DEBUGGING always use finite differences
         if True:  # variable in ("X", "omega"):
             warnings.warn("Override closed form derivative in AbstractCycle")
@@ -372,6 +372,10 @@ class AbstractCycleEquation(AbstractEquation):
 
             return derivative
         ##########
+
+    def closed_form_derivative(self, variable):
+        raise RuntimeError("This should never be called!")
+        return super().closed_form_derivative(variable)
 
     def __copy__(self):
         # Shallow-copy everything manually without calling copy
