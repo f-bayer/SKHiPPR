@@ -235,37 +235,37 @@ class FirstOrderODE(AbstractEquation):
             update = True
 
         ########## DEBUGGING always use finite differences
-        if True:  # variable in ("X", "omega"):
-            warnings.warn("Override closed form derivative in FirstOrderODE")
-            print("Override closed form derivative in FirstOrderODE")
-            if t is not None:
-                t_old = self.t
-                self.t = t
+        # if True:  # variable in ("X", "omega"):
+        #     warnings.warn("Override closed form derivative in FirstOrderODE")
+        #     print(f"Override closed form derivative w.rt. {variable} in FirstOrderODE")
+        #     if t is not None:
+        #         t_old = self.t
+        #         self.t = t
 
-            if x is not None:
-                x_old = self.x
-                self.x = x
+        #     if x is not None:
+        #         x_old = self.x
+        #         self.x = x
 
-            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+        #     derivative = self.finite_difference_derivative(variable, h_step=h_fd)
 
-            if t is not None:
-                self.t = t_old
+        #     if t is not None:
+        #         self.t = t_old
 
-            if x is not None:
-                self.x = x_old
+        #     if x is not None:
+        #         self.x = x_old
 
-            # Check sizes
-            cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
-            rows_expected = self.residual(update=False).shape[0]
-            others_expected = self.residual(update=False).shape[1:]
-            if derivative.shape != (rows_expected, cols_expected, *others_expected):
-                raise ValueError(
-                    f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
-                )
+        #     # Check sizes
+        #     cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
+        #     rows_expected = self.residual(update=False).shape[0]
+        #     others_expected = self.residual(update=False).shape[1:]
+        #     if derivative.shape != (rows_expected, cols_expected, *others_expected):
+        #         raise ValueError(
+        #             f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
+        #         )
 
-            self._derivative_dict[variable] = derivative
+        #     self._derivative_dict[variable] = derivative
 
-            return derivative
+        #     return derivative
         ##########
 
         if not update:
@@ -348,6 +348,30 @@ class AbstractCycleEquation(AbstractEquation):
 
         else:
             super().__setattr__(name, value)
+
+    @override
+    def derivative(self, variable, update=False, h_fd=0.0001):
+        # return super().derivative(variable, update, h_fd)
+        ######### DEBUGGING always use finite differences
+        if True:  # variable in ("X", "omega"):
+            warnings.warn("Override closed form derivative in AbstractCycle")
+            print(f"Override closed form derivative w.r.t. {variable} in AbstractCycle")
+
+            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+
+            # Check sizes
+            cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
+            rows_expected = self.residual(update=False).shape[0]
+            others_expected = self.residual(update=False).shape[1:]
+            if derivative.shape != (rows_expected, cols_expected, *others_expected):
+                raise ValueError(
+                    f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
+                )
+
+            self._derivative_dict[variable] = derivative
+
+            return derivative
+        ##########
 
     def __copy__(self):
         # Shallow-copy everything manually without calling copy

@@ -26,16 +26,18 @@ def shooting_frc(solver=None, visualize=True):
 
     omega_range = (0.1, 3)
 
-    # print("HBM reference")
-    # t_init = np.linspace(0, 2 * np.pi / ode.omega, 150, endpoint=False)
-    # x_init = initial_system.equations[0].x_time(t_init)
-    # frc_ref = frc_HBM(solver, ode, x_init=x_init)
-    # print("HBM reference done.")
-
     frc = []
     if visualize:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
+    else:
+        ax = None
+
+    print("HBM reference")
+    t_init = np.linspace(0, 2 * np.pi / ode.omega, 150, endpoint=False)
+    x_init = initial_system.equations[0].x_time(t_init)
+    frc_ref = frc_HBM(solver, ode, x_init=x_init, ax=ax)
+    print("HBM reference done.")
 
     # solver.verbose = False
     for branch_point in pseudo_arclength_continuator(
@@ -46,7 +48,7 @@ def shooting_frc(solver=None, visualize=True):
         initial_direction=1,
         continuation_parameter="T",
         verbose=True,
-        num_steps=1000,
+        num_steps=100,
     ):
         frc.append(branch_point)
         branch_point.determine_tangent()
@@ -58,6 +60,7 @@ def shooting_frc(solver=None, visualize=True):
             amp_2 = (branch_point.x[1], x_tng[1])
             ax.plot(Ts, amp_1, amp_2, "gray")
             ax.plot(Ts[0], amp_1[0], amp_2[0], ".", color="red")
+
             pass
 
         # ax.plot(
@@ -120,7 +123,7 @@ def shooting_frc(solver=None, visualize=True):
     pass
 
 
-def frc_HBM(solver, ode, x_init):
+def frc_HBM(solver, ode, x_init, ax=None):
     """Reference FRC determined using HBM"""
     N_HBM = 25
     L_DFT = x_init.shape[1]
@@ -135,14 +138,21 @@ def frc_HBM(solver, ode, x_init):
         pseudo_arclength_continuator(
             initial_system=HBM_init,
             solver=solver,
-            stepsize=0.4,
+            stepsize=0.2,
             stepsize_range=(0.05, 0.6),
             continuation_parameter="omega",
             verbose=True,
-            num_steps=80,
+            num_steps=50,
             initial_direction=-1,
         )
     )
+
+    if ax is not None:
+        for bp in frc:
+            x = bp.equations[0].x_time()[:, 0]
+            T = 2 * np.pi / bp.omega
+            ax.plot(T, x[0], x[1], ".", color="green")
+            pass
 
     return frc
 
