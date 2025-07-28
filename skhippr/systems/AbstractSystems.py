@@ -70,15 +70,28 @@ class AbstractEquation(ABC):
         if not update and variable in self._derivative_dict:
             return self._derivative_dict[variable]
 
-        ############ DEBUGGING always use finite differences
-        if variable in ("X", "omega"):
-            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
-            print(
-                f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
-            )
-            warnings.warn(
-                f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
-            )
+        ########### DEBUGGING always use finite differences
+        # if True:  # variable in ("X", "omega"):
+        #     derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+        #     # Check sizes
+        #     cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
+        #     rows_expected = self.residual(update=False).shape[0]
+        #     others_expected = self.residual(update=False).shape[1:]
+        #     if derivative.shape != (rows_expected, cols_expected, *others_expected):
+        #         raise ValueError(
+        #             f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
+        #         )
+
+        #     self._derivative_dict[variable] = derivative
+        #     print(
+        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+        #       )
+        #     warnings.warn(
+        #         f"Caution overrode '{variable}' closed form derivative in AbstractSystems.py for debugging reasons"
+        #       )
+
+        #     return derivative
+        ###########
 
         try:
             derivative = self.closed_form_derivative(variable)
@@ -220,6 +233,40 @@ class FirstOrderODE(AbstractEquation):
     def derivative(self, variable, update=False, h_fd=1e-4, t=None, x=None):
         if t is not None or x is not None:
             update = True
+
+        ########## DEBUGGING always use finite differences
+        if True:  # variable in ("X", "omega"):
+            warnings.warn("Override closed form derivative in FirstOrderODE")
+            print("Override closed form derivative in FirstOrderODE")
+            if t is not None:
+                t_old = self.t
+                self.t = t
+
+            if x is not None:
+                x_old = self.x
+                self.x = x
+
+            derivative = self.finite_difference_derivative(variable, h_step=h_fd)
+
+            if t is not None:
+                self.t = t_old
+
+            if x is not None:
+                self.x = x_old
+
+            # Check sizes
+            cols_expected = np.atleast_1d(getattr(self, variable)).shape[0]
+            rows_expected = self.residual(update=False).shape[0]
+            others_expected = self.residual(update=False).shape[1:]
+            if derivative.shape != (rows_expected, cols_expected, *others_expected):
+                raise ValueError(
+                    f"Size mismatch in derivative w.r.t. '{variable}': Expected {(rows_expected, cols_expected, *others_expected)}, got {derivative.shape[:2]}"
+                )
+
+            self._derivative_dict[variable] = derivative
+
+            return derivative
+        ##########
 
         if not update:
             return super().derivative(variable, update, h_fd)
