@@ -351,10 +351,11 @@ class AbstractCycleEquation(AbstractEquation):
 
     @override
     def derivative(self, variable, update=False, h_fd=0.0001):
-        return super().derivative(variable, update, h_fd)
         ######### DEBUGGING always use finite differences
-        if True:  # variable in ("X", "omega"):
-            warnings.warn("Override closed form derivative in AbstractCycle")
+        if False:  # variable in ("omega"):
+            warnings.warn(
+                "Override closed form derivative w.r.t. {variable} in AbstractCycle"
+            )
             print(f"Override closed form derivative w.r.t. {variable} in AbstractCycle")
 
             derivative = self.finite_difference_derivative(variable, h_step=h_fd)
@@ -372,6 +373,7 @@ class AbstractCycleEquation(AbstractEquation):
 
             return derivative
         ##########
+        return super().derivative(variable, update, h_fd)
 
     def closed_form_derivative(self, variable):
         raise RuntimeError("This should never be called!")

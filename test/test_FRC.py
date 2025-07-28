@@ -94,6 +94,7 @@ def test_FRC_stability(initial_system, params_duffing):
 @pytest.mark.parametrize("initial_direction", [1, -1, 2])
 def test_FRC_validity(solver, initial_system, initial_direction, visualize=False):
     # initial_system.equations[0].omega += 0.01
+    solver.verbose = False
     omega = initial_system.equations[0].omega
     solver.solve(initial_system)
     assert initial_system.solved
@@ -107,7 +108,7 @@ def test_FRC_validity(solver, initial_system, initial_direction, visualize=False
         xs = initial_system.equations[0].x_time()
         plt.plot(xs[0, :], xs[1, :], label="Initial guess")
 
-    solver.max_iterations = 100
+    solver.max_iterations = 10
 
     for k, branch_point in enumerate(
         pseudo_arclength_continuator(

@@ -208,7 +208,11 @@ class HBMEquation(AbstractCycleEquation):
     def dR_domega(self, X=None):
         if X is None:
             X = self.X
-        dR_dom = -self.fourier.factors_derivative * X[self.fourier.idx_derivative]
+        dR_dom = (
+            -self.fourier.factors_derivative
+            / self.period_k
+            * X[self.fourier.idx_derivative]
+        )
         return dR_dom[:, np.newaxis]
 
     def dR_dvar(self, variable, X=None):
