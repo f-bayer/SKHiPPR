@@ -333,6 +333,20 @@ class HBMEquation(AbstractCycleEquation):
             fourier = self.fourier
         return fourier.matrix_inv_DFT(self.hill_matrix())
 
+    @override
+    def stability_criterion(self, eigenvalues):
+        if self.stability_method is None:
+            raise ValueError("No stability method available!")
+        else:
+            floquet_multipliers = eigenvalues
+            if self.ode.autonomous:
+                idx_freedom_of_phase = np.argmin(abs(floquet_multipliers - 1))
+                floquet_multipliers = np.delete(
+                    floquet_multipliers, idx_freedom_of_phase
+                )
+
+        return np.all(np.abs(floquet_multipliers) < 1 + self.stability_method.tol)
+
     def exponential_decay_parameters(self, threshold=5e-15):
         """
         Estimate the exponential decay of the Fourier coefficients of the Jacobian matrix J(t).

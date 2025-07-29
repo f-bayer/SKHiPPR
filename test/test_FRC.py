@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from collections import deque
 from copy import copy
 
+from skhippr.Fourier import Fourier
+from skhippr.systems.nonautonomous import Duffing
 from skhippr.problems.shooting import ShootingBVP
 from skhippr.problems.HBM import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -46,11 +48,28 @@ def initial_system(fourier, duffing_ode):
     )
 
 
-def test_FRC_stability(initial_system, params_duffing):
+def test_FRC_stability(solver, visualize=False):
     # Continuation along the Duffing from back to front. verify that the last 2 stability changes are folds.
-    initial_system.stability_method = KoopmanHillSubharmonic(initial_system.fourier)
-    initial_system.solve()
-    assert initial_system.converged
+
+    fourier = Fourier(N_HBM=25, L_DFT=256, n_dof=2, real_formulation=True)
+    # complex formulation fails due to complex frequency
+
+    ode = Duffing(t=0, x=None, alpha=1, beta=3, F=1, delta=0.1, omega=5)
+    t = fourier.time_samples(ode.omega)
+    initial_guess = np.array(
+        [np.cos(ode.omega * t), -ode.omega * np.sin(ode.omega * t)]
+    )
+    initial_system = HBMSystem(
+        ode=ode,
+        omega=ode.omega,
+        fourier=fourier,
+        initial_guess=fourier.DFT(initial_guess),
+        period_k=1,
+        stability_method=KoopmanHillSubharmonic(fourier),
+    )
+
+    solver.solve(initial_system)
+    assert initial_system.solved
     assert initial_system.stable
 
     # deque is a list that supports efficient appending and has a maximum length
@@ -58,21 +77,31 @@ def test_FRC_stability(initial_system, params_duffing):
     previous_bps = deque([initial_system] * 5, maxlen=5)
     num_stabchanges = 0
 
-    plt.figure()
+    if visualize:
+        plt.figure()
 
     for branch_point in pseudo_arclength_continuator(
-        initial_problem=initial_system,
+        initial_system=initial_system,
+        solver=solver,
         stepsize=0.1,
         stepsize_range=(0.01, 0.15),
-        key_param="omega",
-        value_param=initial_system.omega,
+        initial_direction=-1,
+        continuation_parameter="omega",
         verbose=False,
         num_steps=1000,
-        initial_direction=-1,
     ):
         previous_bps.append(branch_point)
 
-        plt.plot(branch_point.omega, np.linalg.norm(branch_point.x[:-1]), ".")
+        if branch_point.stable:
+            color = "red"
+        else:
+            color = "blue"
+
+        if visualize:
+            plt.plot(
+                branch_point.omega, np.linalg.norm(branch_point.X), ".", color=color
+            )
+
         if previous_bps[-2].stable != previous_bps[-3].stable:
             num_stabchanges += 1
             delta_om_pre = previous_bps[-3].omega - previous_bps[-4].omega
@@ -82,10 +111,8 @@ def test_FRC_stability(initial_system, params_duffing):
         assert (
             np.abs(np.imag(branch_point.omega)) < 1e-14
         ), f"It is expected that complex formulation fails here as frequency becomes cplx"
-        assert np.linalg.norm(branch_point.x[:-1]) >= np.linalg.norm(
-            previous_bps[-2].x[:-1]
-        )
-        if num_stabchanges > 1:
+        assert np.linalg.norm(branch_point.X) >= np.linalg.norm(previous_bps[-2].X)
+        if num_stabchanges > 1 or branch_point.omega < 0.1:
             break
 
     assert num_stabchanges == 2
@@ -173,4 +200,9 @@ def test_FRC_validity(solver, initial_system, initial_direction, visualize=False
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    # pytest.main([__file__])
+    my_solver = NewtonSolver()
+    my_fourier = Fourier(N_HBM=25, L_DFT=256, n_dof=2, real_formulation=True)
+
+    test_FRC_stability(my_solver, my_fourier, visualize=True)
+    plt.show()
