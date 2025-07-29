@@ -2,41 +2,47 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+from copy import copy
 from matplotlib.animation import FuncAnimation
 import pytest
 
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingProblem
-from skhippr.systems.nonautonomous import duffing
-from skhippr.systems.autonomous import vanderpol
+from skhippr.problems.HBM import HBMSystem
+from skhippr.problems.shooting import ShootingSystem
+from skhippr.systems.nonautonomous import Duffing
+from skhippr.systems.autonomous import Vanderpol
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 from skhippr.problems.continuation import pseudo_arclength_continuator
+from skhippr.problems.newton import NewtonSolver
 
 
-def bif_curve_nonaut(sparse=False, real_formulation=False):
+@pytest.fixture
+def ode():
+    return Duffing(
+        t=0,
+        x=np.array([1.0, 0.0]),
+        omega=0.8,
+        alpha=1,
+        beta=0.2,
+        delta=0.1,
+        F=0.05,
+    )
 
-    alpha = 1
-    beta = 0.2
-    F_0 = 0.05
-    delta = 0.1
-    omega = 0.8
+
+def bif_curve_nonaut(real_formulation=False):
+
+    ode = ode()
+    omega = ode.omega
 
     N_HBM = 25
     L_DFT = 300
 
     fourier = Fourier(
-        N_HBM=N_HBM,
-        L_DFT=L_DFT,
-        n_dof=2,
-        sparse_formulation=sparse,
-        real_formulation=real_formulation,
+        N_HBM=N_HBM, L_DFT=L_DFT, n_dof=2, real_formulation=real_formulation
     )
 
     print("Duffing oscillator")
-
-    def f(t, x, omega=omega, alpha=alpha, beta=beta, F=F_0, delta=delta):
-        return duffing(t, x, omega, alpha, beta, F, delta)
 
     ts = fourier.time_samples(omega)
     x0_samples = np.vstack((np.cos(omega * ts), -omega * np.sin(omega * ts)))
@@ -44,28 +50,16 @@ def bif_curve_nonaut(sparse=False, real_formulation=False):
 
     stability_method = KoopmanHillSubharmonic(fourier=fourier)
 
-    initial_problem_HBM = HBMEquation(
-        f=f,
+    hbm_system = HBMSystem(
+        ode=ode,
         initial_guess=X0,
         omega=omega,
         fourier=fourier,
-        variable="x",
         stability_method=stability_method,
-        verbose=False,
-        parameters_f={"omega": omega, "F": F_0},
     )
 
-    kwargs_ode = {"atol": 1e-5, "rtol": 1e-5}
-
-    initial_problem_shoot = ShootingProblem(
-        f=f,
-        x0=x0_samples[:, 0],
-        T=2 * np.pi / omega,
-        autonomous=False,
-        variable="x",
-        verbose=False,
-        parameters={"omega": omega, "F": F_0},
-        kwargs_odesolver=kwargs_ode,
+    shooting_system = ShootingSystem(
+        ode=copy(ode), T=2 * np.pi / ode.omega, atol=1e-5, rtol=1e-5
     )
 
     F_range = (0, 20)
@@ -77,8 +71,9 @@ def bif_curve_nonaut(sparse=False, real_formulation=False):
     ax.set_zlabel("F")
 
     fig_stability = plt.figure()
+    solver = NewtonSolver()
 
-    for initial_problem in (initial_problem_HBM, initial_problem_shoot):
+    for initial_system in (hbm_system, shooting_system):
 
         xs_time = []
         amplitudes = []
@@ -86,30 +81,30 @@ def bif_curve_nonaut(sparse=False, real_formulation=False):
         Fs = []
 
         for branch_point in pseudo_arclength_continuator(
-            initial_problem=initial_problem,
+            initial_system=initial_system,
+            solver=solver,
             stepsize=0.1,
             stepsize_range=(0.001, 0.15),
             initial_direction=1,
             num_steps=1000,
-            key_param="F",
-            value_param=F_0,
+            continuation_parameter="F",
             verbose=True,
         ):
-            xs_time.append(branch_point.x_time())
+            xs_time.append(branch_point.equations[0].x_time())
             amplitudes.append(np.max(xs_time[-1][0, :]))
             Fs.append(branch_point.F)
             stable.append(branch_point.stable)
 
             branch_point.determine_tangent()
-            x_tng = branch_point.x + 0.2 * branch_point.tangent
+            x_tng = branch_point.vector_of_unknowns + 0.2 * branch_point.tangent
             x0 = np.append(xs_time[-1][:, 0], branch_point.F)
             try:
                 # HBM case
-                x0_tng = np.append(fourier.inv_DFT(x_tng)[:, 0], x_tng[-1])
+                x0_tng = np.append(fourier.inv_DFT(x_tng[:-1])[:, 0], x_tng[-1])
             except:
                 # Shooting case
                 x0_tng = x_tng
-                ax.plot(*zip(x0, x0_tng), "gray")
+            ax.plot(*zip(x0, x0_tng), "gray")
 
             if branch_point.F < F_range[0] or branch_point.F > F_range[1]:
                 break
@@ -124,7 +119,7 @@ def bif_curve_nonaut(sparse=False, real_formulation=False):
         F_unstable = Fs.copy()
         F_unstable[stable] = np.nan
 
-        ax.plot(x0s[:, 0], x0s[:, 1], Fs, linewidth=1)
+        ax.plot(x0s[:, 0], x0s[:, 1], np.squeeze(Fs), linewidth=1)
 
         plt.figure(fig_stability)
 
@@ -132,6 +127,110 @@ def bif_curve_nonaut(sparse=False, real_formulation=False):
         plt.plot(F_unstable, amplitudes, "--", label="unstable")
         # plt.title(f"Amplitude of first DOF -- {solver}")
     plt.legend()
+
+
+def test_bifurcation_curve_comparison(ode, real_formulation=True):
+
+    if ode.autonomous:
+        parameter = "nu"
+        omega = 1
+    else:
+        parameter = "F"
+        omega = ode.omega
+
+    N_HBM = 25
+    L_DFT = 300
+    fourier = Fourier(
+        N_HBM=N_HBM, L_DFT=L_DFT, n_dof=2, real_formulation=real_formulation
+    )
+
+    ts = fourier.time_samples(omega)
+    x0_samples = np.vstack((np.cos(omega * ts), -omega * np.sin(omega * ts)))
+    X0 = fourier.DFT(x0_samples)
+
+    stability_method = KoopmanHillSubharmonic(fourier=fourier)
+
+    hbm_system = HBMSystem(
+        ode=ode,
+        initial_guess=X0,
+        omega=omega,
+        fourier=fourier,
+        stability_method=stability_method,
+    )
+
+    shooting_system = ShootingSystem(
+        ode=copy(ode), T=2 * np.pi / ode.omega, atol=1e-5, rtol=1e-5
+    )
+
+    F_range = (0, 20)
+    solver = NewtonSolver()
+    branches = []
+
+    for initial_system in [hbm_system, shooting_system]:
+        branch = []
+
+        for branch_point in pseudo_arclength_continuator(
+            initial_system=initial_system,
+            solver=solver,
+            stepsize=0.1,
+            stepsize_range=(0.001, 0.25),
+            initial_direction=1,
+            num_steps=1000,
+            continuation_parameter=parameter,
+            verbose=True,
+        ):
+            branch.append(branch_point)
+
+            if branch_point.F < F_range[0] or branch_point.F > F_range[1]:
+                break
+        branches.append(branch)
+
+    # Compare the curves using interpolation
+    idx_prev = 0
+    for k, bp_shoot in enumerate(branches[1][:-1]):
+        if getattr(bp_shoot, parameter) > F_range[-1]:
+            print(f"{k}-th shooting point outside F range")
+            continue
+        print(f"k = {k}: F = {bp_shoot.F}, d = ", end="")
+        d, idx_prev = bp_distance(idx_prev, branches[0], bp_shoot)
+        print(f"{d}, idx={idx_prev}")
+        # assert d < 1e-3
+
+
+def bp_distance(idx_prev, branch_hbm, bp_shoot):
+
+    if idx_prev > 100:
+        pass
+
+    if not 0 <= idx_prev < len(branch_hbm) - 1:
+        raise ValueError(f"Index {idx_prev} is outside branch")
+
+    param = bp_shoot.unknowns[-1]
+    x_prev = np.append(
+        branch_hbm[idx_prev].equations[0].x_time()[:, 0],
+        getattr(branch_hbm[idx_prev], param),
+    )
+
+    x_prev = np.real(x_prev)
+    x_next = np.append(
+        branch_hbm[idx_prev + 1].equations[0].x_time()[:, 0],
+        getattr(branch_hbm[idx_prev + 1], param),
+    )
+    x_next = np.real(x_next)
+
+    x_shoot = bp_shoot.vector_of_unknowns
+
+    d_shoot = x_shoot - x_prev
+    d_hbm = x_next - x_prev
+
+    alpha = np.inner(d_shoot, d_hbm) / np.linalg.norm(d_hbm) ** 2
+    if alpha < -1e-3:
+        return bp_distance(int(idx_prev - np.ceil(-alpha)), branch_hbm, bp_shoot)
+    elif alpha > 1 + 1e-3:
+        return bp_distance(int(idx_prev + np.floor(alpha)), branch_hbm, bp_shoot)
+    else:
+        x_interp = x_prev + alpha * d_hbm
+        return np.linalg.norm(x_shoot - x_interp), idx_prev
 
 
 def bif_curve_aut(sparse=False, real_formulation=False):
@@ -255,8 +354,8 @@ def bif_curve_aut(sparse=False, real_formulation=False):
 
 
 if __name__ == "__main__":
-    bif_curve_nonaut(real_formulation=True, sparse=False)
-    plt.figure()
-    animation = bif_curve_aut(real_formulation=True, sparse=False)
+    bif_curve_nonaut(real_formulation=True)
+    # plt.figure()
+    # animation = bif_curve_aut(real_formulation=True, sparse=False)
     plt.show()
     print("All tests successful.")
