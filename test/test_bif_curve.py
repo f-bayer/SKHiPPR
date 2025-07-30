@@ -17,22 +17,32 @@ from skhippr.problems.continuation import pseudo_arclength_continuator
 from skhippr.problems.newton import NewtonSolver
 
 
-@pytest.fixture
-def ode():
-    return Duffing(
-        t=0,
-        x=np.array([1.0, 0.0]),
-        omega=0.8,
-        alpha=1,
-        beta=0.2,
-        delta=0.1,
-        F=0.05,
-    )
+@pytest.fixture(params=[True, False])
+def ode(request):
+    autonomous = request.param
+    if autonomous:
+        return Vanderpol(t=0, x=np.array([2.0, 0]), nu=0.05)
+    else:
+        return Duffing(
+            t=0,
+            x=np.array([1.0, 0.0]),
+            omega=0.8,
+            alpha=1,
+            beta=0.2,
+            delta=0.1,
+            F=0.05,
+        )
 
 
 def bif_curve_nonaut(real_formulation=False):
 
-    ode = ode()
+    class Struct:
+        pass
+
+    request = Struct()
+    request.autonomous = False
+
+    ode = ode(request)
     omega = ode.omega
 
     N_HBM = 25
@@ -134,9 +144,11 @@ def test_bifurcation_curve_comparison(ode, real_formulation=True):
     if ode.autonomous:
         parameter = "nu"
         omega = 1
+        param_range = (0, 3.5)
     else:
         parameter = "F"
         omega = ode.omega
+        param_range = (0, 20)
 
     N_HBM = 25
     L_DFT = 300
@@ -162,7 +174,6 @@ def test_bifurcation_curve_comparison(ode, real_formulation=True):
         ode=copy(ode), T=2 * np.pi / ode.omega, atol=1e-5, rtol=1e-5
     )
 
-    F_range = (0, 20)
     solver = NewtonSolver()
     branches = []
 
@@ -173,64 +184,86 @@ def test_bifurcation_curve_comparison(ode, real_formulation=True):
             initial_system=initial_system,
             solver=solver,
             stepsize=0.1,
-            stepsize_range=(0.001, 0.25),
+            stepsize_range=(0.001, 0.4),
             initial_direction=1,
-            num_steps=1000,
+            num_steps=200,
             continuation_parameter=parameter,
             verbose=True,
         ):
             branch.append(branch_point)
 
-            if branch_point.F < F_range[0] or branch_point.F > F_range[1]:
+            if not param_range[0] <= getattr(branch_point, parameter) <= param_range[1]:
                 break
         branches.append(branch)
 
     # Compare the curves using interpolation
     idx_prev = 0
     for k, bp_shoot in enumerate(branches[1][:-1]):
-        if getattr(bp_shoot, parameter) > F_range[-1]:
-            print(f"{k}-th shooting point outside F range")
+        if not param_range[0] <= getattr(bp_shoot, parameter) <= param_range[1]:
+            print(f"{k}-th shooting point outside {parameter} range")
             continue
-        print(f"k = {k}: F = {bp_shoot.F}, d = ", end="")
-        d, idx_prev = bp_distance(idx_prev, branches[0], bp_shoot)
+        print(f"k = {k}: {parameter} = {getattr(bp_shoot, parameter)}, d = ", end="")
+        d, idx_prev = interpolate_bp(idx_prev, branches[0], bp_shoot)
         print(f"{d}, idx={idx_prev}")
-        # assert d < 1e-3
+
+        assert d < 1e-2
+    pass
 
 
-def bp_distance(idx_prev, branch_hbm, bp_shoot):
+def interpolate_bp(idx_prev, branch_hbm, bp_shoot):
 
-    if idx_prev > 100:
+    if idx_prev >= 10:
         pass
 
     if not 0 <= idx_prev < len(branch_hbm) - 1:
         raise ValueError(f"Index {idx_prev} is outside branch")
 
-    param = bp_shoot.unknowns[-1]
-    x_prev = np.append(
-        branch_hbm[idx_prev].equations[0].x_time()[:, 0],
-        getattr(branch_hbm[idx_prev], param),
-    )
-
-    x_prev = np.real(x_prev)
-    x_next = np.append(
-        branch_hbm[idx_prev + 1].equations[0].x_time()[:, 0],
-        getattr(branch_hbm[idx_prev + 1], param),
-    )
-    x_next = np.real(x_next)
-
     x_shoot = bp_shoot.vector_of_unknowns
+    param = bp_shoot.unknowns[-1]
+
+    for k in (0, 1):
+        if branch_hbm[idx_prev + k].equations[0].ode.autonomous:
+            # account for freedom of phase: interpolate over x(t) to find value closest to x
+            x_t = branch_hbm[idx_prev + k].equations[0].x_time()
+            x = interpolate_time(int(np.ceil(x_t.shape[1] / 2)), x_t, x_shoot[:2])
+            x = np.append(x, 2 * np.pi / branch_hbm[idx_prev + k].omega)
+        else:
+            x = branch_hbm[idx_prev + k].equations[0].x_time()[:, 0]
+
+        x = np.append(x, getattr(branch_hbm[idx_prev + k], param))
+        x = np.real(x)
+
+        if k == 0:
+            x_prev = x
+        else:
+            x_next = x
 
     d_shoot = x_shoot - x_prev
     d_hbm = x_next - x_prev
 
     alpha = np.inner(d_shoot, d_hbm) / np.linalg.norm(d_hbm) ** 2
     if alpha < -1e-3:
-        return bp_distance(int(idx_prev - np.ceil(-alpha)), branch_hbm, bp_shoot)
+        return interpolate_bp(int(idx_prev - np.ceil(-alpha)), branch_hbm, bp_shoot)
     elif alpha > 1 + 1e-3:
-        return bp_distance(int(idx_prev + np.floor(alpha)), branch_hbm, bp_shoot)
+        return interpolate_bp(int(idx_prev + np.floor(alpha)), branch_hbm, bp_shoot)
     else:
         x_interp = x_prev + alpha * d_hbm
         return np.linalg.norm(x_shoot - x_interp), idx_prev
+
+
+def interpolate_time(idx_prev, x_time, x_comp):
+    d_comp = x_comp - x_time[:, idx_prev]
+    d_time = x_time[:, np.mod(idx_prev + 1, x_time.shape[1])] - x_time[:, idx_prev]
+
+    alpha = np.inner(d_comp, d_time) / np.linalg.norm(d_time) ** 2
+    if alpha < -1e-3:
+        idx_next = int(np.mod(idx_prev - np.ceil(-alpha), x_time.shape[1]))
+        return interpolate_time(idx_next, x_time, x_comp)
+    elif alpha > 1 + 1e-3:
+        idx_next = int(np.mod(idx_prev + np.floor(alpha), x_time.shape[1]))
+        return interpolate_time(idx_next, x_time, x_comp)
+    else:
+        return x_time[:, idx_prev] + alpha * d_time
 
 
 def bif_curve_aut(sparse=False, real_formulation=False):
