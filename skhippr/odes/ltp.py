@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.linalg import expm
 
-from skhippr.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.AbstractODE import AbstractODE
 
 """Hill-type equations"""
 
 
-class HillODE(FirstOrderODE):
+class HillODE(AbstractODE):
     def __init__(self, t, x, g_fcn, a=0, b=1, omega=1, damping=0):
         """Encodes damped Hill ODEs of the form x_ddot + d*x_dot + (a + b*g(omega*t))*x"""
         super().__init__(False, 2)
@@ -176,7 +176,7 @@ class TruncatedMeissner(HillODE):
         return np.squeeze(np.tensordot(self.b * self.fourier_coeffs, cos, axes=(0, 0)))
 
 
-class ShirleyODE(FirstOrderODE):
+class ShirleyODE(AbstractODE):
 
     def __init__(self, t, x, E_alpha, E_beta, b, omega):
         super().__init__(autonomous=False, n_dof=2)

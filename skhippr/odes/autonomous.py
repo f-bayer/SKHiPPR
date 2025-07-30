@@ -1,9 +1,9 @@
 import numpy as np
 from typing import override
-from skhippr.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.AbstractODE import AbstractODE
 
 
-class Vanderpol(FirstOrderODE):
+class Vanderpol(AbstractODE):
     """
     Van der Pol oscillator as a first-order autonomous ODE system.
 
@@ -141,7 +141,7 @@ class Vanderpol(FirstOrderODE):
                 )
 
 
-class Truss(FirstOrderODE):
+class Truss(AbstractODE):
 
     def __init__(
         self,
@@ -240,7 +240,7 @@ class Truss(FirstOrderODE):
         return df_dx
 
 
-class BlockOnBelt(FirstOrderODE):
+class BlockOnBelt(AbstractODE):
 
     def __init__(
         self,

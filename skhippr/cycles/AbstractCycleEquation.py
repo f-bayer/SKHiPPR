@@ -3,13 +3,11 @@ from typing import override
 from copy import copy
 
 from skhippr.equations.AbstractEquation import AbstractEquation
-from skhippr.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.AbstractODE import AbstractODE
 
 
 class AbstractCycleEquation(AbstractEquation):
-    def __init__(
-        self, ode: FirstOrderODE, omega=None, period_k=1, stability_method=None
-    ):
+    def __init__(self, ode: AbstractODE, omega=None, period_k=1, stability_method=None):
         self.ode = ode
         super().__init__(stability_method)
 

@@ -5,7 +5,7 @@ import numpy as np
 
 from skhippr.equations.AbstractEquation import AbstractEquation
 from skhippr.cycles.AbstractCycleEquation import AbstractCycleEquation
-from skhippr.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.AbstractODE import AbstractODE
 from skhippr.Fourier import Fourier
 from skhippr.equations.EquationSystem import EquationSystem
 
@@ -85,7 +85,7 @@ class HBMEquation(AbstractCycleEquation):
 
     def __init__(
         self,
-        ode: FirstOrderODE,
+        ode: AbstractODE,
         omega: float,
         fourier: Fourier,
         initial_guess: np.ndarray = None,

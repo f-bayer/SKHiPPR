@@ -12,7 +12,7 @@ from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 # still an abstract class
-class FirstOrderODE(AbstractEquation):
+class AbstractODE(AbstractEquation):
     def __init__(self, autonomous: bool, n_dof: int, stability_method=None):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
         if stability_method is None:

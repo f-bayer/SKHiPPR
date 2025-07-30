@@ -1,9 +1,9 @@
 import numpy as np
 from typing import override
-from skhippr.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.AbstractODE import AbstractODE
 
 
-class Duffing(FirstOrderODE):
+class Duffing(AbstractODE):
     def __init__(
         self,
         t: float,
