@@ -17,9 +17,12 @@ from skhippr.problems.continuation import pseudo_arclength_continuator
 from skhippr.problems.newton import NewtonSolver
 
 
-@pytest.fixture(params=[True, False])
-def ode(request):
-    autonomous = request.param
+@pytest.fixture(params=[True, False], name="ode")
+def ode_fixture(request):
+    return ode(autonomous=request.param)
+
+
+def ode(autonomous):
     if autonomous:
         return Vanderpol(t=0, x=np.array([2.0, 0]), nu=0.05)
     else:
@@ -35,6 +38,10 @@ def ode(request):
 
 
 @pytest.fixture
+def shooting_system_fixture(ode):
+    return shooting_system(ode)
+
+
 def shooting_system(ode):
     if ode.autonomous:
         omega = 1
@@ -44,8 +51,11 @@ def shooting_system(ode):
 
 
 @pytest.fixture
-def hbm_system(ode):
+def hbm_system_fixture(ode):
+    return hbm_system(ode)
 
+
+def hbm_system(ode):
     if ode.autonomous:
         omega = 1
     else:
@@ -88,109 +98,58 @@ def run_continuation(system, solver, parameter, param_range, max_steps=200):
     return branch
 
 
-def bif_curve_nonaut(real_formulation=False):
+def plot_bif_curve_nonaut():
 
-    class Struct:
-        pass
-
-    request = Struct()
-    request.autonomous = False
-
-    ode = ode(request)
-    omega = ode.omega
-
-    N_HBM = 25
-    L_DFT = 300
-
-    fourier = Fourier(
-        N_HBM=N_HBM, L_DFT=L_DFT, n_dof=2, real_formulation=real_formulation
-    )
-
-    print("Duffing oscillator")
-
-    ts = fourier.time_samples(omega)
-    x0_samples = np.vstack((np.cos(omega * ts), -omega * np.sin(omega * ts)))
-    X0 = fourier.DFT(x0_samples)
-
-    stability_method = KoopmanHillSubharmonic(fourier=fourier)
-
-    hbm_system = HBMSystem(
-        ode=ode,
-        initial_guess=X0,
-        omega=omega,
-        fourier=fourier,
-        stability_method=stability_method,
-    )
-
-    shooting_system = ShootingSystem(
-        ode=copy(ode), T=2 * np.pi / ode.omega, atol=1e-5, rtol=1e-5
-    )
+    solver = NewtonSolver()
+    duffing = ode(False)
+    hbm_sys = hbm_system(duffing)
+    fourier = hbm_sys.equations[0].fourier
+    shooting_sys = shooting_system(duffing)
 
     F_range = (0, 20)
 
     fig_3d = plt.figure()
-    ax = fig_3d.add_subplot(111, projection="3d")
-    ax.set_xlabel("x_1")
-    ax.set_ylabel("x_2")
-    ax.set_zlabel("F")
+    ax_3d = fig_3d.add_subplot(111, projection="3d")
+    ax_3d.set_xlabel("x_1")
+    ax_3d.set_ylabel("x_2")
+    ax_3d.set_zlabel("F")
 
     fig_stability = plt.figure()
-    solver = NewtonSolver()
 
-    for initial_system in (hbm_system, shooting_system):
+    for system in (hbm_sys, shooting_sys):
 
-        xs_time = []
-        amplitudes = []
-        stable = []
-        Fs = []
+        branch = run_continuation(system, solver, "F", F_range, 200)
+        Fs = np.array([np.squeeze(bp.F) for bp in branch])
 
-        for branch_point in pseudo_arclength_continuator(
-            initial_system=initial_system,
-            solver=solver,
-            stepsize=0.1,
-            stepsize_range=(0.001, 0.15),
-            initial_direction=1,
-            num_steps=1000,
-            continuation_parameter="F",
-            verbose=True,
-        ):
-            xs_time.append(branch_point.equations[0].x_time())
-            amplitudes.append(np.max(xs_time[-1][0, :]))
-            Fs.append(branch_point.F)
-            stable.append(branch_point.stable)
+        xs_time = [bp.equations[0].x_time() for bp in branch]
 
-            branch_point.determine_tangent()
+        # Tangents
+        is_hbm = isinstance(system, type(hbm_sys))
+        for branch_point, x_time in zip(branch[:-1], xs_time[:-1]):
+
+            x0 = np.append(x_time[:, 0], branch_point.F)
             x_tng = branch_point.vector_of_unknowns + 0.2 * branch_point.tangent
-            x0 = np.append(xs_time[-1][:, 0], branch_point.F)
-            try:
-                # HBM case
+
+            if is_hbm:
                 x0_tng = np.append(fourier.inv_DFT(x_tng[:-1])[:, 0], x_tng[-1])
-            except:
-                # Shooting case
+            else:
                 x0_tng = x_tng
-            ax.plot(*zip(x0, x0_tng), "gray")
 
-            if branch_point.F < F_range[0] or branch_point.F > F_range[1]:
-                break
+            ax_3d.plot(*zip(x0, x0_tng), "gray")
 
-        x0s = np.array([x_time[:, 0] for x_time in xs_time])
-        amplitudes = np.array(amplitudes)
-        stable = np.array(stable)
-        unstable = np.invert(stable)
-        Fs = np.array(Fs)
-        F_stable = Fs.copy()
-        F_stable[unstable] = np.nan
-        F_unstable = Fs.copy()
-        F_unstable[stable] = np.nan
+        x0s = np.array([x[:, 0] for x in xs_time])
+        ax_3d.plot(x0s[:, 0], x0s[:, 1], Fs, linewidth=1)
 
-        ax.plot(x0s[:, 0], x0s[:, 1], np.squeeze(Fs), linewidth=1)
-
+        # Stability plot
         plt.figure(fig_stability)
+        amplitudes = [np.max(x[0, :]) for x in xs_time]
+
+        stable = np.array([bp.stable for bp in branch])
+        F_stable = np.where(stable, Fs, np.nan)
+        F_unstable = np.where(~stable, Fs, np.nan)
 
         plt.plot(F_stable, amplitudes, label="stable")
         plt.plot(F_unstable, amplitudes, "--", label="unstable")
-        # plt.title(f"Amplitude of first DOF -- {solver}")
-    plt.legend()
 
 
 def test_bifurcation_curve_comparison(hbm_system, shooting_system):
@@ -298,128 +257,128 @@ def closest_point_on_solution(x, x_time):
     return x_proj
 
 
-def bif_curve_aut(sparse=False, real_formulation=False):
-    nu_0 = 0.1
-    omega_0 = 1
-    N_HBM = 45
-    L_DFT = 1000
+# def bif_curve_aut(sparse=False, real_formulation=False):
+#     nu_0 = 0.1
+#     omega_0 = 1
+#     N_HBM = 45
+#     L_DFT = 1000
 
-    print("Van der Pol oscillator")
+#     print("Van der Pol oscillator")
 
-    fourier = Fourier(
-        N_HBM=N_HBM,
-        L_DFT=L_DFT,
-        n_dof=2,
-        sparse_formulation=sparse,
-        real_formulation=real_formulation,
-    )
+#     fourier = Fourier(
+#         N_HBM=N_HBM,
+#         L_DFT=L_DFT,
+#         n_dof=2,
+#         sparse_formulation=sparse,
+#         real_formulation=real_formulation,
+#     )
 
-    ts = fourier.time_samples(omega_0)
-    x0_samples = np.vstack(
-        (2 * np.cos(omega_0 * ts), -2 * omega_0 * np.sin(omega_0 * ts))
-    )
-    X0 = fourier.DFT(x0_samples)
+#     ts = fourier.time_samples(omega_0)
+#     x0_samples = np.vstack(
+#         (2 * np.cos(omega_0 * ts), -2 * omega_0 * np.sin(omega_0 * ts))
+#     )
+#     X0 = fourier.DFT(x0_samples)
 
-    stability_method = KoopmanHillSubharmonic(
-        fourier=fourier, autonomous=True, tol=1e-4
-    )
+#     stability_method = KoopmanHillSubharmonic(
+#         fourier=fourier, autonomous=True, tol=1e-4
+#     )
 
-    initial_problem = HBMProblem_autonomous(
-        f=vanderpol,
-        initial_guess=X0,
-        omega=omega_0,
-        fourier=fourier,
-        variable="x",
-        stability_method=stability_method,
-        verbose=False,
-        parameters_f={"nu": nu_0},
-    )
+#     initial_problem = HBMProblem_autonomous(
+#         f=vanderpol,
+#         initial_guess=X0,
+#         omega=omega_0,
+#         fourier=fourier,
+#         variable="x",
+#         stability_method=stability_method,
+#         verbose=False,
+#         parameters_f={"nu": nu_0},
+#     )
 
-    initial_problem.solve()
-    print(f"Initial problem convergence: {initial_problem.converged}")
+#     initial_problem.solve()
+#     print(f"Initial problem convergence: {initial_problem.converged}")
 
-    nu_range = (nu_0, 10)
+#     nu_range = (nu_0, 10)
 
-    xs_time = []
-    amplitudes = []
-    nus = []
-    stable = []
-    omegas = []
-    floquet_multipliers = []
-    x0s = []
+#     xs_time = []
+#     amplitudes = []
+#     nus = []
+#     stable = []
+#     omegas = []
+#     floquet_multipliers = []
+#     x0s = []
 
-    for branch_point in pseudo_arclength_continuator(
-        initial_problem=initial_problem,
-        stepsize=0.1,
-        stepsize_range=(0.001, 0.15),
-        initial_direction=1,
-        num_steps=1000,
-        key_param="nu",
-        value_param=nu_0,
-        verbose=True,
-    ):
-        xs_time.append(branch_point.x_time())
-        amplitudes.append(np.max(xs_time[-1][0, :]))
-        nus.append(branch_point.nu)
-        stable.append(branch_point.stable)
-        omegas.append(branch_point.omega)
-        floquet_multipliers.append(branch_point.eigenvalues)
+#     for branch_point in pseudo_arclength_continuator(
+#         initial_problem=initial_problem,
+#         stepsize=0.1,
+#         stepsize_range=(0.001, 0.15),
+#         initial_direction=1,
+#         num_steps=1000,
+#         key_param="nu",
+#         value_param=nu_0,
+#         verbose=True,
+#     ):
+#         xs_time.append(branch_point.x_time())
+#         amplitudes.append(np.max(xs_time[-1][0, :]))
+#         nus.append(branch_point.nu)
+#         stable.append(branch_point.stable)
+#         omegas.append(branch_point.omega)
+#         floquet_multipliers.append(branch_point.eigenvalues)
 
-        x0 = xs_time[-1][:, 0]
+#         x0 = xs_time[-1][:, 0]
 
-        if branch_point.nu < nu_range[0] or branch_point.nu > nu_range[1]:
-            break
+#         if branch_point.nu < nu_range[0] or branch_point.nu > nu_range[1]:
+#             break
 
-    amplitudes = np.array(amplitudes)
-    stable = np.array(stable)
-    unstable = np.invert(stable)
-    nus = np.array(nus)
-    nu_stable = nus.copy()
-    nu_stable[unstable] = np.nan
-    nu_unstable = nus.copy()
-    nu_unstable[stable] = np.nan
+#     amplitudes = np.array(amplitudes)
+#     stable = np.array(stable)
+#     unstable = np.invert(stable)
+#     nus = np.array(nus)
+#     nu_stable = nus.copy()
+#     nu_stable[unstable] = np.nan
+#     nu_unstable = nus.copy()
+#     nu_unstable[stable] = np.nan
 
-    plt.plot(nu_stable, amplitudes, "r+-", label="stable")
-    plt.plot(nu_unstable, amplitudes, "bx-", label="unstable")
-    # plt.title(f"Amplitude of first DOF -- {solver}")
-    plt.legend()
-    plt.xlabel("\nu")
-    plt.ylabel("|x_1|")
+#     plt.plot(nu_stable, amplitudes, "r+-", label="stable")
+#     plt.plot(nu_unstable, amplitudes, "bx-", label="unstable")
+#     # plt.title(f"Amplitude of first DOF -- {solver}")
+#     plt.legend()
+#     plt.xlabel("\nu")
+#     plt.ylabel("|x_1|")
 
-    plt.figure()
-    plt.plot(nu_stable, omegas, "r", label="stable")
-    plt.plot(nu_unstable, omegas, "b", label="unstable")
-    plt.xlabel("\nu")
-    plt.ylabel("\omega")
+#     plt.figure()
+#     plt.plot(nu_stable, omegas, "r", label="stable")
+#     plt.plot(nu_unstable, omegas, "b", label="unstable")
+#     plt.xlabel(xlabel="\nu")
+#     plt.ylabel("\omega")
 
-    fig_anim, axs = plt.subplots(nrows=1, ncols=2)
-    # Create an animation
-    (line2,) = axs[0].plot(xs_time[0][0, :], xs_time[0][1, :])
-    axs[0].axis("equal")
-    (plot_floquet_multiplier,) = axs[1].plot(
-        np.real(floquet_multipliers[0]),
-        np.imag(floquet_multipliers[0]),
-        "x",
-    )
-    phis = np.linspace(0, 2 * np.pi)
-    axs[1].plot(np.cos(phis), np.sin(phis), "k-")
-    axs[1].axis("equal")
+#     fig_anim, axs = plt.subplots(nrows=1, ncols=2)
+#     # Create an animation
+#     (line2,) = axs[0].plot(xs_time[0][0, :], xs_time[0][1, :])
+#     axs[0].axis("equal")
+#     (plot_floquet_multiplier,) = axs[1].plot(
+#         np.real(floquet_multipliers[0]),
+#         np.imag(floquet_multipliers[0]),
+#         "x",
+#     )
+#     phis = np.linspace(0, 2 * np.pi)
+#     axs[1].plot(np.cos(phis), np.sin(phis), "k-")
+#     axs[1].axis("equal")
 
-    def update(frame):
-        line2.set_xdata(xs_time[frame][0, :])
-        line2.set_ydata(xs_time[frame][1, :])
-        plot_floquet_multiplier.set_xdata(np.real(floquet_multipliers[frame]))
-        plot_floquet_multiplier.set_ydata(np.imag(floquet_multipliers[frame]))
-        return (line2, plot_floquet_multiplier)
+#     def update(frame):
+#         line2.set_xdata(xs_time[frame][0, :])
+#         line2.set_ydata(xs_time[frame][1, :])
+#         plot_floquet_multiplier.set_xdata(np.real(floquet_multipliers[frame]))
+#         plot_floquet_multiplier.set_ydata(np.imag(floquet_multipliers[frame]))
+#         return (line2, plot_floquet_multiplier)
 
-    animation = FuncAnimation(
-        fig=fig_anim, func=update, frames=len(xs_time), interval=20
-    )
-    return animation
+#     animation = FuncAnimation(
+#         fig=fig_anim, func=update, frames=len(xs_time), interval=20
+#     )
+#     return animation
 
 
 if __name__ == "__main__":
-    bif_curve_nonaut(real_formulation=True)
+    plot_bif_curve_nonaut()
     # plt.figure()
     # animation = bif_curve_aut(real_formulation=True, sparse=False)
     plt.show()
