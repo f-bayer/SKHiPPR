@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from skhippr.odes.FirstOrderODE import Equation
+from skhippr.equations.Equation import Equation
 
 
 def my_function(x=np.array([0, 1]), a=1, b=2):
