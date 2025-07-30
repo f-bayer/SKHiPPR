@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from skhippr.systems.nonautonomous import Duffing
 from skhippr.systems.autonomous import Vanderpol, Truss
-from skhippr.solvers.newton import EquationSystem
+from skhippr.equations.EquationSystem import EquationSystem
 
 
 def test_solution(solver, ode_setting):

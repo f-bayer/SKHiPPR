@@ -9,7 +9,7 @@ from skhippr.systems.AbstractSystems import (
     FirstOrderODE,
 )
 from skhippr.Fourier import Fourier
-from skhippr.solvers.newton import EquationSystem
+from skhippr.equations.EquationSystem import EquationSystem
 
 # Imports only needed for type hinting
 if TYPE_CHECKING:

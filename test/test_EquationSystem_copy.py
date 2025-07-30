@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from copy import copy
-from skhippr.solvers.newton import EquationSystem
+from skhippr.equations.EquationSystem import EquationSystem
 from skhippr.solvers.continuation import BranchPoint
 from skhippr.systems.AbstractSystems import AbstractEquation
 

@@ -7,7 +7,7 @@ from scipy.integrate import solve_ivp
 
 from skhippr.systems.AbstractSystems import AbstractEquation, AbstractCycleEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
-from skhippr.solvers.newton import EquationSystem
+from skhippr.equations.EquationSystem import EquationSystem
 
 
 class ShootingBVP(AbstractCycleEquation):
