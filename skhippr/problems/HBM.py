@@ -4,10 +4,8 @@ from collections.abc import Callable
 import numpy as np
 
 from skhippr.equations.AbstractEquation import AbstractEquation
-from skhippr.odes.FirstOrderODE import (
-    AbstractCycleEquation,
-    FirstOrderODE,
-)
+from skhippr.cycles.AbstractCycleEquation import AbstractCycleEquation
+from skhippr.odes.FirstOrderODE import FirstOrderODE
 from skhippr.Fourier import Fourier
 from skhippr.equations.EquationSystem import EquationSystem
 
