@@ -313,7 +313,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
         Phi_t = super().fundamental_matrix(t_over_period=t_over_period, problem=problem)
 
-        hill_mat_subh = self.hill_subh(problem=problem)
+        hill_mat_subh = self.hill_subh(equ=problem)
         t = 2 * np.pi / problem.omega * t_over_period
         Phi_t += C_subh @ expm(hill_mat_subh * t) @ self.W_subh
 
@@ -360,7 +360,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         if C is None:
             C = self.C_time(t_over_period)
 
-    def hill_subh(self, problem: HBMEquation) -> np.ndarray:
+    def hill_subh(self, equ: HBMEquation) -> np.ndarray:
         """
         Constructs the subharmonic Hill matrix for the given HBM problem.
 
@@ -386,7 +386,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         * Bayer et al., 2024, Appendix: Details on the block structure real-valued formulation.
         """
 
-        hill_mat = problem.hill_matrix()
+        hill_mat = equ.hill_matrix()
         if self.fourier.real_formulation:
             # Split the Hill matrix into blocks for const, cos, sin
             blocks = []
@@ -417,7 +417,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
             # Construct their subharmonic pendants
             # Tc = Tc
-            Ts += 0.5 * problem.omega * np.eye(self.fourier.n_dof * self.fourier.N_HBM)
+            Ts += 0.5 * equ.omega * np.eye(self.fourier.n_dof * self.fourier.N_HBM)
 
             Kc = np.vstack((Jc, Kc[: -self.fourier.n_dof, :]))
             Ks = np.vstack((Js, Ks[: -self.fourier.n_dof, :]))
@@ -427,7 +427,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
         else:
             Hill_subh = hill_mat[self.fourier.n_dof :, self.fourier.n_dof :]
-            Hill_subh = Hill_subh + 0.5j * problem.omega * np.eye(
+            Hill_subh = Hill_subh + 0.5j * equ.omega * np.eye(
                 self.fourier.n_dof * 2 * self.fourier.N_HBM
             )
         return Hill_subh
