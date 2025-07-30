@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.animation import FuncAnimation
 
 from skhippr.Fourier import Fourier
-from skhippr.equations.odes.autonomous import Vanderpol
+from skhippr.odes.autonomous import Vanderpol
 from skhippr.problems.HBM import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 from skhippr.solvers.newton import NewtonSolver

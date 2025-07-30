@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 
 from pytest import param
 from skhippr.Fourier import Fourier
-from skhippr.equations.odes.nonautonomous import duffing
+from skhippr.odes.nonautonomous import duffing
 from skhippr.problems.shooting import ShootingProblem
 from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection

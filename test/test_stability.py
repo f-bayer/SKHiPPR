@@ -10,8 +10,8 @@ from skhippr.Fourier import Fourier
 from skhippr.problems.HBM import HBMSystem
 from skhippr.problems.shooting import ShootingSystem
 
-from skhippr.equations.odes.nonautonomous import Duffing
-from skhippr.equations.odes.autonomous import Vanderpol
+from skhippr.odes.nonautonomous import Duffing
+from skhippr.odes.autonomous import Vanderpol
 
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,

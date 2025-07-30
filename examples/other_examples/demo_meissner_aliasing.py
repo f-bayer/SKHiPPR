@@ -12,7 +12,7 @@ Usage:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skhippr.equations.odes.ltp import (
+from skhippr.odes.ltp import (
     meissner,
     meissner_fourier,
     meissner_fundamental_matrix,

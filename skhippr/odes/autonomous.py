@@ -1,6 +1,6 @@
 import numpy as np
 from typing import override
-from skhippr.equations.odes.FirstOrderODE import FirstOrderODE
+from skhippr.odes.FirstOrderODE import FirstOrderODE
 
 
 class Vanderpol(FirstOrderODE):

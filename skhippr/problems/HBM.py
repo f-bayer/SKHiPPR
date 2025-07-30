@@ -4,7 +4,7 @@ from collections.abc import Callable
 import numpy as np
 
 from skhippr.equations.AbstractEquation import AbstractEquation
-from skhippr.equations.odes.FirstOrderODE import (
+from skhippr.odes.FirstOrderODE import (
     AbstractCycleEquation,
     FirstOrderODE,
 )

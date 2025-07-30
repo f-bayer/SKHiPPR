@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from skhippr.problems.shooting import ShootingBVP
-from skhippr.equations.odes.ltp import HillLTI, SmoothedMeissner
+from skhippr.odes.ltp import HillLTI, SmoothedMeissner
 
 
 @pytest.mark.parametrize("t_over_period", np.arange(0, 3))

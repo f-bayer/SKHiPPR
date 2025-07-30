@@ -37,7 +37,7 @@ Dependencies:
 import matplotlib.pyplot as plt
 from copy import copy
 
-from skhippr.equations.odes.nonautonomous import duffing
+from skhippr.odes.nonautonomous import duffing
 from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 

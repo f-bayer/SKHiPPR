@@ -41,7 +41,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-from skhippr.equations.odes.ltp import mathieu, meissner, meissner_g
+from skhippr.odes.ltp import mathieu, meissner, meissner_g
 from skhippr.Fourier import Fourier
 from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
 from skhippr.problems.shooting import ShootingProblem

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
-from skhippr.equations.odes.nonautonomous import Duffing
-from skhippr.equations.odes.autonomous import Vanderpol, Truss
+from skhippr.odes.nonautonomous import Duffing
+from skhippr.odes.autonomous import Vanderpol, Truss
 from skhippr.equations.EquationSystem import EquationSystem
 
 
