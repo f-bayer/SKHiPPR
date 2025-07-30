@@ -6,6 +6,7 @@ from skhippr.solvers.newton import NewtonSolver, EquationSystem
 from skhippr.solvers.continuation import pseudo_arclength_continuator
 from skhippr.odes.autonomous import Truss
 from skhippr.equations.AbstractEquation import AbstractEquation
+from skhippr.equations.Circle import CircleEquation
 
 
 @pytest.fixture
@@ -19,23 +20,6 @@ def truss_params():
         "F": -2,
     }
     return params
-
-
-class CircleEquation(AbstractEquation):
-    def __init__(self, y: np.ndarray, radius=1):
-        super().__init__(None)
-        self.y = y
-        self.radius = radius
-
-    def residual_function(self):
-        return np.atleast_1d(self.y[0] ** 2 + self.y[1] ** 2 - self.radius**2)
-
-    def closed_form_derivative(self, variable):
-        match variable:
-            case "y":
-                return np.atleast_2d(np.array([2 * self.y[0], 2 * self.y[1]]))
-            case "radius":
-                return np.atleast_2d(-2 * self.radius)
 
 
 def test_cont_circle(solver, visualize=False):

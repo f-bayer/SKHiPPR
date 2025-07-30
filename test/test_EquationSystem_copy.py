@@ -3,66 +3,16 @@ import numpy as np
 from copy import copy
 from skhippr.equations.EquationSystem import EquationSystem
 from skhippr.solvers.continuation import BranchPoint
-from skhippr.equations.AbstractEquation import AbstractEquation
+from skhippr.equations.Circle import CircleWithPhase
 
 """ Test parameter access in BranchPoint objects"""
-
-
-class CircleExplicit(AbstractEquation):
-    def __init__(self, x, radius, theta, other):
-        super().__init__(stability_method=None)
-        self.x = x
-        self.radius = radius
-        self.theta = theta
-        self.other = other
-
-    def residual_function(self):
-        return np.squeeze(
-            np.array(
-                [
-                    self.x[0] ** 2 + self.x[1] ** 2 - self.radius**2,
-                    self.x[1] * np.cos(self.theta) - self.x[0] * np.sin(self.theta),
-                ]
-            )
-        )
-
-    def closed_form_derivative(self, variable):
-        match variable:
-            case "x":
-                return np.array(
-                    [
-                        [2 * self.x[0], 2 * self.x[1]],
-                        [
-                            -np.sin(np.squeeze(self.theta)),
-                            np.cos(np.squeeze(self.theta)),
-                        ],
-                    ]
-                )
-            case "radius":
-                radius = np.atleast_1d(self.radius)
-                return np.array([-2 * radius, [0]])
-            case "theta":
-                theta = np.atleast_1d(self.theta)
-                return np.array(
-                    [
-                        [0],
-                        -self.x[1] * np.sin(self.theta)
-                        - self.x[0] * np.cos(self.theta),
-                    ]
-                )
-            case "other":
-                return self.other
-            case "other2":
-                return self.other[2]
-            case _:
-                raise NotImplementedError
 
 
 @pytest.fixture
 def circle(solver):
     theta = 0
     radius = 1
-    circ = CircleExplicit(
+    circ = CircleWithPhase(
         x=np.array([1.1, 0.1]), radius=radius, theta=theta, other=(100, 10, 0)
     )
     circle_sys = EquationSystem([circ], ["radius", "theta"], None)
