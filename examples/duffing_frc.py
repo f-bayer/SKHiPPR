@@ -13,7 +13,7 @@ from tqdm import tqdm  # for the progress bar
 from skhippr.Fourier import Fourier
 
 # --- System function ---
-from skhippr.systems.nonautonomous import duffing
+from skhippr.equations.odes.nonautonomous import duffing
 
 # --- HBM solver ---
 from skhippr.problems.HBM import HBMEquation

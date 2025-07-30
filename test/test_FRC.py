@@ -7,7 +7,7 @@ from collections import deque
 from copy import copy
 
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import Duffing
+from skhippr.equations.odes.nonautonomous import Duffing
 from skhippr.problems.shooting import ShootingBVP
 from skhippr.problems.HBM import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic

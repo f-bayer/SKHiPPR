@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from skhippr.problems.HBM import HBMEquation, HBMSystem
 from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import Duffing
-from skhippr.systems.autonomous import Vanderpol
+from skhippr.equations.odes.nonautonomous import Duffing
+from skhippr.equations.odes.autonomous import Vanderpol
 from skhippr.solvers.newton import NewtonSolver
 
 

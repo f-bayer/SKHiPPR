@@ -8,8 +8,8 @@ import pytest
 from skhippr.Fourier import Fourier
 from skhippr.problems.HBM import HBMSystem
 from skhippr.problems.shooting import ShootingSystem
-from skhippr.systems.nonautonomous import Duffing
-from skhippr.systems.autonomous import Vanderpol
+from skhippr.equations.odes.nonautonomous import Duffing
+from skhippr.equations.odes.autonomous import Vanderpol
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 from skhippr.solvers.continuation import pseudo_arclength_continuator
 from skhippr.solvers.newton import NewtonSolver

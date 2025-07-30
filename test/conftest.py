@@ -2,9 +2,9 @@ import pytest
 import numpy as np
 
 from skhippr.Fourier import Fourier
-from skhippr.systems.autonomous import Vanderpol, Truss, BlockOnBelt
-from skhippr.systems.nonautonomous import Duffing
-from skhippr.systems.ltp import (
+from skhippr.equations.odes.autonomous import Vanderpol, Truss, BlockOnBelt
+from skhippr.equations.odes.nonautonomous import Duffing
+from skhippr.equations.odes.ltp import (
     HillLTI,
     MathieuODE,
     SmoothedMeissner,

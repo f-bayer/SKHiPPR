@@ -3,8 +3,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 
-from skhippr.systems.autonomous import Vanderpol
-from skhippr.systems.nonautonomous import Duffing
+from skhippr.equations.odes.autonomous import Vanderpol
+from skhippr.equations.odes.nonautonomous import Duffing
 from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.solvers.newton import NewtonSolver
 

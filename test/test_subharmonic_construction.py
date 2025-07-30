@@ -3,7 +3,7 @@ import numpy as np
 from copy import copy, replace
 
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import Duffing
+from skhippr.equations.odes.nonautonomous import Duffing
 from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
