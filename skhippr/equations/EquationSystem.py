@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 from copy import copy
+import numpy as np
 
 from skhippr.equations.AbstractEquation import AbstractEquation
 

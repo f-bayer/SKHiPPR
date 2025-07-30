@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 
 from skhippr.equations.EquationSystem import EquationSystem
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 class TestEquationY(AbstractEquation):

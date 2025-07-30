@@ -34,7 +34,7 @@ from collections.abc import Iterable, Iterator
 import numpy as np
 
 from skhippr.solvers.newton import NewtonSolver, EquationSystem
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 def pseudo_arclength_continuator(

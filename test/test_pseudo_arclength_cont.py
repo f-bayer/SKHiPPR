@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from skhippr.solvers.newton import NewtonSolver, EquationSystem
 from skhippr.solvers.continuation import pseudo_arclength_continuator
 from skhippr.systems.autonomous import Truss
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 @pytest.fixture

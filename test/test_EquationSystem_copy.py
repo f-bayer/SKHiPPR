@@ -3,7 +3,7 @@ import numpy as np
 from copy import copy
 from skhippr.equations.EquationSystem import EquationSystem
 from skhippr.solvers.continuation import BranchPoint
-from skhippr.systems.AbstractSystems import AbstractEquation
+from skhippr.equations.AbstractEquation import AbstractEquation
 
 """ Test parameter access in BranchPoint objects"""
 
