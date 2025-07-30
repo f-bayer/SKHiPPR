@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.linalg import expm
 
-from skhippr.systems.AbstractSystems import FirstOrderODE
+from skhippr.equations.odes.FirstOrderODE import FirstOrderODE
 
 """Hill-type equations"""
 

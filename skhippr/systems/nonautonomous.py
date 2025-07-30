@@ -1,6 +1,6 @@
 import numpy as np
 from typing import override
-from skhippr.systems.AbstractSystems import FirstOrderODE
+from skhippr.equations.odes.FirstOrderODE import FirstOrderODE
 
 
 class Duffing(FirstOrderODE):

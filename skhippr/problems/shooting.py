@@ -6,7 +6,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 from skhippr.equations.AbstractEquation import AbstractEquation
-from skhippr.systems.AbstractSystems import AbstractCycleEquation
+from skhippr.equations.odes.FirstOrderODE import AbstractCycleEquation
 from skhippr.stability._StabilityMethod import StabilityEquilibrium
 from skhippr.equations.EquationSystem import EquationSystem
 

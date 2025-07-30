@@ -3,8 +3,8 @@ import warnings
 from collections.abc import Callable
 import numpy as np
 
-from skhippr.systems.AbstractSystems import (
-    AbstractEquation,
+from skhippr.equations.AbstractEquation import AbstractEquation
+from skhippr.equations.odes.FirstOrderODE import (
     AbstractCycleEquation,
     FirstOrderODE,
 )
