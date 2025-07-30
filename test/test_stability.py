@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
 
-from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingProblem
+from skhippr.problems.HBM import HBMSystem
+from skhippr.problems.shooting import ShootingSystem
 
-from skhippr.systems.nonautonomous import duffing
-from skhippr.systems.autonomous import vanderpol
+from skhippr.systems.nonautonomous import Duffing
+from skhippr.systems.autonomous import Vanderpol
 
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
@@ -21,75 +21,59 @@ from skhippr.stability.ClassicalHill import ClassicalHill
 from skhippr.stability.SinglePass import SinglePassRK4, SinglePassRK38
 
 
+@pytest.mark.parametrize("autonomous", [False, True])
 @pytest.mark.parametrize(
-    "autonomous,stability_method",
+    "stability_method",
     [
-        (False, KoopmanHillProjection),
-        (False, KoopmanHillSubharmonic),
-        (False, lambda fourier: ClassicalHill(fourier, sorting_method="imaginary")),
-        # (False, lambda fourier: ClassicalHill(fourier, sorting_method="symmetry")),
-        (False, SinglePassRK4),
-        (False, lambda fourier: SinglePassRK38(fourier, stepsize=1e-3)),
-        (True, KoopmanHillProjection),
-        (True, KoopmanHillSubharmonic),
-        (True, lambda fourier: ClassicalHill(fourier, sorting_method="imaginary")),
-        # (True, lambda fourier: ClassicalHill(fourier, sorting_method="symmetry")),
-        (True, SinglePassRK4),
-        (True, lambda fourier: SinglePassRK38(fourier, stepsize=1e-3)),
+        KoopmanHillProjection,
+        KoopmanHillSubharmonic,
+        lambda fourier: ClassicalHill(fourier, sorting_method="imaginary"),
+        SinglePassRK4,
+        lambda fourier: SinglePassRK38(fourier, stepsize=1e-3),
     ],
 )
-def test_stability(
-    params_duffing, autonomous, stability_method, fourier, visualize=False
-):
+def test_stability(solver, autonomous, stability_method, fourier, visualize=False):
 
     if autonomous:
-        f = vanderpol
-        params = {"nu": 0.5}
+        ode = Vanderpol(t=0, x=np.array([2.0, 0]), nu=0.05)
         omega = 1
-        x0 = np.array([2.0, 0])
-
     else:
-        f = duffing
-        omega = 0.4
-        params = params_duffing[1]
-        x0 = np.array([1.0, 0.0])
+        ode = Duffing(
+            t=0,
+            x=np.array([1.0, 0.0]),
+            omega=0.8,
+            alpha=1,
+            beta=0.2,
+            delta=0.1,
+            F=3,
+        )
+        omega = ode.omega
 
     ode_kwargs = {"rtol": 1e-7, "atol": 1e-7}
 
     # Reference: Floquet multipliers obtained using Shooting
-    sol_shooting = ShootingProblem(
-        f=f,
-        x0=x0,
-        T=2 * np.pi / omega,
-        autonomous=autonomous,
-        kwargs_odesolver=ode_kwargs,
-        parameters=params,
-    )
-    sol_shooting.solve()
-    assert sol_shooting.converged
-    floquet_multipliers_shooting = sol_shooting.eigenvalues
+    sys_shooting = ShootingSystem(ode, T=2 * np.pi / omega, rtol=1e-7, atol=1e-7)
+
+    solver.solve(sys_shooting)
+    assert sys_shooting.solved
+    omega = sys_shooting.equations[0].omega
+    floquet_multipliers_shooting = sys_shooting.eigenvalues + 1
 
     # determine periodic solution using HBM
     method = stability_method(fourier)
-    x_shooting = sol_shooting.x_time(fourier.time_samples(sol_shooting.omega))
+    x_shooting = sys_shooting.equations[0].x_time(fourier.time_samples(omega))
     X0 = fourier.DFT(x_shooting)
 
-    if autonomous:
-        factory_HBM = HBMProblem_autonomous
-    else:
-        factory_HBM = HBMEquation
-
-    sol_HBM = factory_HBM(
-        f=f,
-        initial_guess=X0,
-        omega=omega,
+    sys_HBM = HBMSystem(
+        ode,
+        omega,
         fourier=fourier,
-        parameters_f=params,
-        stability_method=method,
+        initial_guess=X0,
+        stability_method=stability_method(fourier),
     )
-    sol_HBM.solve()
-    assert sol_HBM.converged
-    floquet_multipliers = sol_HBM.eigenvalues
+    solver.solve(sys_HBM)
+    assert sys_HBM.solved
+    floquet_multipliers = sys_HBM.eigenvalues
 
     # Account for the fact that the arrays of FMs might be sorted differently
     for k, idx in enumerate(itertools.permutations(range(len(floquet_multipliers)))):
@@ -97,7 +81,7 @@ def test_stability(
         fm_equal = np.allclose(floquet_multipliers_shooting, fm_reordered, atol=1e-5)
         if fm_equal:
             break
-    # assert fm_equal
+    assert fm_equal
 
     if visualize:
         print(method)

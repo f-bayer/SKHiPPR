@@ -121,10 +121,7 @@ class SinglePassRK(_StabilityHBM):
 
         """
 
-        if problem.fourier.L_DFT == self.fourier.L_DFT:
-            J_samples = problem.derivatives[f"{problem.variable}_samp"]
-        else:
-            J_samples = problem.ode_samples(self.fourier)
+        J_samples = problem.ode_samples(self.fourier)
         T = 2 * np.pi / problem.omega
         dt = self.h0 * T
         A = self.A * dt

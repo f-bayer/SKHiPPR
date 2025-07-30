@@ -35,7 +35,7 @@ def ode(autonomous):
         )
 
 
-@pytest.fixture
+@pytest.fixture(name="shooting_system")
 def shooting_system_fixture(ode):
     return shooting_system(ode)
 
@@ -48,7 +48,7 @@ def shooting_system(ode):
     return ShootingSystem(ode=copy(ode), T=2 * np.pi / omega, atol=1e-4, rtol=1e-5)
 
 
-@pytest.fixture
+@pytest.fixture(name="hbm_system")
 def hbm_system_fixture(ode):
     return hbm_system(ode)
 
