@@ -210,73 +210,92 @@ def test_bifurcation_curve_comparison(hbm_system, shooting_system):
     ]
 
     # Compare the curves using interpolation
-    idx_prev = 0
-    for k, bp_shoot in enumerate(branches[1][:-1]):
-        if not param_range[0] <= getattr(bp_shoot, parameter) <= param_range[1]:
+    errors = compare_branches(branch_hbm=branches[0], branch_shoot=branches[1])
+    assert np.all(np.array(errors) < 1e-2)
+
+
+def hbm_x0_vec(bp_hbm, x0_ref=None):
+    hbm = bp_hbm.equations[0]
+    x_t = hbm.x_time()
+    if hbm.ode.autonomous:
+        # Eliminate freedom of phase by approximating the closest point to x_ref
+        x = closest_point_on_solution(x0_ref, x_t)
+        x = np.append(x, 2 * np.pi / hbm.omega)
+    else:
+        x = x_t[:, 0]
+    # non-autonomous: take state at t=0 and append continuation parameter
+    return np.append(x, getattr(bp_hbm, bp_hbm.unknowns[-1]))
+
+
+def compare_branches(branch_hbm, branch_shoot):
+    """Compare each shooting branch point to the HBM branch using interpolation."""
+    parameter = branch_shoot[0].unknowns[-1]
+    param_range = (
+        getattr(branch_hbm[0], parameter),
+        getattr(branch_hbm[-1], parameter),
+    )
+    n_dof = branch_shoot[0].equations[0].ode.n_dof
+    idx_hbm = 0
+    errors = []
+
+    for k, bp_shoot in enumerate(branch_shoot):
+        value_param = getattr(bp_shoot, parameter)
+        if not param_range[0] <= value_param <= param_range[1]:
             print(f"{k}-th shooting point outside {parameter} range")
             continue
-        print(f"k = {k}: {parameter} = {getattr(bp_shoot, parameter)}, d = ", end="")
-        d, idx_prev = interpolate_bp(idx_prev, branches[0], bp_shoot)
-        print(f"{d}, idx={idx_prev}")
 
-        assert d < 1e-2
-    pass
+        x_shoot = bp_shoot.vector_of_unknowns
+        window = range(max(0, idx_hbm - 5), min(len(branch_hbm) - 1, idx_hbm + 6))
+        get_vec = lambda i: hbm_x0_vec(branch_hbm[i], x_shoot[:n_dof])
 
-
-def interpolate_bp(idx_prev, branch_hbm, bp_shoot):
-
-    if idx_prev >= 10:
-        pass
-
-    if not 0 <= idx_prev < len(branch_hbm) - 1:
-        raise ValueError(f"Index {idx_prev} is outside branch")
-
-    x_shoot = bp_shoot.vector_of_unknowns
-    param = bp_shoot.unknowns[-1]
-
-    for k in (0, 1):
-        if branch_hbm[idx_prev + k].equations[0].ode.autonomous:
-            # account for freedom of phase: interpolate over x(t) to find value closest to x
-            x_t = branch_hbm[idx_prev + k].equations[0].x_time()
-            x = interpolate_time(int(np.ceil(x_t.shape[1] / 2)), x_t, x_shoot[:2])
-            x = np.append(x, 2 * np.pi / branch_hbm[idx_prev + k].omega)
-        else:
-            x = branch_hbm[idx_prev + k].equations[0].x_time()[:, 0]
-
-        x = np.append(x, getattr(branch_hbm[idx_prev + k], param))
-        x = np.real(x)
-
-        if k == 0:
-            x_prev = x
-        else:
-            x_next = x
-
-    d_shoot = x_shoot - x_prev
-    d_hbm = x_next - x_prev
-
-    alpha = np.inner(d_shoot, d_hbm) / np.linalg.norm(d_hbm) ** 2
-    if alpha < -1e-3:
-        return interpolate_bp(int(idx_prev - np.ceil(-alpha)), branch_hbm, bp_shoot)
-    elif alpha > 1 + 1e-3:
-        return interpolate_bp(int(idx_prev + np.floor(alpha)), branch_hbm, bp_shoot)
-    else:
-        x_interp = x_prev + alpha * d_hbm
-        return np.linalg.norm(x_shoot - x_interp), idx_prev
+        err, idx_hbm, _ = best_segment(x_shoot, get_vec, window)
+        print(f"{k}: {parameter} = {value_param}, d = {err}, idx = {idx_hbm}")
+        errors.append(err)
+    return errors
 
 
-def interpolate_time(idx_prev, x_time, x_comp):
-    d_comp = x_comp - x_time[:, idx_prev]
-    d_time = x_time[:, np.mod(idx_prev + 1, x_time.shape[1])] - x_time[:, idx_prev]
+def project_segment(x, a, b):
+    """Project vector x onto segment a -> b. Returns (alpha in [0,1], x_proj, dist)."""
+    d = b - a
+    norm = np.linalg.norm(d) ** 2
+    if norm == 0:
+        raise ValueError("'a' and 'b' are identical!")
 
-    alpha = np.inner(d_comp, d_time) / np.linalg.norm(d_time) ** 2
-    if alpha < -1e-3:
-        idx_next = int(np.mod(idx_prev - np.ceil(-alpha), x_time.shape[1]))
-        return interpolate_time(idx_next, x_time, x_comp)
-    elif alpha > 1 + 1e-3:
-        idx_next = int(np.mod(idx_prev + np.floor(alpha), x_time.shape[1]))
-        return interpolate_time(idx_next, x_time, x_comp)
-    else:
-        return x_time[:, idx_prev] + alpha * d_time
+    alpha = np.dot(x - a, d) / norm
+    x_proj = a + alpha * d
+    return x_proj, np.linalg.norm(x - x_proj)
+
+
+def best_segment(x, get_vec, window):
+    """
+    Search within the window for the segment i→i+1 with the best projection of x.
+    get_vec(i) must return the vector at index i.
+    length is the number of points; segments are (i, i+1).
+    """
+    best = (np.inf, np.nan, None)  # (dist, idx, alpha, x_proj)
+
+    for i in window:
+        a, b = get_vec(i), get_vec(i + 1)
+        x_proj, dist = project_segment(x, a, b)
+        if dist < best[0]:
+            best = (dist, i, x_proj)
+
+    return best  # dist, idx, x_proj
+
+
+def closest_point_on_solution(x, x_time):
+    """
+    Interpolate along time samples x_time[:, i] to match x.
+    It is assumed that x_time encodes a periodic solution, i.e., there is a branch segment connecting x_time[:, -1] and x_time[:, 0].
+    """
+    L = x_time.shape[1]
+    window = range(L)
+
+    def get_vec(i):
+        return x_time[:, np.mod(i, L)]
+
+    _, _, x_proj = best_segment(x, get_vec, window)
+    return x_proj
 
 
 def bif_curve_aut(sparse=False, real_formulation=False):
