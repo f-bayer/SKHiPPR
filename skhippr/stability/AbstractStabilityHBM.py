@@ -3,11 +3,11 @@ import numpy as np
 import warnings
 
 from skhippr.Fourier import Fourier
-from skhippr.stability._StabilityMethod import _StabilityMethod
+from skhippr.stability.AbstractStabilityMethod import AbstractStabilityMethod
 from skhippr.cycles.hbm import HBMEquation
 
 
-class _StabilityHBM(_StabilityMethod):
+class AbstractStabilityHBM(AbstractStabilityMethod):
     """
     Abstract base class for stability methods for periodic solutions, applicable to HBM problems.
 

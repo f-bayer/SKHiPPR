@@ -6,11 +6,11 @@ from copy import replace
 from scipy import fft
 
 from skhippr.cycles.hbm import HBMEquation
-from skhippr.stability._StabilityHBM import _StabilityHBM
+from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 from skhippr.Fourier import Fourier
 
 
-class SinglePassRK(_StabilityHBM):
+class SinglePassRK(AbstractStabilityHBM):
     """
     SinglePassRK implements single-pass fixed-step explicit Runge-Kutta methods for stability analysis in the context of Harmonic Balance Methods (HBM).
 

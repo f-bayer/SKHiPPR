@@ -5,10 +5,10 @@ from scipy.linalg import expm
 
 from skhippr.Fourier import Fourier
 from skhippr.cycles.hbm import HBMEquation
-from skhippr.stability._StabilityHBM import _StabilityHBM
+from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 
 
-class KoopmanHillProjection(_StabilityHBM):
+class KoopmanHillProjection(AbstractStabilityHBM):
     """
     Direct Koopman Hill projection method for stability analysis of periodic solutions.
 

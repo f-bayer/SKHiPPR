@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
 from skhippr.cycles.hbm import HBMEquation
-from skhippr.stability._StabilityHBM import _StabilityHBM
+from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 
 
-class ClassicalHill(_StabilityHBM):
+class ClassicalHill(AbstractStabilityHBM):
     """
     Stability analysis for periodic solutions by solving the Hill eigenvalue problem for the Floquet exponents with subsequent sorting.
 

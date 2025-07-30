@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from skhippr.solvers.newton import NewtonSolver
 
 
-class _StabilityMethod(ABC):
+class AbstractStabilityMethod(ABC):
     """
     Abstract base class for stability analysis methods.
 
@@ -84,7 +84,7 @@ class _StabilityMethod(ABC):
         return self.label
 
 
-class StabilityEquilibrium(_StabilityMethod):
+class StabilityEquilibrium(AbstractStabilityMethod):
     """
     Class for assessing stability of equilibria.
 

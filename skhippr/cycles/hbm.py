@@ -1,6 +1,5 @@
-from typing import override, TYPE_CHECKING, Any
+from typing import override, TYPE_CHECKING
 import warnings
-from collections.abc import Callable
 import numpy as np
 
 from skhippr.equations.AbstractEquation import AbstractEquation
@@ -11,7 +10,7 @@ from skhippr.equations.EquationSystem import EquationSystem
 
 # Imports only needed for type hinting
 if TYPE_CHECKING:
-    from skhippr.stability._StabilityHBM import _StabilityHBM
+    from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 
 
 class HBMEquation(AbstractCycleEquation):
@@ -90,7 +89,7 @@ class HBMEquation(AbstractCycleEquation):
         fourier: Fourier,
         initial_guess: np.ndarray = None,
         period_k: float = 1,
-        stability_method: "_StabilityHBM" = None,
+        stability_method: "AbstractStabilityHBM" = None,
     ):
         """
         Initialize the HBM equations.
@@ -481,7 +480,7 @@ class HBMSystem(EquationSystem):
         fourier,
         initial_guess: np.ndarray = None,
         period_k: float = 1,
-        stability_method: "_StabilityHBM" = None,
+        stability_method: "AbstractStabilityHBM" = None,
         harmo_anchor: int = 1,
         dof_anchor: int = 0,
     ):

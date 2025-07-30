@@ -7,7 +7,7 @@ import numpy as np
 from copy import copy
 import warnings
 
-from skhippr.stability._StabilityMethod import StabilityEquilibrium
+from skhippr.stability.AbstractStabilityMethod import StabilityEquilibrium
 from skhippr.equations.AbstractEquation import AbstractEquation
 
 
