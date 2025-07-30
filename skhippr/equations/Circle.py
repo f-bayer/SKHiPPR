@@ -17,6 +17,37 @@ class CircleEquation(AbstractEquation):
                 return np.atleast_2d(np.array([2 * self.y[0], 2 * self.y[1]]))
             case "radius":
                 return np.atleast_2d(-2 * self.radius)
+            case _:
+                return np.atleast_2d(0)
+
+
+class AngleEquation(AbstractEquation):
+
+    def __init__(self, y: np.ndarray, theta=1):
+        super().__init__(None)
+        self.y = y
+        self.theta = theta
+
+    def residual_function(self):
+        return np.atleast_1d(
+            self.y[1] * np.cos(self.theta) - self.y[0] * np.sin(self.theta)
+        )
+
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "y":
+                return np.atleast_2d(
+                    [
+                        -np.sin(np.squeeze(self.theta)),
+                        np.cos(np.squeeze(self.theta)),
+                    ]
+                )
+            case "theta":
+                return np.atleast_2d(
+                    -self.y[1] * np.sin(self.theta) - self.y[0] * np.cos(self.theta)
+                )
+            case _:
+                return np.atleast_2d(0)
 
 
 class CircleWithPhase(AbstractEquation):
