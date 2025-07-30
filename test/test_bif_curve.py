@@ -30,8 +30,62 @@ def ode(request):
             alpha=1,
             beta=0.2,
             delta=0.1,
-            F=0.05,
+            F=3,
         )
+
+
+@pytest.fixture
+def shooting_system(ode):
+    if ode.autonomous:
+        omega = 1
+    else:
+        omega = ode.omega
+    return ShootingSystem(ode=copy(ode), T=2 * np.pi / omega, atol=1e-4, rtol=1e-5)
+
+
+@pytest.fixture
+def hbm_system(ode):
+
+    if ode.autonomous:
+        omega = 1
+    else:
+        omega = ode.omega
+
+    fourier = Fourier(N_HBM=25, L_DFT=300, n_dof=ode.n_dof, real_formulation=True)
+
+    ts = fourier.time_samples(omega)
+    x0_samples = np.vstack((np.cos(omega * ts), -omega * np.sin(omega * ts)))
+    X0 = fourier.DFT(x0_samples)
+
+    stability_method = KoopmanHillSubharmonic(fourier=fourier)
+
+    return HBMSystem(
+        ode=copy(ode),
+        initial_guess=X0,
+        omega=omega,
+        fourier=fourier,
+        stability_method=stability_method,
+    )
+
+
+def run_continuation(system, solver, parameter, param_range, max_steps=200):
+    branch = []
+
+    for bp in pseudo_arclength_continuator(
+        initial_system=system,
+        solver=solver,
+        stepsize=0.1,
+        stepsize_range=(0.001, 0.4),
+        initial_direction=1,
+        num_steps=max_steps,
+        continuation_parameter=parameter,
+        verbose=True,
+    ):
+        branch.append(bp)
+
+        if not param_range[0] <= getattr(bp, parameter) <= param_range[1]:
+            break
+    return branch
 
 
 def bif_curve_nonaut(real_formulation=False):
@@ -139,62 +193,21 @@ def bif_curve_nonaut(real_formulation=False):
     plt.legend()
 
 
-def test_bifurcation_curve_comparison(ode, real_formulation=True):
+def test_bifurcation_curve_comparison(hbm_system, shooting_system):
 
-    if ode.autonomous:
+    if hbm_system.equations[0].ode.autonomous:
         parameter = "nu"
-        omega = 1
         param_range = (0, 3.5)
     else:
         parameter = "F"
-        omega = ode.omega
         param_range = (0, 20)
 
-    N_HBM = 25
-    L_DFT = 300
-    fourier = Fourier(
-        N_HBM=N_HBM, L_DFT=L_DFT, n_dof=2, real_formulation=real_formulation
-    )
-
-    ts = fourier.time_samples(omega)
-    x0_samples = np.vstack((np.cos(omega * ts), -omega * np.sin(omega * ts)))
-    X0 = fourier.DFT(x0_samples)
-
-    stability_method = KoopmanHillSubharmonic(fourier=fourier)
-
-    hbm_system = HBMSystem(
-        ode=ode,
-        initial_guess=X0,
-        omega=omega,
-        fourier=fourier,
-        stability_method=stability_method,
-    )
-
-    shooting_system = ShootingSystem(
-        ode=copy(ode), T=2 * np.pi / ode.omega, atol=1e-5, rtol=1e-5
-    )
-
     solver = NewtonSolver()
-    branches = []
 
-    for initial_system in [hbm_system, shooting_system]:
-        branch = []
-
-        for branch_point in pseudo_arclength_continuator(
-            initial_system=initial_system,
-            solver=solver,
-            stepsize=0.1,
-            stepsize_range=(0.001, 0.4),
-            initial_direction=1,
-            num_steps=200,
-            continuation_parameter=parameter,
-            verbose=True,
-        ):
-            branch.append(branch_point)
-
-            if not param_range[0] <= getattr(branch_point, parameter) <= param_range[1]:
-                break
-        branches.append(branch)
+    branches = [
+        run_continuation(system, solver, parameter, param_range, max_steps=200)
+        for system in [hbm_system, shooting_system]
+    ]
 
     # Compare the curves using interpolation
     idx_prev = 0
