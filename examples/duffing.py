@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # --- Fourier configuration ---
 from skhippr.Fourier import Fourier
 
-# --- HBM solver ---
+# --- HBM equation system ---
 from skhippr.cycles.hbm import HBMEquation
 
 # --- Stability method ---
@@ -16,64 +16,6 @@ from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 
 # --- Continuation ---
 from skhippr.solvers.continuation import pseudo_arclength_continuator, BranchPoint
-
-
-def system_function(t, x, omega=1, F=1):
-    """
-    Exemplary system function: Duffing oscillator
-
-    Computes the state derivatives and their Jacobians for the Duffing oscillator system.
-
-    Parameters
-    ----------
-
-    t : float
-        time
-    x : array_like, shape (2,)
-        State vector of the system, where x[0] is position and x[1] is velocity.
-    omega : float, optional
-        Angular frequency of the driving force (default is 1).
-    F : float, optional
-        Amplitude of the driving force (default is 1).
-
-    Returns
-    -------
-
-    f : ndarray, shape (2,)
-        Time derivatives of the state vector.
-    derivatives : dict
-        Dictionary containing the Jacobians:
-            - "x": ndarray, shape (2, 2)
-                Partial derivatives of ``f`` with respect to ``x``.
-            - "F": ndarray, shape (2,)
-                Partial derivatives of ``f`` with respect to ``F``.
-
-    """
-
-    alpha = 0.7
-    delta = 0.16
-    beta = 3
-
-    f = np.zeros(2)
-    f[0] = x[1]
-    f[1] = (
-        -alpha * x[0]
-        - delta * x[1, ...]
-        - beta * x[0, ...] ** 3
-        + F * np.cos(omega * t)
-    )
-
-    df_dx = np.zeros((2, 2))
-    df_dx[0, 1] = 1
-    df_dx[1, 0] = -alpha - 3 * beta * x[0, ...] ** 2
-    df_dx[1, 1, ...] = -delta
-
-    df_dF = np.zeros(2)
-    df_dF[1] = np.cos(omega * t)
-
-    derivatives = {"x": df_dx, "F": df_dF}
-
-    return f, derivatives
 
 
 def main():
@@ -95,7 +37,9 @@ def main():
     None
     """
 
-    # --- FFT and stability method configuration ---
+    # instantiation of the ODE
+
+    # --- FFT, stability method configuration ---
     fourier = Fourier(N_HBM=25, L_DFT=300, n_dof=2, real_formulation=True)
     stability_method = KoopmanHillSubharmonic(
         fourier=fourier, tol=1e-4, autonomous=False
