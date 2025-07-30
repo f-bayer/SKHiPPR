@@ -31,14 +31,14 @@ Dependencies:
 -------------
 - numpy
 - matplotlib
-- skhippr (systems.nonautonomous, problems.HBM, stability.KoopmanHillProjection, Fourier)
+- skhippr (systems.nonautonomous, problems.hbm, stability.KoopmanHillProjection, Fourier)
 """
 
 import matplotlib.pyplot as plt
 from copy import copy
 
 from skhippr.odes.nonautonomous import duffing
-from skhippr.problems.HBM import HBMEquation
+from skhippr.problems.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 from skhippr.Fourier import Fourier

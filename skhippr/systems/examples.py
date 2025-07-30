@@ -86,7 +86,7 @@ def trivial_hbm_system(
 
     Notes
     -----
-    The second argument, the state, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.problems.HBM.HBMProblem` upon initialization.
+    The second argument, the state, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.problems.hbm.hbmProblem` upon initialization.
 
     Caution
     -------

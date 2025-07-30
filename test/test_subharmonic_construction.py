@@ -4,7 +4,7 @@ from copy import copy, replace
 
 from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import Duffing
-from skhippr.problems.HBM import HBMEquation
+from skhippr.problems.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
     KoopmanHillSubharmonic,

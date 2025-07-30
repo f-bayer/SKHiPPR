@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
 
-from skhippr.problems.HBM import HBMSystem
+from skhippr.problems.hbm import HBMSystem
 from skhippr.problems.shooting import ShootingSystem
 
 from skhippr.odes.nonautonomous import Duffing

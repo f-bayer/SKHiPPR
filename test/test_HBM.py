@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.HBM import HBMEquation, HBMSystem
+from skhippr.problems.hbm import HBMEquation, HBMSystem
 from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import Duffing

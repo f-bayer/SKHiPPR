@@ -27,7 +27,7 @@ Dependencies:
 -------------
 - numpy
 - matplotlib
-- skhippr (Fourier, systems.nonautonomous, problems.shooting, problems.HBM, stability.KoopmanHillProjection)
+- skhippr (Fourier, systems.nonautonomous, problems.shooting, problems.hbm, stability.KoopmanHillProjection)
 """
 
 import numpy as np
@@ -37,7 +37,7 @@ from pytest import param
 from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import duffing
 from skhippr.problems.shooting import ShootingProblem
-from skhippr.problems.HBM import HBMEquation
+from skhippr.problems.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 

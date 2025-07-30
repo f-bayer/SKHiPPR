@@ -25,20 +25,20 @@ class HBMEquation(AbstractCycleEquation):
 
     Problem configuration:
 
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.f_with_params` now encodes the *time-domain* ODE which is passed to the constructor. The first two arguments must be time ``t`` and state.
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem.omega`
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem.period_k`
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem.omega_solution`
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem.fourier`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.f_with_params` now encodes the *time-domain* ODE which is passed to the constructor. The first two arguments must be time ``t`` and state.
+    * :py:attr:`~skhippr.problems.hbm.hbmProblem.omega`
+    * :py:attr:`~skhippr.problems.hbm.hbmProblem.period_k`
+    * :py:attr:`~skhippr.problems.hbm.hbmProblem.omega_solution`
+    * :py:attr:`~skhippr.problems.hbm.hbmProblem.fourier`
 
     Extracting information about the solution:
 
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.x_time`
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.hill_matrix`
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.ode_coeffs`
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.ode_samples`
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.exponential_decay_parameters`
-    * :py:func:`~skhippr.problems.HBM.HBMProblem.error_bound_fundamental_matrix`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.x_time`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.hill_matrix`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.ode_coeffs`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.ode_samples`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.exponential_decay_parameters`
+    * :py:func:`~skhippr.problems.hbm.hbmProblem.error_bound_fundamental_matrix`
 
 
 
@@ -50,7 +50,7 @@ class HBMEquation(AbstractCycleEquation):
         Should take as first two arguments time t and state vector, then parameters as named arguments.
         Should return the residual and its derivatives (at minimum with respect to state vector and continuation parameter(s)) in the time domain.
     initial_guess : np.ndarray
-        Initial guess for the solution. Can be passed either in the frequency domain (:py:attr:`~skhippr.problems.HBM.HBMProblem.fourier.n_dof` * (2 * :py:attr:`~skhippr.problems.HBM.HBMProblem.fourier.N_HBM` + 1) 1-D array) or time domain ( ( :py:attr:`~skhippr.problems.HBM.HBMProblem.fourier.n_dof`, :py:attr:`~skhippr.problems.HBM.HBMProblem.fourier.L_DFT` 2-D array).
+        Initial guess for the solution. Can be passed either in the frequency domain (:py:attr:`~skhippr.problems.hbm.hbmProblem.fourier.n_dof` * (2 * :py:attr:`~skhippr.problems.hbm.hbmProblem.fourier.N_HBM` + 1) 1-D array) or time domain ( ( :py:attr:`~skhippr.problems.hbm.hbmProblem.fourier.n_dof`, :py:attr:`~skhippr.problems.hbm.hbmProblem.fourier.L_DFT` 2-D array).
     omega : float
         Fundamental frequency of the excitation.
     fourier : Fourier
@@ -116,7 +116,7 @@ class HBMEquation(AbstractCycleEquation):
         Return
         -------
         numpy.ndarray
-            The time-domain signal obtained by applying the inverse DFT to :py:attr:`~skhippr.problems.HBM.HBMProblem.x`.
+            The time-domain signal obtained by applying the inverse DFT to :py:attr:`~skhippr.problems.hbm.hbmProblem.x`.
         """
 
         return self.fourier.inv_DFT(self.X)

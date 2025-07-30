@@ -4,7 +4,7 @@ from matplotlib.animation import FuncAnimation
 
 from skhippr.Fourier import Fourier
 from skhippr.odes.autonomous import Vanderpol
-from skhippr.problems.HBM import HBMSystem
+from skhippr.problems.hbm import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 from skhippr.solvers.newton import NewtonSolver
 from skhippr.solvers.continuation import pseudo_arclength_continuator

@@ -165,7 +165,7 @@ class BranchPoint(EquationSystem):
 
     All attributes that are not explicitly set in the :py:class:`~skhippr.problems.continuation.BranchPoint` (and mentioned below) are delegated directly to the underlying :py:class:`~skhippr.problems.newton.NewtonProblem`.
 
-    For example, if ``branch_point`` is a :py:class:`~skhippr.problems.continuation.BranchPoint` with an underlying :py:class:`~skhippr.problems.HBM.HBMProblem`, the frequency of the solution can be accessed immediately by ``branch_point.omega``.
+    For example, if ``branch_point`` is a :py:class:`~skhippr.problems.continuation.BranchPoint` with an underlying :py:class:`~skhippr.problems.hbm.hbmProblem`, the frequency of the solution can be accessed immediately by ``branch_point.omega``.
 
     Attributes which are *not* delegated:
     -------------------------------------

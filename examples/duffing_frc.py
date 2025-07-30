@@ -16,7 +16,7 @@ from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import duffing
 
 # --- HBM solver ---
-from skhippr.problems.HBM import HBMEquation
+from skhippr.problems.hbm import HBMEquation
 
 # --- Stability method ---
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -39,7 +39,7 @@ def main():
     * :py:class:`~skhippr.stability.ClassicalHill.ClassicalHill`
     * :py:class:`~skhippr.stability.SinglePass.SinglePassRK`
 
-    #. Setup and solution of the initial :py:class:`~skhippr.problems.HBM.HBMProblem`.
+    #. Setup and solution of the initial :py:class:`~skhippr.problems.hbm.hbmProblem`.
     #. Visualization of the initial solution and its stability properties using :py:func:`visualize_solution`.
     #. Continuation of the force response curve using :py:func:`initial_force_response`
     #. Generation of frequency response curves from starting from points on the previous force response using :py:func:`continue_from_continuation_curve`.
@@ -124,7 +124,7 @@ def initial_force_response(
 
     Args
     ----
-    initial_problem : :py:class:`~skhippr.problems.HBM.HBMProblem`
+    initial_problem : :py:class:`~skhippr.problems.hbm.hbmProblem`
         The initial problem or problem setup to start the continuation from. Must take a parameter ``F``.
     F_min : float
         The minimum value of the force parameter ``F`` to start the continuation.
@@ -294,7 +294,7 @@ def plot_3D_frc(
 
 def visualize_solution(problem: HBMEquation):
     """
-    Visualizes and analyzes properties of one solved :py:class:`~skhippr.problems.HBM.HBMProblem`.
+    Visualizes and analyzes properties of one solved :py:class:`~skhippr.problems.hbm.hbmProblem`.
 
     This function generates two subplots:
 
@@ -304,7 +304,7 @@ def visualize_solution(problem: HBMEquation):
     Parameters
     ----------
     problem : HBMProblem
-        The :py:class:`~skhippr.problems.HBM.HBMProblem` object containing the state trajectory and Floquet multipliers. It is assumed that ``problem.converged == True``.
+        The :py:class:`~skhippr.problems.hbm.hbmProblem` object containing the state trajectory and Floquet multipliers. It is assumed that ``problem.converged == True``.
 
     Returns
     -------

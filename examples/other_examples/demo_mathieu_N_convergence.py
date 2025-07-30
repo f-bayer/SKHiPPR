@@ -32,7 +32,7 @@ Dependencies
 - numpy
 - matplotlib
 - csv
-- skhippr (with modules: systems.ltp.mathieu, Fourier, problems.HBM, problems.shooting, stability.KoopmanHillProjection)
+- skhippr (with modules: systems.ltp.mathieu, Fourier, problems.hbm, problems.shooting, stability.KoopmanHillProjection)
 """
 
 from enum import auto
@@ -43,7 +43,7 @@ import csv
 
 from skhippr.odes.ltp import mathieu, meissner, meissner_g
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMEquation, HBMProblem_autonomous
+from skhippr.problems.hbm import HBMEquation, HBMProblem_autonomous
 from skhippr.problems.shooting import ShootingProblem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
