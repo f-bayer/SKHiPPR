@@ -6,8 +6,8 @@ from skhippr.Fourier import Fourier
 from skhippr.systems.autonomous import Vanderpol
 from skhippr.problems.HBM import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
-from skhippr.problems.newton import NewtonSolver
-from skhippr.problems.continuation import pseudo_arclength_continuator
+from skhippr.solvers.newton import NewtonSolver
+from skhippr.solvers.continuation import pseudo_arclength_continuator
 
 
 def plot_bif_curve_aut():

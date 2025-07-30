@@ -3,7 +3,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from skhippr.problems.newton import NewtonSolver
+    from skhippr.solvers.newton import NewtonSolver
 
 
 class _StabilityMethod(ABC):

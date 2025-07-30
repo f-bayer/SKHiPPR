@@ -9,7 +9,7 @@ from skhippr.problems.shooting import ShootingBVP, ShootingSystem
 from skhippr.Fourier import Fourier
 from skhippr.systems.nonautonomous import Duffing
 from skhippr.systems.autonomous import Vanderpol
-from skhippr.problems.newton import NewtonSolver
+from skhippr.solvers.newton import NewtonSolver
 
 
 @pytest.mark.parametrize("period_k", [1, 5])

@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from skhippr.problems.newton import EquationSystem
+from skhippr.solvers.newton import EquationSystem
 from skhippr.systems.AbstractSystems import AbstractEquation
 
 

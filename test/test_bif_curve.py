@@ -11,8 +11,8 @@ from skhippr.problems.shooting import ShootingSystem
 from skhippr.systems.nonautonomous import Duffing
 from skhippr.systems.autonomous import Vanderpol
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
-from skhippr.problems.continuation import pseudo_arclength_continuator
-from skhippr.problems.newton import NewtonSolver
+from skhippr.solvers.continuation import pseudo_arclength_continuator
+from skhippr.solvers.newton import NewtonSolver
 
 
 @pytest.fixture(params=[True, False], name="ode")

@@ -33,7 +33,7 @@ skhippr.problems.newton.NewtonProblem
 from collections.abc import Iterable, Iterator
 import numpy as np
 
-from skhippr.problems.newton import NewtonSolver, EquationSystem
+from skhippr.solvers.newton import NewtonSolver, EquationSystem
 from skhippr.systems.AbstractSystems import AbstractEquation
 
 

@@ -12,8 +12,8 @@ from skhippr.problems.shooting import ShootingBVP
 from skhippr.problems.HBM import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 
-from skhippr.problems.continuation import pseudo_arclength_continuator
-from skhippr.problems.newton import NewtonSolver
+from skhippr.solvers.continuation import pseudo_arclength_continuator
+from skhippr.solvers.newton import NewtonSolver
 
 
 @pytest.fixture

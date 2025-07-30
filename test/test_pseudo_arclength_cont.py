@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.problems.newton import NewtonSolver, EquationSystem
-from skhippr.problems.continuation import pseudo_arclength_continuator
+from skhippr.solvers.newton import NewtonSolver, EquationSystem
+from skhippr.solvers.continuation import pseudo_arclength_continuator
 from skhippr.systems.autonomous import Truss
 from skhippr.systems.AbstractSystems import AbstractEquation
 

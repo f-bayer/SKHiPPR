@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 from copy import copy
-from skhippr.problems.newton import EquationSystem
-from skhippr.problems.continuation import BranchPoint
+from skhippr.solvers.newton import EquationSystem
+from skhippr.solvers.continuation import BranchPoint
 from skhippr.systems.AbstractSystems import AbstractEquation
 
 """ Test parameter access in BranchPoint objects"""

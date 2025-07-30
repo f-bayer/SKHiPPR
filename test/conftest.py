@@ -11,7 +11,7 @@ from skhippr.systems.ltp import (
     TruncatedMeissner,
     ShirleyODE,
 )
-from skhippr.problems.newton import NewtonSolver
+from skhippr.solvers.newton import NewtonSolver
 
 
 @pytest.fixture(scope="session", params=[1, 100])

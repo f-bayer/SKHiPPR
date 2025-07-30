@@ -22,7 +22,7 @@ from skhippr.problems.HBM import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 
 # --- Continuation ---
-from skhippr.problems.continuation import pseudo_arclength_continuator, BranchPoint
+from skhippr.solvers.continuation import pseudo_arclength_continuator, BranchPoint
 
 
 def main():

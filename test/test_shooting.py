@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from skhippr.systems.autonomous import Vanderpol
 from skhippr.systems.nonautonomous import Duffing
 from skhippr.problems.shooting import ShootingBVP, ShootingSystem
-from skhippr.problems.newton import NewtonSolver
+from skhippr.solvers.newton import NewtonSolver
 
 import warnings
 
