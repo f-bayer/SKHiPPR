@@ -5,7 +5,7 @@ from math import lcm
 from copy import replace
 from scipy import fft
 
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability._StabilityHBM import _StabilityHBM
 from skhippr.Fourier import Fourier
 

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skhippr.odes.autonomous import Vanderpol
-from skhippr.problems.hbm import HBMSystem
+from skhippr.cycles.hbm import HBMSystem
 from skhippr.stability.SinglePass import SinglePassRK4
 
 

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from skhippr.Fourier import Fourier
 
 # --- HBM solver ---
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 
 # --- Stability method ---
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -85,8 +85,8 @@ def main():
     #. Creation of a :py:class:`~skhippr.Fourier` object to collect FFT parameters.
     #. Creation of a :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic` object which defines the stability method.
 
-    #. Setup and solution of the initial :py:class:`~skhippr.problems.hbm.hbmProblem`.
-    #. Continuation of the frequency response curve using :py:func:`~skhippr.problems.continuation.pseudo_arclength_continuator`and collecting branch point properties
+    #. Setup and solution of the initial :py:class:`~skhippr.cycles.hbm.hbmProblem`.
+    #. Continuation of the frequency response curve using :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator`and collecting branch point properties
     #. plotting
 
     Returns

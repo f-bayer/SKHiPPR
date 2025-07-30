@@ -11,30 +11,30 @@ class NewtonSolver:
 
     Definition of the underlying equation system:
 
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.f_with_params`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.variable`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x0` (initial guess)
+    * :py:func:`~skhippr.cycles.newton.NewtonProblem.f_with_params`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.variable`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.x0` (initial guess)
     * ``<param>``, when passed to the constructor as optional keyword argument, becomes an attribute with the corresponding value and is passed as keyword argument to the residual function.
 
     Newton solver parameters:
 
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.tolerance`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.max_iterations`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stability_method`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.tolerance`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.max_iterations`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.verbose`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.stability_method`
 
     Attributes (updated during the solution process):
 
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.x`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.derivatives`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.converged`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.stable`
-    * :py:attr:`~skhippr.problems.newton.NewtonProblem.eigenvalues`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.x`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.derivatives`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.converged`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.stable`
+    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.eigenvalues`
 
     Important class methods:
 
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.solve`
-    * :py:func:`~skhippr.problems.newton.NewtonProblem.reset`
+    * :py:func:`~skhippr.cycles.newton.NewtonProblem.solve`
+    * :py:func:`~skhippr.cycles.newton.NewtonProblem.reset`
 
     Attributes:
     -----------
@@ -133,14 +133,14 @@ class NewtonSolver:
 
     def solve(self, equation_system: EquationSystem):
         """
-        Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.problems.newton.NewtonProblem.residual_function`.
+        Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.cycles.newton.NewtonProblem.residual_function`.
 
         Performs iterative correction steps starting from the current vector of unknowns until the residual norm is sufficiently small or the maximum number of iterations is reached. After convergence, performs a stability check if applicable.
 
         Notes
         -----
-        * Solution is stored in :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns`,constructed by the members of :py:attr:`~skhippr.problems.newton.NewtonProblem.unknowns_dict`
-        * Prints progress and convergence information if :py:attr:`~skhippr.problems.newton.NewtonProblem.verbose` is ``True``.
+        * Solution is stored in :py:attr:`~skhippr.cycles.newton.NewtonProblem.unknowns`,constructed by the members of :py:attr:`~skhippr.cycles.newton.NewtonProblem.unknowns_dict`
+        * Prints progress and convergence information if :py:attr:`~skhippr.cycles.newton.NewtonProblem.verbose` is ``True``.
         """
         if not equation_system.well_posed:
             raise ValueError(

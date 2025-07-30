@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skhippr.Fourier import Fourier
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability._StabilityHBM import _StabilityHBM
 
 
@@ -67,7 +67,7 @@ class ClassicalHill(_StabilityHBM):
         """
         Solves the eigenvalue problem for the Hill matrix and performs sorting to identify the Floquet exponents.
 
-        Computes the eigenvalues of :py:func:`problem.hill_matrix <skhippr.problems.hbm.hbmProblem.hill_matrix>` and then chooses those that minimize ``self.sorting_criterion``.
+        Computes the eigenvalues of :py:func:`problem.hill_matrix <skhippr.cycles.hbm.hbmProblem.hill_matrix>` and then chooses those that minimize ``self.sorting_criterion``.
 
         The Floquet exponents can optionally be visualized in the complex plane.
 

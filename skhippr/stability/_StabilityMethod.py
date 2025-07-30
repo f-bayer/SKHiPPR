@@ -30,12 +30,12 @@ class _StabilityMethod(ABC):
     @abstractmethod
     def determine_eigenvalues(self, problem: "NewtonSolver") -> np.ndarray:
         """
-        Determine the eigenvalues that govern the stability from a given :py:class:`~skhippr.problems.newton.NewtonProblem`.
+        Determine the eigenvalues that govern the stability from a given :py:class:`~skhippr.cycles.newton.NewtonProblem`.
 
         Parameters
         ----------
 
-        problem : :py:class:`~skhippr.problems.newton.NewtonProblem`
+        problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
             The problem instance containing the (converged) system for which eigenvalues are to be computed.
 
         Returns
@@ -88,7 +88,7 @@ class StabilityEquilibrium(_StabilityMethod):
     """
     Class for assessing stability of equilibria.
 
-    The solution of a :py:class:`~skhippr.problems.newton.NewtonProblem` corresponds to an equilibrium of the system ::
+    The solution of a :py:class:`~skhippr.cycles.newton.NewtonProblem` corresponds to an equilibrium of the system ::
 
         x_dot = problem.residual_function(x)
 

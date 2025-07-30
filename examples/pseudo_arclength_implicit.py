@@ -13,9 +13,9 @@ def main():
     using Newton's method on the circle equation.
     The process includes:
 
-    #. Instantiating a :py:class:`~skhippr.problems.newton.NewtonProblem` with the initial guess and the :py:func:`circle` function.
-    #. Using the :py:func:`~skhippr.problems.continuation.pseudo_arclength_continuator` to iterate along the solution branch.
-    #. Plotting predictors, corrected solutions, and tangents at each :py:class:`~skhippr.problems.continuation.BranchPoint`.
+    #. Instantiating a :py:class:`~skhippr.cycles.newton.NewtonProblem` with the initial guess and the :py:func:`circle` function.
+    #. Using the :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator` to iterate along the solution branch.
+    #. Plotting predictors, corrected solutions, and tangents at each :py:class:`~skhippr.cycles.continuation.BranchPoint`.
     #. After one circle is completed, ``radius`` is dynamically updated.
     #. Finally, the resulting branches are displayed using ``matplotlib``.
 

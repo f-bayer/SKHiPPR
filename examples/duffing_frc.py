@@ -16,7 +16,7 @@ from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import duffing
 
 # --- HBM solver ---
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 
 # --- Stability method ---
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
@@ -39,7 +39,7 @@ def main():
     * :py:class:`~skhippr.stability.ClassicalHill.ClassicalHill`
     * :py:class:`~skhippr.stability.SinglePass.SinglePassRK`
 
-    #. Setup and solution of the initial :py:class:`~skhippr.problems.hbm.hbmProblem`.
+    #. Setup and solution of the initial :py:class:`~skhippr.cycles.hbm.hbmProblem`.
     #. Visualization of the initial solution and its stability properties using :py:func:`visualize_solution`.
     #. Continuation of the force response curve using :py:func:`initial_force_response`
     #. Generation of frequency response curves from starting from points on the previous force response using :py:func:`continue_from_continuation_curve`.
@@ -120,11 +120,11 @@ def initial_force_response(
     """
     Continue the force response curve starting from the initial solution.
 
-    This function uses the :py:func:`~skhippr.problems.continuation.pseudo_arclength_continuator` to trace the response of a system as the force parameter ``F`` is varied from ``F_min`` up to ``F_max``.
+    This function uses the :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator` to trace the response of a system as the force parameter ``F`` is varied from ``F_min`` up to ``F_max``.
 
     Args
     ----
-    initial_problem : :py:class:`~skhippr.problems.hbm.hbmProblem`
+    initial_problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
         The initial problem or problem setup to start the continuation from. Must take a parameter ``F``.
     F_min : float
         The minimum value of the force parameter ``F`` to start the continuation.
@@ -136,7 +136,7 @@ def initial_force_response(
     Returns
     -------
     response_F : list[BranchPoint]
-        A list of :py:class:`~skhippr.problems.continuation.BranchPoint`` objects representing the computed points along the force response curve.
+        A list of :py:class:`~skhippr.cycles.continuation.BranchPoint`` objects representing the computed points along the force response curve.
     """
 
     response_F = []
@@ -164,7 +164,7 @@ def continue_from_continuation_curve(
     """
     Finds and computes frequency response curves emanating from specified points on a force response curve.
 
-    This function iterates over a given continuation curve (list of :py:class:`~skhippr.problems.continuation.BranchPoint` objects). When the continuation parameter first exceeds the next value in ``values_spark``, the method it initiates a new continuation along the different parameter ``key_cont`` (e.g., ``"omega"``). The resulting branches are collected and returned as a list of lists of :py:class:`~skhippr.problems.continuation.BranchPoint` objects.
+    This function iterates over a given continuation curve (list of :py:class:`~skhippr.cycles.continuation.BranchPoint` objects). When the continuation parameter first exceeds the next value in ``values_spark``, the method it initiates a new continuation along the different parameter ``key_cont`` (e.g., ``"omega"``). The resulting branches are collected and returned as a list of lists of :py:class:`~skhippr.cycles.continuation.BranchPoint` objects.
 
     Parameters
     ----------
@@ -243,7 +243,7 @@ def plot_3D_frc(
     Parameters
     ----------
     list_of_points : Iterable[BranchPoint]
-        A continuation curve to plot. Every :py:class:`~skhippr.problems.continuation.BranchPoint` must have the attributes ``point.F`` and ``point.omega``.
+        A continuation curve to plot. Every :py:class:`~skhippr.cycles.continuation.BranchPoint` must have the attributes ``point.F`` and ``point.omega``.
     label : str, optional
         Label for the curve. Defaults to ``""``.
     ax : matplotlib.axes._subplots.Axes3DSubplot, optional
@@ -294,7 +294,7 @@ def plot_3D_frc(
 
 def visualize_solution(problem: HBMEquation):
     """
-    Visualizes and analyzes properties of one solved :py:class:`~skhippr.problems.hbm.hbmProblem`.
+    Visualizes and analyzes properties of one solved :py:class:`~skhippr.cycles.hbm.hbmProblem`.
 
     This function generates two subplots:
 
@@ -304,7 +304,7 @@ def visualize_solution(problem: HBMEquation):
     Parameters
     ----------
     problem : HBMProblem
-        The :py:class:`~skhippr.problems.hbm.hbmProblem` object containing the state trajectory and Floquet multipliers. It is assumed that ``problem.converged == True``.
+        The :py:class:`~skhippr.cycles.hbm.hbmProblem` object containing the state trajectory and Floquet multipliers. It is assumed that ``problem.converged == True``.
 
     Returns
     -------

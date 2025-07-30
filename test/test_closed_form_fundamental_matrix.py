@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from skhippr.problems.shooting import ShootingBVP
+from skhippr.cycles.shooting import ShootingBVP
 from skhippr.odes.ltp import HillLTI, SmoothedMeissner
 
 

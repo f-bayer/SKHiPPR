@@ -8,8 +8,8 @@ from copy import copy
 
 from skhippr.Fourier import Fourier
 from skhippr.odes.nonautonomous import Duffing
-from skhippr.problems.shooting import ShootingBVP
-from skhippr.problems.hbm import HBMSystem
+from skhippr.cycles.shooting import ShootingBVP
+from skhippr.cycles.hbm import HBMSystem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillSubharmonic
 
 from skhippr.solvers.continuation import pseudo_arclength_continuator

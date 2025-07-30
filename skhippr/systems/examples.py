@@ -6,7 +6,7 @@ import numpy as np
 def trivial_newton_residual(x: np.ndarray, parameter_1: float, **parameters):
     """
     Illustrates the syntax of a residual function for an exemplary trivial Newton problem.
-    The :py:class:`~skhippr.problems.newton.NewtonProblem` attempts to find a value for the first argument such that the ``residual`` is returned as (numerically) zero.
+    The :py:class:`~skhippr.cycles.newton.NewtonProblem` attempts to find a value for the first argument such that the ``residual`` is returned as (numerically) zero.
 
     A residual function must return the residual and the derivative w.r.t. the first argument. Derivatives w.r.t other arguments are optional (are used in, e.g., continuation).
 
@@ -32,7 +32,7 @@ def trivial_newton_residual(x: np.ndarray, parameter_1: float, **parameters):
 
     Notes
     -----
-    * The first argument, the unknown variable, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.problems.newton.NewtonProblem` upon initialization.
+    * The first argument, the unknown variable, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.cycles.newton.NewtonProblem` upon initialization.
     * Implementation of the vectorized formulation is optional: All methods fall back to evaluating multiple unknowns one-by-one if necessary.
     """
 
@@ -86,7 +86,7 @@ def trivial_hbm_system(
 
     Notes
     -----
-    The second argument, the state, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.problems.hbm.hbmProblem` upon initialization.
+    The second argument, the state, may have an arbitrary name other than ``x``. In that case, the corresponding key in ``derivatives`` must reflect the correct name of the variable and that name must be passed to the :py:class:`~skhippr.cycles.hbm.hbmProblem` upon initialization.
 
     Caution
     -------

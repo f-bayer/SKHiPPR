@@ -4,7 +4,7 @@ import warnings
 
 from skhippr.Fourier import Fourier
 from skhippr.stability._StabilityMethod import _StabilityMethod
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 
 
 class _StabilityHBM(_StabilityMethod):
@@ -46,8 +46,8 @@ class _StabilityHBM(_StabilityMethod):
 
         t_over_period : float
             Normalized time over the period (typically between 0 and 1).
-        problem : :py:class:`~skhippr.problems.hbm.hbmProblem`
-            The (solved) :py:class:`~skhippr.problems.hbm.hbmProblem` of whose solution the fundamental matrix is sought.
+        problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
+            The (solved) :py:class:`~skhippr.cycles.hbm.hbmProblem` of whose solution the fundamental matrix is sought.
 
         Returns
         -------
@@ -58,12 +58,12 @@ class _StabilityHBM(_StabilityMethod):
 
     def determine_eigenvalues(self, problem: HBMEquation) -> np.ndarray:  # type:ignore
         """
-        Determine the Floquet multipliers of the periodic solution (eigenvalues of the monodromy matrix) for the periodic solution encoded in the given :py:class:`~skhippr.problems.hbm.hbmProblem`.
+        Determine the Floquet multipliers of the periodic solution (eigenvalues of the monodromy matrix) for the periodic solution encoded in the given :py:class:`~skhippr.cycles.hbm.hbmProblem`.
 
         Parameters
         ----------
 
-        problem : :py:class:`~skhippr.problems.hbm.hbmProblem`
+        problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
             The (solved) harmonic balance method (HBM) problem of whose solution the Floquet multipliers are sought.
 
         Returns
@@ -122,7 +122,7 @@ class _StabilityHBM(_StabilityMethod):
 
     def error_bound(self, t, a, b):
         """
-        Compute an error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.problems.hbm.hbmProblem.exponential_decay_parameters`.
+        Compute an error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.cycles.hbm.hbmProblem.exponential_decay_parameters`.
 
         ``a`` and ``b`` bound the norm of the Fourier coefficients by::
 

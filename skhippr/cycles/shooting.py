@@ -15,7 +15,7 @@ class ShootingBVP(AbstractCycleEquation):
     """
     ShootingBVP implements the boundary value problem with shooting method for finding periodic solutions of nonautonomous ODEs.
 
-    This class extends :py:class:`~skhippr.problems.newton.NewtonProblem` to solve the boundary value problem given by integrating the initial value problem over a period using ``scipy.integrate.solve_ivp`` and matching the state at start and end time.
+    This class extends :py:class:`~skhippr.cycles.newton.NewtonProblem` to solve the boundary value problem given by integrating the initial value problem over a period using ``scipy.integrate.solve_ivp`` and matching the state at start and end time.
     It supports both autonomous and non-autonomous systems, and can compute stability via Floquet multipliers.
 
     * For non-autonomous systems, the unknown ``x`` is the state at time ``t = 0``.
@@ -70,7 +70,7 @@ class ShootingBVP(AbstractCycleEquation):
         """
         Computes the residual function ``r = x(T) - x(0)`` of the shooting problem.
 
-        Using :py:func:`~skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix`, integrate over the period and return the result and the monodromy matrix. Then subtract the initial condition and the identity matrix, respectively.
+        Using :py:func:`~skhippr.cycles.shooting.ShootingProblem.integrate_with_fundamental_matrix`, integrate over the period and return the result and the monodromy matrix. Then subtract the initial condition and the identity matrix, respectively.
 
         Returns
         -------

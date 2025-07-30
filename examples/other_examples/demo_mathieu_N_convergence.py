@@ -43,8 +43,8 @@ import csv
 
 from skhippr.odes.ltp import mathieu, meissner, meissner_g
 from skhippr.Fourier import Fourier
-from skhippr.problems.hbm import HBMEquation, HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingProblem
+from skhippr.cycles.hbm import HBMEquation, HBMProblem_autonomous
+from skhippr.cycles.shooting import ShootingProblem
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 

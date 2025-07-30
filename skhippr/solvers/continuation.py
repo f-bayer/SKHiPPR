@@ -2,7 +2,7 @@
 Module for pseudo-arclength continuation of nonlinear problems.
 
 This module provides tools for performing pseudo-arclength continuation using Newton's method.
-It includes a generator function for continuation and a :py:class:`~skhippr.problems.continuation.BranchPoint` wrapper class that extends :py:class:`~skhippr.problems.newton.NewtonProblem`
+It includes a generator function for continuation and a :py:class:`~skhippr.cycles.continuation.BranchPoint` wrapper class that extends :py:class:`~skhippr.cycles.newton.NewtonProblem`
 with continuation-specific features.
 
 Classes
@@ -27,7 +27,7 @@ numpy
 copy
 typing.override
 collections.abc.Iterable, Iterator
-skhippr.problems.newton.NewtonProblem
+skhippr.cycles.newton.NewtonProblem
 """
 
 from collections.abc import Iterable, Iterator
@@ -48,16 +48,16 @@ def pseudo_arclength_continuator(
     num_steps: int = 1000,
 ) -> Iterator["BranchPoint"]:
     """
-    Perform pseudo-arclength continuation of the solution branch emerging from a nonlinear :py:class:`~skhippr.problems.newton.NewtonProblem`.
+    Perform pseudo-arclength continuation of the solution branch emerging from a nonlinear :py:class:`~skhippr.cycles.newton.NewtonProblem`.
 
-    This generator yields a sequence of :py:class:`~skhippr.problems.continuation.BranchPoint` objects, each representing an individual solution
+    This generator yields a sequence of :py:class:`~skhippr.cycles.continuation.BranchPoint` objects, each representing an individual solution
     to the problem, by following the solution branch using the pseudo-arclength continuation method.
 
     Parameters
     ----------
 
-    initial_problem : :py:class:`~skhippr.problems.newton.NewtonProblem`
-        The initial :py:class:`~skhippr.problems.newton.NewtonProblem` instance to start continuation from. It need not be solved already.
+    initial_problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
+        The initial :py:class:`~skhippr.cycles.newton.NewtonProblem` instance to start continuation from. It need not be solved already.
 
         * Explicit case: If the problem has as many equations as unknowns, an explicit continuation parameter (``key_param``) is required.
         * Implicit case: Otherwise, the problem must have exactly one equation more than unknowns.
@@ -80,7 +80,7 @@ def pseudo_arclength_continuator(
     Yields
     ------
 
-    :py:class:`~skhippr.problems.continuation.BranchPoint`
+    :py:class:`~skhippr.cycles.continuation.BranchPoint`
         The next converged solution point along the continuation branch.
 
     Raises
@@ -152,9 +152,9 @@ def pseudo_arclength_continuator(
 
 class BranchPoint(EquationSystem):
     """
-    A :py:class:`~skhippr.problems.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
+    A :py:class:`~skhippr.cycles.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
 
-    An object of this class wraps a :py:class:`~skhippr.problems.newton.NewtonProblem` instance (or subclasses) and provides additional functionality for continuation methods:
+    An object of this class wraps a :py:class:`~skhippr.cycles.newton.NewtonProblem` instance (or subclasses) and provides additional functionality for continuation methods:
 
     * stores the tangent vector at the branch point
     * predicts the next point on the branch
@@ -163,15 +163,15 @@ class BranchPoint(EquationSystem):
     Notes
     -----
 
-    All attributes that are not explicitly set in the :py:class:`~skhippr.problems.continuation.BranchPoint` (and mentioned below) are delegated directly to the underlying :py:class:`~skhippr.problems.newton.NewtonProblem`.
+    All attributes that are not explicitly set in the :py:class:`~skhippr.cycles.continuation.BranchPoint` (and mentioned below) are delegated directly to the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem`.
 
-    For example, if ``branch_point`` is a :py:class:`~skhippr.problems.continuation.BranchPoint` with an underlying :py:class:`~skhippr.problems.hbm.hbmProblem`, the frequency of the solution can be accessed immediately by ``branch_point.omega``.
+    For example, if ``branch_point`` is a :py:class:`~skhippr.cycles.continuation.BranchPoint` with an underlying :py:class:`~skhippr.cycles.hbm.hbmProblem`, the frequency of the solution can be accessed immediately by ``branch_point.omega``.
 
     Attributes which are *not* delegated:
     -------------------------------------
 
-    _problem : :py:class:`~skhippr.problems.newton.NewtonProblem`
-        The underlying :py:class:`~skhippr.problems.newton.NewtonProblem` instance being wrapped.
+    _problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
+        The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` instance being wrapped.
     anchor : np.ndarray
         The anchor vector used in the augmented system for continuation. Newton updates are performed orthogonal to the anchor.
         If a scalar is passed during initialization, the last entry of ``x`` is kept constant.
@@ -183,25 +183,25 @@ class BranchPoint(EquationSystem):
     key_param: str or None
         Name of the continuation parameter.
 
-        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.problems.newton.NewtonProblem` has one equation less than unknowns.
-        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.problems.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
+        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` has one equation less than unknowns.
+        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
 
         .. caution::
 
-            ``key_param`` is set as attribute of the underlying :py:class:`~skhippr.problems.newton.NewtonProblem`, but can (like all other attributes) be immediately accessed by ``branch_point.key_param`` .
+            ``key_param`` is set as attribute of the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem`, but can (like all other attributes) be immediately accessed by ``branch_point.key_param`` .
 
 
     Parameters
     ----------
-    problem : :py:class:`~skhippr.problems.newton.NewtonProblem`
+    problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
         The underlying problem to be solved along the branch. May have one equation less than unknowns (implicit case) or as many
     x0: np.ndarray, optional
         Initial guess. If ``None``, defaults to the current ``x`` value fo the underlying problem.
     key_param: str or None, optional
         Name of the continuation parameter.
 
-        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.problems.newton.NewtonProblem` has one equation less than unknowns.
-        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.problems.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
+        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` has one equation less than unknowns.
+        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
 
     value_param: float or None, optional
         Initial value of the continuation parameter. Must be passed if ``key_param`` is not None.
@@ -276,7 +276,7 @@ class BranchPoint(EquationSystem):
         -------
 
         BranchPoint
-            A new :py:class:`~skhippr.problems.continuation.BranchPoint` instance (not converged) representing the predicted next point along the continuation path.
+            A new :py:class:`~skhippr.cycles.continuation.BranchPoint` instance (not converged) representing the predicted next point along the continuation path.
 
         Notes
         -----

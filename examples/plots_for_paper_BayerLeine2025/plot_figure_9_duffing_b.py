@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 
 from skhippr.odes.nonautonomous import duffing
-from skhippr.problems.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 from skhippr.Fourier import Fourier
