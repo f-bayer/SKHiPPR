@@ -49,11 +49,11 @@ class HillODE(AbstractODE):
             case "x":
                 J = np.zeros((x.shape[0], *x.shape))
                 J[0, 1, ...] = 1
-                J[1, 1, ...] = self.damping
-                J[1, 0, ...] = self.a
+                J[1, 1, ...] = -self.damping
+                J[1, 0, ...] = -self.a
 
                 tau = self.omega * t
-                J[1, 0, ...] += self.b * self.g_fcn(tau)
+                J[1, 0, ...] -= self.b * self.g_fcn(tau)
                 return J
 
             case _:
