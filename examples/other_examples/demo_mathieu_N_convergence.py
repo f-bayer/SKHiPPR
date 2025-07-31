@@ -35,24 +35,26 @@ Dependencies
 - skhippr (with modules: systems.ltp.mathieu, Fourier, problems.hbm, problems.shooting, stability.KoopmanHillProjection)
 """
 
-from enum import auto
-from colorama import init
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-from skhippr.odes.ltp import mathieu, meissner, meissner_g
+from skhippr.solvers.newton import NewtonSolver
+from skhippr.odes.ltp import MathieuODE, SmoothedMeissner
 from skhippr.Fourier import Fourier
-from skhippr.cycles.hbm import HBMEquation, HBMProblem_autonomous
-from skhippr.cycles.shooting import ShootingProblem
+from skhippr.cycles.hbm import HBMSystem
+from skhippr.cycles.shooting import ShootingSystem, ShootingBVP
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 
 def analyze_N_mathieu(N_max=60, csv_path=None):
-    mathieu_params = {"a": 4, "b": 0.2, "omega": 1, "d": 0.005}
+    mathieu = MathieuODE(
+        t=0, x=np.array([0.0, 0.0]), a=4, b=0.2, omega=1, damping=0.005
+    )
+    solver = NewtonSolver(verbose=False)
     if csv_path:
         initialize_csv(csv_path, N_max=N_max, key_param=None)
-    analyze_N_convergence(mathieu, mathieu_params, N_max=N_max, csv_path=csv_path)
+    analyze_N_convergence(solver=solver, ode=mathieu, N_max=N_max, csv_path=csv_path)
 
 
 def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
@@ -98,7 +100,7 @@ def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
             csv_path=csv_path,
             params_plot=params_plot,
             ax_conv=ax_conv,
-            key_param="smoothing",
+            parameter="smoothing",
             value_param=eps,
         )
 
@@ -117,19 +119,16 @@ def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
 
 
 def analyze_N_convergence(
-    f,
-    params,
+    solver,
+    ode,
+    fourier_ref=None,
     Phi_T_ref=None,
     N_max=10,
     params_plot=None,
     ax_conv=None,
     csv_path=None,
-    key_param=None,
-    value_param=None,
-    variable="y",
-    autonomous=False,
-    initial_guess=None,
-) -> HBMEquation:
+    parameter=None,
+) -> HBMSystem:
     """
     Analyze the convergence of the Koopman-Hill projection with increasing number of harmonics (N_HBM)
     in the context of a Hill-type problem.
@@ -160,70 +159,54 @@ def analyze_N_convergence(
     """
 
     # Setup
-    T = 2 * np.pi / params["omega"]
-    if autonomous:
-        del params["omega"]
+    T = 2 * np.pi / ode.omega
 
     if params_plot is None:
         params_plot = {"color": "k"}
 
-    if initial_guess is None:
-        initial_guess = np.array([0.0, 0.0])
+    if fourier_ref is None:
+        fourier_ref = Fourier(
+            N_HBM=1, L_DFT=1024, n_dof=ode.n_dof, real_formulation=True
+        )
 
     if Phi_T_ref is None:
-        Phi_T_ref, sol_shoot = reference_monodromy_matrix(
-            f,
-            params,
-            T,
-            variable=variable,
-            autonomous=autonomous,
-            initial_guess=initial_guess,
-        )
+        Phi_T_ref, sol_shoot = reference_monodromy_matrix(solver, ode)
+        x_t = sol_shoot.equations[0].x_time(fourier_ref.time_samples(ode.omega))
     else:
         sol_shoot = None
-    lambdas_ref = np.linalg.eig(Phi_T_ref).eigenvalues
+        x_t = None
 
-    ax_conv, axs, plot_FMs = setup_plot(ax_conv, lambdas_ref)
+    FMs_ref = np.linalg.eig(Phi_T_ref).eigenvalues
 
-    errors = initialize_errors_with_param(params, key_param, csv_path)
+    ax_conv, axs, plot_FMs = setup_plot(ax_conv, FMs_ref)
+
+    errors = initialize_errors_with_param(ode, parameter, csv_path)
 
     for N_HBM in range(1, N_max + 1):
         print(N_HBM)
-        hbm = setup_hbm_problem(
-            f,
-            params,
-            N_HBM,
-            key_param,
-            value_param,
-            autonomous=autonomous,
-            sol_ref=sol_shoot,
-            variable=variable,
+        hbm_sys = setup_hbm_system(
+            solver=solver, ode=ode, fourier_ref=fourier_ref, N_HBM=N_HBM, x_t=x_t
         )
 
-        lambdas = hbm.eigenvalues
-        Phi_T = hbm.stability_method.fundamental_matrix(t_over_period=1, problem=hbm)
+        FMs = hbm_sys.eigenvalues
+        Phi_T = hbm_sys.equations[0].stability_method.fundamental_matrix(
+            t_over_period=1, problem=hbm_sys.equations[0]
+        )
 
         errors.append(np.linalg.norm(Phi_T - Phi_T_ref, ord=2))
         ax_conv.semilogy(N_HBM, errors[-1], ".", **params_plot)
-        try:
-            del params_plot["label"]
-        except:
-            # The key doesn't exist
-            pass
 
         if plot_FMs:
-            axs[1].plot(np.real(lambdas), np.imag(lambdas), ".")
+            axs[1].plot(np.real(FMs), np.imag(FMs), ".")
         pass
 
     if csv_path:
         write_errors_to_csv(csv_path, errors)
 
-    return hbm
+    return hbm_sys
 
 
-def reference_monodromy_matrix(
-    f, params, T, variable="y", initial_guess=None, autonomous=False, L_DFT=1026
-):
+def reference_monodromy_matrix(solver, ode):
     """
     Computes the reference monodromy matrix for a given system with an equilibrium at zero using the shooting method.
 
@@ -248,32 +231,16 @@ def reference_monodromy_matrix(
         AssertionError: If 0 is not an equilibrium and no initial guess was passed.
     """
 
-    if initial_guess is None:
-        x0 = np.array([0.0, 0.0])
-    else:
-        x0 = initial_guess
+    sys_shooting = ShootingSystem(ode, T=2 * np.pi / ode.omega, atol=1e-12, rtol=1e-12)
 
-    params_odesolver = {"atol": 1e-12, "rtol": 1e-12}
-    sol_shooting = ShootingProblem(
-        f=f,
-        x0=x0,
-        T=T,
-        autonomous=autonomous,
-        variable=variable,
-        verbose=True,
-        parameters=params,
-        kwargs_odesolver=params_odesolver,
-    )
-    sol_shooting.solve()
-    assert sol_shooting.converged
-    if initial_guess is None:
-        # solved at equilibrium point (0,0)
-        assert np.max(np.abs(sol_shooting.x)) == 0
+    solver.solve(sys_shooting)
+    assert sys_shooting.solved
 
-    x_time = sol_shooting.x_time(
-        t_eval=np.linspace(0, 2 * np.pi / sol_shooting.omega, L_DFT, endpoint=False)
-    )
-    return sol_shooting.derivatives[variable][:2, :2] + np.eye(2), sol_shooting
+    bvp = sys_shooting.equations[0]
+
+    monodromy_matrix = bvp.derivative(variable="x", update=True) + np.eye(bvp.ode.n_dof)
+
+    return monodromy_matrix, sys_shooting
 
 
 def setup_plot(ax, lambdas_ref):
@@ -293,13 +260,13 @@ def setup_plot(ax, lambdas_ref):
             - plot_FMs (bool): Flag indicating whether Floquet multipliers should be plotted.
     """
     if ax is None:
-        _, axs = plt.subplots(ncols=2, nrows=1)
+        _, axs = plt.subplots(ncols=2, nrows=1, gridspec_kw={"wspace": 0.4})
         phis = np.linspace(0, 2 * np.pi, 250)
         axs[1].plot(np.cos(phis), np.sin(phis), "--", color="gray")
         axs[1].plot(np.real(lambdas_ref), np.imag(lambdas_ref), "kx")
         axs[1].axis("equal")
-        axs[1].set_xlabel("Re(\\lambda)")
-        axs[1].set_ylabel("Im(\\lambda)")
+        axs[1].set_xlabel("Re($\\lambda$)")
+        axs[1].set_ylabel("Im($\\lambda$)")
         del phis
         plot_FMs = True
         ax = axs[0]
@@ -311,10 +278,10 @@ def setup_plot(ax, lambdas_ref):
     return ax, axs, plot_FMs
 
 
-def initialize_errors_with_param(params, key_param, csv_path):
+def initialize_errors_with_param(ode, parameter, csv_path):
     """
     Initializes a list of errors.
-    If a CSV path is provided, the first column of the CSV corresponds to different parameter values. Then, the list is initialized with that value.
+    If a CSV path is provided, the first column of the CSV file corresponds to different parameter values. Then, the list is initialized with that value.
     Otherwise, the list is initialized empty.
 
     Args:
@@ -324,21 +291,18 @@ def initialize_errors_with_param(params, key_param, csv_path):
     Returns:
         list: A list containing the smoothing value from params if csv_path is provided; otherwise, an empty list.
     """
-    if csv_path:
-        return [params.get(key_param, 0)]  # fallback if smoothing not present
+    if csv_path and parameter is not None:
+        return [getattr(ode, parameter, 0)]
     else:
         return []
 
 
-def setup_hbm_problem(
-    f,
-    params_default,
+def setup_hbm_system(
+    solver,
+    ode,
+    fourier_ref,
     N_HBM,
-    key_param=None,
-    value_param=None,
-    autonomous=False,
-    sol_ref=None,
-    variable="y",
+    x_t=None,
 ):
     """
     Sets up and solves a Harmonic Balance Method (HBM) problem for a given function and parameters. The function must have an equilibrium at 0.
@@ -354,45 +318,28 @@ def setup_hbm_problem(
     Raises:
         AssertionError: If the HBM problem does not converge or the solution is not 0
     """
-    fourier_kwargs = {"L_DFT": 1026, "real_formulation": True}
-    if key_param in fourier_kwargs:
-        fourier_kwargs[key_param] = value_param
+    fourier = Fourier(
+        N_HBM=N_HBM,
+        L_DFT=fourier_ref.L_DFT,
+        n_dof=fourier_ref.n_dof,
+        real_formulation=fourier_ref.real_formulation,
+    )
+    if x_t is None:
+        x_t = np.zeros(fourier.n_dof, fourier.L_DFT)
 
-    fourier = Fourier(N_HBM=N_HBM, n_dof=2, **fourier_kwargs)
-    if sol_ref:
-        X_init = fourier.DFT(sol_ref.x_time(fourier.time_samples(sol_ref.omega)))
-        omega_init = sol_ref.omega
-    else:
-        X_init = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
-        omega_init = 1
-    if autonomous:
-        hbm = HBMProblem_autonomous(
-            f=f,
-            omega=omega_init,
-            initial_guess=X_init,
-            variable=variable,
-            stability_method=KoopmanHillProjection(fourier),
-            verbose=False,
-            fourier=fourier,
-            parameters_f=params_default,
-        )
-    else:
-        hbm = HBMEquation(
-            f=f,
-            omega=params_default["omega"],
-            initial_guess=X_init,
-            variable=variable,
-            stability_method=KoopmanHillProjection(fourier),
-            verbose=False,
-            fourier=fourier,
-            parameters_f=params_default,
-        )
-    if key_param is not None and key_param not in fourier_kwargs:
-        hbm.__setattr__(key_param, value_param)
-    hbm.solve()
-    assert hbm.converged
-    if sol_ref is None:
-        assert np.max(np.abs(hbm.x)) == 0
+    X_init = fourier.DFT(x_t)
+
+    hbm = HBMSystem(
+        ode=ode,
+        omega=ode.omega,
+        fourier=fourier,
+        initial_guess=X_init,
+        stability_method=KoopmanHillProjection(fourier),
+    )
+
+    solver.solve(hbm)
+    assert hbm.solved
+
     return hbm
 
 
@@ -414,10 +361,10 @@ def initialize_csv(csv_path, N_max, key_param=None):
 
 if __name__ == "__main__":
     analyze_N_mathieu(N_max=10, csv_path="data_mathieu.csv")
-    vals_smoothing = np.insert(np.logspace(-3, 0, 4, endpoint=True), 0, 0)
-    analyze_smoothness_effects(
-        N_max=70,
-        csv_path="data_meissner_smoothed.csv",
-        smoothing=vals_smoothing,
-    )
+    # vals_smoothing = np.insert(np.logspace(-3, 0, 4, endpoint=True), 0, 0)
+    # analyze_smoothness_effects(
+    #     N_max=70,
+    #     csv_path="data_meissner_smoothed.csv",
+    #     smoothing=vals_smoothing,
+    # )
     plt.show()
