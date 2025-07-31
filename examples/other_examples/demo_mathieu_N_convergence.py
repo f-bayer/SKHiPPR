@@ -195,7 +195,7 @@ def analyze_N_convergence(
 
         FMs = hbm_sys.eigenvalues
         Phi_T = hbm_sys.equations[0].stability_method.fundamental_matrix(
-            t_over_period=1, problem=hbm_sys.equations[0]
+            t_over_period=1, hbm=hbm_sys.equations[0]
         )
 
         errors.append(np.linalg.norm(Phi_T - Phi_T_ref, ord=2))

@@ -37,14 +37,15 @@ Dependencies:
 import matplotlib.pyplot as plt
 from copy import copy
 
-from skhippr.odes.nonautonomous import duffing
+from skhippr.solvers.newton import NewtonSolver
+from skhippr.odes.nonautonomous import Duffing
 from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 from skhippr.Fourier import Fourier
 
 
-def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=None):
+def main(solver, ode, fourier: Fourier, x_init=None, idx_k=None):
     """
     Finds the periodic solution of the Duffing oscillator, identifies exponential decay parameters (a, b),
     and generates plots for the solution and its spectral properties.
@@ -66,28 +67,24 @@ def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=
 
     # Initial guess for HBM problem
     if x_init is None:
-        taus = fourier.time_samples(omega=1)
-        x_init = np.vstack([np.cos(taus), -params_duffing["omega"] * np.sin(taus)])
+        taus = fourier.time_samples_normalized
+        x_init = np.vstack([np.cos(taus), -ode.omega * np.sin(taus)])
 
     # Create and solve HBM problem
-    prb = HBMEquation(
-        f=duffing,
-        fourier=fourier,
+    hbm = HBMEquation(
+        ode,
+        ode.omega,
+        fourier,
+        fourier.DFT(x_init),
         stability_method=KoopmanHillProjection(fourier),
-        tolerance=1e-8,
-        verbose=True,
-        period_k=1,
-        parameters_f=params_duffing,
-        omega=params_duffing["omega"],
-        initial_guess=fourier.DFT(x_init),
     )
-    prb.solve()
-    assert prb.converged
-    ax_period = plot_period(prb)
+    solver.solve_equation(hbm, "X")
+    x_t = hbm.x_time()
+    ax_period = plot_period(hbm)
 
     # Identify exponential decay parameters
     threshold = 5e-15
-    lines = prb.exponential_decay_parameters(threshold)
+    lines = hbm.exponential_decay_parameters(threshold)
 
     if idx_k is not None:
         lines = lines[idx_k]
@@ -98,34 +95,22 @@ def main(params_duffing: dict[str, float], fourier: Fourier, x_init=None, idx_k=
 
     # Bar chart with *all* norms and (a, b) lines
     fig, ax = plt.subplots(ncols=1, nrows=1)
-    J_norms_all, ks_all = determine_J_norms(prb, threshold=0)
+    J_norms_all, ks_all = determine_J_norms(hbm, threshold=0)
     plot_bar(ks_all, J_norms_all, threshold, ax)
     plot_lines(lines, ks_all, ax, logscale=True)
     ax.legend()
 
     # Solution of linear system (beta = 0) for reference
-    params_linear = copy(params_duffing)
-    params_linear["beta"] = 0
-    prb_linear = prb = HBMEquation(
-        f=duffing,
-        fourier=fourier,
-        stability_method=KoopmanHillProjection(fourier),
-        tolerance=1e-8,
-        verbose=True,
-        period_k=1,
-        parameters_f=params_linear,
-        omega=params_linear["omega"],
-        initial_guess=fourier.DFT(x_init),
-    )
-    prb_linear.solve()
-    assert prb_linear.converged
-    plot_period(prb_linear, ax=ax_period, linestyle="--", color="black")
+    ode.beta = 0
+    solver.solve_equation(hbm, "X")
+    plot_period(hbm, ax=ax_period, linestyle="--", color="black")
     ax_period.legend()
+    x_t = hbm.x_time()
 
-    return lines, prb.x_time()
+    return lines, x_t
 
 
-def determine_J_norms(prb: HBMEquation, threshold: float = 1e-15):
+def determine_J_norms(hbm: HBMEquation, threshold: float = 1e-15):
     """
     Computes the norms of the Fourier coefficients of the Jacobian in an HBMProblem.
     This function extracts the Fourier coefficient matrices from the provided
@@ -140,18 +125,18 @@ def determine_J_norms(prb: HBMEquation, threshold: float = 1e-15):
             - norms: Array of 2-norms of the Jacobian matrices above the threshold.
             - ks: Array of corresponding harmonic indices for the returned norms.
     """
-    Js = prb.ode_coeffs()
+    Js = hbm.ode_coeffs()
     norms = []
     ks = []
-    for k in range(prb.fourier.N_HBM + 1):
-        if prb.fourier.real_formulation:
+    for k in range(hbm.fourier.N_HBM + 1):
+        if hbm.fourier.real_formulation:
             if k > 0:
-                J_cplx = 0.5 * Js[:, :, k] + 0.5j * Js[:, :, prb.fourier.N_HBM + k]
+                J_cplx = 0.5 * Js[:, :, k] + 0.5j * Js[:, :, hbm.fourier.N_HBM + k]
             else:
                 J_cplx = Js[:, :, 0]
         else:
             # consider the positive component
-            J_cplx = Js[:, :, prb.fourier.N_HBM + k]
+            J_cplx = Js[:, :, hbm.fourier.N_HBM + k]
 
         norm_J = np.linalg.norm(J_cplx, ord=2)
         if norm_J > threshold:
@@ -221,7 +206,7 @@ def plot_lines(
         ax.plot(x_vals, y_vals, label=f"{k}: b = {b:.2f}, a={a:.2f}")
 
 
-def plot_period(problem: HBMEquation, ax=None, **kwargs):
+def plot_period(hbm: HBMEquation, ax=None, **kwargs):
     """
     Plots the phase plot of a given HBMProblem instance.
 
@@ -243,18 +228,22 @@ def plot_period(problem: HBMEquation, ax=None, **kwargs):
     -----
     The plot will be labeled with the value of `problem.beta`.
     """
-    x_time = problem.x_time()
+    x_time = hbm.x_time()
     if ax is None:
         fig, ax = plt.subplots(nrows=1, ncols=1)
-    ax.plot(x_time[0, :], x_time[1, :], label=f"$\\beta={problem.beta}$", **kwargs)
+    ax.plot(x_time[0, :], x_time[1, :], label=f"$\\beta={hbm.ode.beta}$", **kwargs)
     return ax
 
 
 if __name__ == "__main__":
-    params_config_1 = {"alpha": 5, "beta": 0.1, "delta": 0.02, "F": 0.1, "omega": 5}
-    params_config_2 = {"alpha": 0.5, "beta": 3, "delta": 0.05, "F": 0.1, "omega": 0.3}
+
+    odes = [
+        Duffing(0, np.array([0, 0]), alpha=5, beta=0.1, delta=0.02, F=0.1, omega=5),
+        Duffing(0, np.array([0, 0]), alpha=0.5, beta=3, delta=0.02, F=0.1, omega=0.3),
+    ]
 
     fourier = Fourier(N_HBM=45, L_DFT=5 * 45, n_dof=2, real_formulation=True)
-    _, x2_init = main(params_duffing=params_config_1, fourier=fourier, idx_k=0)
-    main(params_duffing=params_config_2, fourier=fourier, x_init=x2_init, idx_k=2)
+    solver = NewtonSolver()
+    _, x2_init = main(solver, odes[0], fourier=fourier, idx_k=0)
+    main(solver, odes[1], fourier=fourier, idx_k=2, x_init=x2_init)
     plt.show()

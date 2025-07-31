@@ -58,7 +58,7 @@ class ClassicalHill(AbstractStabilityHBM):
                 f"Unknown sorting method {sorting_method}. Allowed values: 'imaginary', 'symmetry'."
             )
 
-    def fundamental_matrix(self, t_over_period: float, problem: HBMEquation):
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation):
         raise NotImplementedError("Not implemented yet for classical Hill")
 
     def hill_EVP(

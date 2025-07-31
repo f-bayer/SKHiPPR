@@ -74,7 +74,7 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
 
         """
 
-        monodromy = self.fundamental_matrix(t_over_period=1, problem=problem)
+        monodromy = self.fundamental_matrix(t_over_period=1, hbm=problem)
         floquet_multipliers = np.linalg.eigvals(monodromy)
         return floquet_multipliers
 

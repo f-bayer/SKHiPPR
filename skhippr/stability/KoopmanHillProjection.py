@@ -67,9 +67,7 @@ class KoopmanHillProjection(AbstractStabilityHBM):
             self.W = self.fourier.T_to_real_from_cplx @ self.W
             self.C = self.C @ self.fourier.T_to_cplx_from_real
 
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMEquation
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using direct Koopman-Hill projection.
 
@@ -100,8 +98,8 @@ class KoopmanHillProjection(AbstractStabilityHBM):
         """
 
         C = self.C_time(t_over_period)
-        hill_matrix = problem.hill_matrix()
-        t = t_over_period * 2 * np.pi / problem.omega
+        hill_matrix = hbm.hill_matrix()
+        t = t_over_period * 2 * np.pi / hbm.omega
 
         funda_mat = C @ expm(hill_matrix * t) @ self.W
 
@@ -275,9 +273,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         self.W_subh = np.kron(W0[1:, :], eye)
         self.C_subh = -np.kron(C0[:, 1:], eye)
 
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMEquation
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using subharmonic Koopman-Hill projection.
 
@@ -311,10 +307,10 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         C = self.C_time(t_over_period)
         C_subh = self.C_subh_time(t_over_period=t_over_period)
 
-        Phi_t = super().fundamental_matrix(t_over_period=t_over_period, problem=problem)
+        Phi_t = super().fundamental_matrix(t_over_period=t_over_period, hbm=hbm)
 
-        hill_mat_subh = self.hill_subh(equ=problem)
-        t = 2 * np.pi / problem.omega * t_over_period
+        hill_mat_subh = self.hill_subh(equ=hbm)
+        t = 2 * np.pi / hbm.omega * t_over_period
         Phi_t += C_subh @ expm(hill_mat_subh * t) @ self.W_subh
 
         return Phi_t
