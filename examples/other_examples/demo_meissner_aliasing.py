@@ -12,12 +12,9 @@ Usage:
 
 import numpy as np
 import matplotlib.pyplot as plt
-from skhippr.odes.ltp import (
-    meissner,
-    meissner_fourier,
-    meissner_fundamental_matrix,
-    meissner_g,
-)
+from skhippr.odes.ltp import SmoothedMeissner, TruncatedMeissner
+from skhippr.Fourier import Fourier
+from skhippr.solvers.newton import NewtonSolver
 
 from demo_mathieu_N_convergence import (
     analyze_N_convergence,
@@ -53,57 +50,84 @@ def analyze_N_meissner_aliasing(N_max=60, Ls_DFT=(1024,), csv_path=None):
         In contrast, if L_DFT is divisible by 2 but not by 4, the series for the total aliasing error is alternating in sign, making the resulting aliasing error negligible (case L_DFT=1026).
     """
     initialize_csv(csv_path, N_max, key_param="L_DFT")
-    params = {"a": 4, "b": 0.2, "omega": 1, "d": 0.0}
-    params_plot = {}
-    T = 2 * np.pi / params["omega"]
-    Phi_T_ref = meissner_fundamental_matrix(T, 0, **params)
+    ode = SmoothedMeissner(
+        t=0, x=np.array([0.0, 0.0]), smoothing=0, a=4, b=0.2, omega=1, damping=0.0
+    )
+    solver = NewtonSolver()
+
+    params_plot = dict()
+    T = 2 * np.pi / ode.omega
+    Phi_T_ref = ode.fundamental_matrix(t_end=T, t_0=0)
     lambdas_ref = np.linalg.eig(Phi_T_ref).eigenvalues
     ax_conv, axs, _ = setup_plot(None, lambdas_ref)
     ax_time = axs[1]
     ax_time.clear()
+    ax_time.set_aspect("auto")
 
     # Plot true square function into right figure
     ts = np.linspace(0, T, max(Ls_DFT) + 1, endpoint=True)
-    g, _ = meissner_g(ts, params["a"], params["b"], params["omega"])
+    g = ode.a + ode.b * ode.g_fcn(ts)
     ax_time.plot(ts, g, "k", label="True square function")
-    ax_time.set_xlim((0.23 * T, 0.27 * T))
-    ax_time.set_ylim((params["a"] - 1.2 * params["b"], params["a"] + 1.2 * params["b"]))
+    ax_time.set_xlim((0.2 * T, 0.3 * T))
+    ax_time.set_ylim((ode.a - 1.2 * ode.b, ode.a + 1.2 * ode.b))
+
     # Perform Koopman-Hill projection on Meissner equation for various L_DFT
     for k, L_DFT in enumerate(Ls_DFT):
         params_plot["color"] = f"C{k}"
+        if k >= 4:
+            params_plot["marker"] = "o"
+            params_plot["fillstyle"] = "none"
+        else:
+            params_plot["marker"] = "."
         params_plot["label"] = f"L_DFT={L_DFT}"
+        fourier_ref = Fourier(1, L_DFT, n_dof=ode.n_dof, real_formulation=True)
+        ode.L_DFT = L_DFT  # for the csv file, has no effect on the dynamics
         hbm = analyze_N_convergence(
-            meissner,
-            params,
+            solver=solver,
+            ode=ode,
+            fourier_ref=fourier_ref,
             Phi_T_ref=Phi_T_ref,
             N_max=N_max,
-            csv_path=csv_path,
-            key_param="L_DFT",
-            value_param=L_DFT,
             params_plot=params_plot,
             ax_conv=ax_conv,
+            csv_path=csv_path,
+            parameter="L_DFT",
         )
 
         # Plot the identified "square" function
+        del params_plot["marker"]
         ts = np.linspace(0, T, L_DFT, endpoint=False)
-        J_time = hbm.ode_samples()
+        J_time = hbm.equations[0].ode_samples()
         ax_time.plot(ts, -J_time[1, 0, :].squeeze(), "--", **params_plot)
 
     # Perform Koopman-Hill projection without any aliasing (i.e., on the function given by the truncated Fourier series of the square function)
     params_plot["color"] = f"C{k+1}"
-    params_plot["marker"] = "o"
+    params_plot["marker"] = "x"
     params_plot["fillstyle"] = "none"
-    params_plot["label"] = "No aliasing error"
+    params_plot["label"] = "No aliasing"
 
-    params["N_HBM"] = N_max
+    ode_trunc = TruncatedMeissner(
+        t=0,
+        x=np.array([0.0, 0.0]),
+        N_harmonics=N_max,
+        a=ode.a,
+        b=ode.b,
+        omega=ode.omega,
+        damping=ode.damping,
+    )
+    g = ode_trunc.a + ode_trunc.b * ode_trunc.g_fcn(fourier_ref.time_samples_normalized)
+    ax_time.plot(ts, g, "r:", label="No aliasing")
+
+    ode_trunc.L_DFT = f"truncated N = {ode_trunc.N_harmonics}"
+
     analyze_N_convergence(
-        meissner_fourier,
-        params,
+        solver,
+        ode_trunc,
+        fourier_ref=fourier_ref,
         Phi_T_ref=Phi_T_ref,
         N_max=N_max,
         csv_path=csv_path,
-        key_param="L_DFT",
-        value_param=L_DFT,
+        parameter="L_DFT",
         params_plot=params_plot,
         ax_conv=ax_conv,
     )
@@ -117,7 +141,7 @@ if __name__ == "__main__":
     # Showcase the influence of L_DFT (i.e., the influence of aliasing) on the prediction accuracy of the Meissner eq.
 
     analyze_N_meissner_aliasing(
-        N_max=60,
+        N_max=20,
         csv_path="data_meissner.csv",
         Ls_DFT=(1024, 1025, 1026, 1027, 1028, 1029, 1030),
     )

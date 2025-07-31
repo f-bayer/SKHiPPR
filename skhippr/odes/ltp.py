@@ -121,10 +121,10 @@ class SmoothedMeissner(HillODE):
 
         # Meissner fundamental matrix pieced together by LTI fundamental matrices
         T = 2 * np.pi / self.omega
-        gamma_sq_1 = self.a + self.b  # when t in (-T/4, T/4)
-        gamma_sq_2 = self.a - self.b  # when t in (T/4, 3*T/4)
+        gamma_sq_1 = -self.a - self.b  # when t in (-T/4, T/4)
+        gamma_sq_2 = -self.a + self.b  # when t in (T/4, 3*T/4)
 
-        A = np.array([[0, 1], [gamma_sq_1, self.damping]])
+        A = np.array([[0, 1], [gamma_sq_1, -self.damping]])
 
         Phi_t = np.eye(N=2)
 
@@ -173,7 +173,7 @@ class TruncatedMeissner(HillODE):
         t = np.atleast_1d(t)
         cos = np.cos(np.tensordot(self.harmonics, t, axes=0))
         # harmonic is now in 0-th dimension, t in others
-        return np.squeeze(np.tensordot(self.b * self.fourier_coeffs, cos, axes=(0, 0)))
+        return np.squeeze(np.tensordot(self.fourier_coeffs, cos, axes=(0, 0)))
 
 
 class ShirleyODE(AbstractODE):

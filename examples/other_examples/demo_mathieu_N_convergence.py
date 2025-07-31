@@ -201,6 +201,9 @@ def analyze_N_convergence(
         errors.append(np.linalg.norm(Phi_T - Phi_T_ref, ord=2))
         ax_conv.semilogy(N_HBM, errors[-1], ".", **params_plot)
 
+        if "label" in params_plot:
+            del params_plot["label"]  # to ensure that only one dot appears in legend
+
         if plot_FMs:
             axs[1].plot(np.real(FMs), np.imag(FMs), ".")
         pass
@@ -330,7 +333,7 @@ def setup_hbm_system(
         real_formulation=fourier_ref.real_formulation,
     )
     if x_t is None:
-        x_t = np.zeros(fourier.n_dof, fourier.L_DFT)
+        x_t = np.zeros((fourier.n_dof, fourier.L_DFT))
 
     X_init = fourier.DFT(x_t)
 
