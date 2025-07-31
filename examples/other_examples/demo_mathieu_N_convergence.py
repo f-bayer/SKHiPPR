@@ -72,10 +72,15 @@ def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
     smoothing : array-like or None, optional
         Sequence of smoothing parameter values to analyze. If None, a default sequence from 1 to 0 is used.
     """
-    params = {"a": 4, "b": 0.2, "omega": 1, "d": 0.005}
-    T = 2 * np.pi / params["omega"]
+    solver = NewtonSolver()
+    fourier_ref = Fourier(N_HBM=1, L_DFT=1026, n_dof=2, real_formulation=True)
     if smoothing is None:
         smoothing = np.flip(np.linspace(0, 1, 7, endpoint=True))
+
+    ode = SmoothedMeissner(
+        0, np.array([0.0, 0.0]), smoothing[0], a=4, b=0.2, omega=1, damping=0.005
+    )
+    T = 2 * np.pi / ode.omega
 
     if csv_path:
         initialize_csv(csv_path, N_max=N_max, key_param="smoothing")
@@ -86,31 +91,31 @@ def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
     ax_time.clear()
     ax_time.set_aspect("auto")
     ax_time.set_xlim((0, 0.5))
-    ax_time.set_ylim((params["a"] - 1.2 * params["b"], params["a"] + 1.2 * params["b"]))
+    ax_time.set_ylim(ode.a - 1.2 * ode.b, ode.a + 1.2 * ode.b)
     ax_time.set_xlabel("t/T")
 
     for k, eps in enumerate(smoothing):
         params_plot["color"] = f"C{k}"
         params_plot["label"] = f"$\\epsilon = {eps}$"
-        params["smoothing"] = eps
+        ode.smoothing = eps
         hbm = analyze_N_convergence(
-            meissner,
-            params,
+            solver=solver,
+            ode=ode,
+            fourier_ref=fourier_ref,
+            Phi_T_ref=None,
             N_max=N_max,
-            csv_path=csv_path,
             params_plot=params_plot,
             ax_conv=ax_conv,
+            csv_path=csv_path,
             parameter="smoothing",
-            value_param=eps,
         )
 
         # Plot the considered function and the identified samples
-        ts = hbm.fourier.time_samples(omega=params["omega"])
+        ts = fourier_ref.time_samples_normalized
 
-        g, _ = meissner_g(
-            ts, params["a"], params["b"], params["omega"], params["smoothing"]
-        )
-        J_time = hbm.ode_samples()
+        g = -ode.a - ode.b * ode.g_fcn(ts)
+
+        J_time = hbm.equations[0].ode_samples()
         ax_time.plot(ts / T, g, "k-")
         ax_time.plot(ts / T, -J_time[1, 0, :].squeeze(), ".", **params_plot)
 
@@ -361,10 +366,10 @@ def initialize_csv(csv_path, N_max, key_param=None):
 
 if __name__ == "__main__":
     analyze_N_mathieu(N_max=10, csv_path="data_mathieu.csv")
-    # vals_smoothing = np.insert(np.logspace(-3, 0, 4, endpoint=True), 0, 0)
-    # analyze_smoothness_effects(
-    #     N_max=70,
-    #     csv_path="data_meissner_smoothed.csv",
-    #     smoothing=vals_smoothing,
-    # )
+    vals_smoothing = np.insert(np.logspace(-3, 0, 4, endpoint=True), 0, 0)
+    analyze_smoothness_effects(
+        N_max=70,
+        csv_path="data_meissner_smoothed.csv",
+        smoothing=vals_smoothing,
+    )
     plt.show()
