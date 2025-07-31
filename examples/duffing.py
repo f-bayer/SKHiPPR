@@ -46,9 +46,7 @@ def main():
 
     # --- FFT, stability method and Newton solver configuration ---
     fourier = Fourier(N_HBM=25, L_DFT=300, n_dof=2, real_formulation=True)
-    stability_method = KoopmanHillSubharmonic(
-        fourier=fourier, tol=1e-4, autonomous=False
-    )
+    stability_method = KoopmanHillSubharmonic(fourier, tol=1e-4, autonomous=False)
     solver = NewtonSolver(verbose=True)
 
     # --- Instantiation of the ODE at initial point of branch ---
@@ -70,8 +68,9 @@ def main():
     )
 
     # --- Solve initial HBM problem. ---
-    # As hbm is here an AbstractEquation and not an EquationSystem, we need to use solver.solve_equation() and specify the unknown variable explicitly.
-    # solver.solve_equation() internally instantiates an EquationSystem, just containing hbm.
+    # As hbm is here an AbstractEquation, we can use solver.solve_equation()
+    # and specify the unknown variable explicitly.
+    # solver.solve_equation() internally instantiates an EquationSystem.
     solver.solve_equation(equation=hbm, unknown="X")
 
     # --- Avoid that the solver prints a full report at each continuation step
