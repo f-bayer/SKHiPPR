@@ -1,11 +1,19 @@
 from collections.abc import Iterable
 from copy import copy
 import numpy as np
+from numpy._typing._array_like import NDArray
 
 from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 class EquationSystem:
+    """Encodes (one or multiple) :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` objects, together with a matching set of ``unknowns`` (names of attributes of one or more ``equations``), to be solved by the :py:class:`~skhippr.solvers.newton.NewtonSolver`.
+
+    All unknowns are attributes of the :py:class:`~skhippr.equations.EquationSystem.EquationSystem` and of all its collected :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` objects. If the unknown is updated in the :py:class:`~skhippr.equations.EquationSystem.EquationSystem`, it is also updated in all equations.
+
+    One of the equations can be chosen to determine the stability of the system. This is done by passing an equation as ``equation_determining_stability`` to the constructor. If no such equation is given, no stability analysis is performed.
+    """
+
     def __init__(
         self,
         equations: Iterable[AbstractEquation],
@@ -14,7 +22,7 @@ class EquationSystem:
     ):
         self.equations = equations
         self.unknowns = unknowns
-        self.init_unknowns()
+        self._init_unknowns()
         self.equation_determining_stability = equation_determining_stability
 
         # Initial residual evaluation
@@ -24,7 +32,7 @@ class EquationSystem:
         else:
             self.solved = False
 
-    def init_unknowns(self):
+    def _init_unknowns(self):
         """Make sure that every Equation object (and self) has every unknown as attribute"""
         self.length_unknowns = {}
         for unk in self.unknowns:
@@ -61,21 +69,15 @@ class EquationSystem:
 
     @property
     def well_posed(self):
+        """Checks if the system of equations is well-posed, i.e., if the total number of equations matches the total number of unknowns."""
         return (
             self.residual_function(update=False).size == self.length_unknowns["total"]
         )
 
     @property
-    def vector_of_unknowns(self):
+    def vector_of_unknowns(self) -> np.ndarray:
         """
-        Stack all individual unknowns into a single 1-D numpy array.
-        For first evaluation:
-            If multiple elements of self.equation have a parameter, the first one is taken.
-
-        Returns
-        -------
-        numpy.ndarray
-            A 1-D array containing all unknowns concatenated along axis 0.
+        All individual unknowns, stacked into a single 1-D numpy array in the order given by ``self.unknowns``. This property can also be set to update all unknowns in the system.
         """
         return np.concatenate(
             [np.atleast_1d(getattr(self.equations[0], unk)) for unk in self.unknowns]
@@ -106,11 +108,13 @@ class EquationSystem:
             setattr(self, unk, value)
 
     @property
-    def stable(self):
+    def stable(self) -> bool:
+        """Stability of the equation system, determined by the equation given in ``self.equation_determining_stability``."""
         return self.equation_determining_stability.stable
 
     @property
-    def eigenvalues(self):
+    def eigenvalues(self) -> np.ndarray:
+        """Eigenvalues governing the stability of the equation system, determined by the equation given in ``self.equation_determining_stability``."""
         return self.equation_determining_stability.eigenvalues
 
     def parse_vector_of_unknowns(self, x=None):
@@ -163,27 +167,16 @@ class EquationSystem:
 
         super().__setattr__(name, value)
 
-    def residual_function(
-        self, update=False
-    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    def residual_function(self, update=False) -> np.ndarray:
         """
-        Assembles one overall residual from the residuals of self.equations. Raises an error if there are not as many equations as unknowns.
-
-        Returns
-        -------
-
-        np.ndarray
-            The result of calling the individual residuals.
+        Assembles one overall residual (1-D numpy array) by stacking the residuals of ``self.equations``.
         """
 
         res = np.concatenate([equ.residual(update=update) for equ in self.equations])
         return res
 
-    def jacobian(self, update=False, h_fd=1e-4):
-        """Assemble the derivative of the residual w.r.t the unknowns.
-        NOTE: If update is True, the equations are updated in order. I.e., if one equation relies on Jacobians of the previous equation, that should work.
-
-        """
+    def jacobian(self, update=False, h_fd=1e-4) -> np.ndarray:
+        """Assemble the derivative of the overall residual w.r.t  all the unknowns (2-D numpy array), with the ordering given by the ordering of ``self.equations`` and ``self.unknowns``, respectively."""
         jac = np.vstack(
             [
                 np.hstack([equ.derivative(unk, update, h_fd) for unk in self.unknowns])
@@ -209,7 +202,8 @@ class EquationSystem:
                 update=update
             )
 
-    def duplicate(self):
+    def duplicate(self) -> "EquationSystem":
+        """Creates a copy of the EquationSystem, with all equations and the equation determining stability shallow-copied to avoid accidental changes to the original equations."""
         equations = [copy(equ) for equ in self.equations]
         if self.equation_determining_stability is None:
             equation_determining_stability = None

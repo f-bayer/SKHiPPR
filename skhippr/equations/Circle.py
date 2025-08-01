@@ -3,6 +3,14 @@ from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 class CircleEquation(AbstractEquation):
+    """Has attributes ``y`` and ``radius``.
+    The residual function::
+
+        self.y[0] ** 2 + self.y[1] ** 2 - self.radius**2
+
+    is zero when the point ``y`` lies on the circle with radius ``radius``.
+    """
+
     def __init__(self, y: np.ndarray, radius=1):
         super().__init__(None)
         self.y = y
@@ -22,6 +30,15 @@ class CircleEquation(AbstractEquation):
 
 
 class AngleEquation(AbstractEquation):
+    """Has attributes ``y`` and ``theta``. If ``y`` encloses the angle ``theta`` with the positive x axis, then .
+    the residual function::
+
+
+        self.y[1] * np.cos(self.theta) - self.y[0] * np.sin(self.theta)
+
+
+    vanishes.
+    """
 
     def __init__(self, y: np.ndarray, theta=1):
         super().__init__(None)

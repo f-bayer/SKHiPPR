@@ -3,8 +3,18 @@ import numpy as np
 
 
 class AbstractEquation(ABC):
+    """
+    Abstract base class for algebraic equations in the SKHiPPR framework.
+
+    Must provide a residual. The residual may depend on arbitrarily many attributes of the object and must return a numpy array. The :py:class:`~skhippr.solvers.newton.NewtonSolver` attempts to modify the object's attributes such that the residual becomes zero.
+
+    Subclasses may provide closed-form expressions for the derivatives of the residual with respect to the attributes. Otherwise, finite differences are used.
+
+    The class also offers functionality for stability analysis if a :py:class:`~skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod` object is passed.
+    """
 
     def __init__(self, stability_method=None):
+
         super().__init__()
         self._derivative_dict = {}
         self.residual_value = None
@@ -26,7 +36,7 @@ class AbstractEquation(ABC):
 
     @abstractmethod
     def residual_function(self):  # -> ndarray:
-        """Compute the residual function based on attributes."""
+        """Compute the residual function based on attributes of the object. This method must be implemented in subclasses."""
         residual: np.ndarray = ...
         return residual
 
@@ -36,25 +46,27 @@ class AbstractEquation(ABC):
     def derivative(self, variable: str, update=False, h_fd=1e-4):
         """
         Compute the derivative of the residual with respect to a given variable.
-        The derivative is computed using finite differences.
-        The variable is assumed to be a property of the AbstractEquationSystem.
-        This method can be overwritten in subclasses to return a closed-form derivative.
+        This method should be called whenever a derivative is desired.
+
+        If ``update`` is ``False``, a previously computed derivative is returned if available. Otherwise, the derivative is computed anew and is cached for future use.
+
+        If closed-form derivatives are available, they are used. Otherwise, if :py:func:`~skhippr.equations.AbstractEquationSystem.AbstractEquationSystem.closed_form_derivative` raises a ``NotImplementedError``, :py:func:`~skhippr.equations.AbstractEquationSystem.AbstractEquationSystem.finite_difference_derivative` is used to compute the derivative.
 
         Parameters
         ----------
 
         variable : str
-            The name of the variable (property of the system) with respect to which the derivative is computed.
+            The name of the variable (attribute) with respect to which the derivative is computed.
         update : bool, optional
-            If True, updates the cached derivative with the newly computed value. Default is False.
+            If ``True``, updates the cached derivative with the newly computed value. Default is ``False``.
         h_fd : float, optional
-            Step size for finite difference approximation. Default is 1e-4.
+            Step size for finite difference approximation. Default is ``1e-4``.
 
         Returns
         -------
 
         np.ndarray
-            The partial derivative of the residual with respect to the specified variable.
+            The partial derivative of  the residual with respect to the specified variable.
 
         """
 
@@ -104,13 +116,44 @@ class AbstractEquation(ABC):
 
         return derivative
 
-    def closed_form_derivative(self, variable):
-        # Can be overridden in subclasses to return a numpy array
+    def closed_form_derivative(self, variable: str) -> np.array:  # -> Any:
+        """
+        Compute the closed-form derivative of the residual with respect to a given variable.  To be implemented in subclasses. Must raise a ``NotImplementedError`` if closed-form derivative is nonzero and not available analytically.
+
+        Returns
+        -------
+
+        np.ndarray
+            The closed-form derivative of the residual with respect to the specified variable as a2-D numpy array. Must be 2-D even if the variable or the residual is a scalar.
+
+        Raises
+        ------
+        NotImplementedError
+            If the derivative is not available in closed form and should be determined using finite differences.
+        """
         raise NotImplementedError(
             f"Closed-form derivative of residual w.r.t {variable} not implemented."
         )
 
     def finite_difference_derivative(self, variable, h_step=1e-4) -> np.ndarray:
+        """Compute the finite difference derivative of the residual with respect to a given variable.
+
+        Parameters
+        ----------
+
+        variable : str
+            The name of the variable (attribute) with respect to which the derivative is computed.
+        h_step : float, optional
+            Step size for finite difference approximation. Default is ``1e-4``.
+
+        Returns
+        -------
+
+        np.ndarray
+            The finite difference derivative of the residual with respect to the specified variable as a 2-D numpy array.
+
+
+        """
 
         x_orig = getattr(self, variable)
         x = np.atleast_1d(x_orig)
@@ -129,6 +172,17 @@ class AbstractEquation(ABC):
         return derivative
 
     def determine_stability(self, update=False):
+        """Determine the stability of the equation using the stability method.
+
+        If the stability method is not set, an ``AttributeError`` is raised.
+        If ``update`` is ``True``, the eigenvalues are computed using the stability method. Otherwise, the cached values is used.
+        The stability is determined based on :py:func:`~skhippr.equations.AbstractEquationSystem.AbstractEquationSystem.stability_criterion`.
+
+        Parameters
+        ----------
+        update : bool, optional
+            If ``True``, updates the eigenvalues and stability status. Default is ``False``.
+        """
         if self.stability_method is None:
             raise AttributeError("Stability method not available")
 
@@ -141,6 +195,7 @@ class AbstractEquation(ABC):
         return self.stable, self.eigenvalues
 
     def stability_criterion(self, eigenvalues):
+        """Determine stability based on stability-defining eigenvalues computed by the stability method."""
         if self.stability_method is None:
             raise ValueError("No stability method available!")
         else:
