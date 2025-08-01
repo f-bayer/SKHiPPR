@@ -1,5 +1,5 @@
-"""Template for getting started immediately on setting up a frc continuation problem.
-This example uses a Duffing oscillator, but by modifying the content of system_function, one can immediately continue other nonautonomous systems.
+"""Demonstration / Template for creating a simple frequency response curve of a non-autonomous dynamical system with HBM.
+This example uses a Duffing oscillator, but ``ode`` can be instantiated as any non-autonomous :py:class:`~skhippr.odes.AbstractODE.AbstractODE`.
 """
 
 import numpy as np
@@ -27,16 +27,17 @@ from skhippr.solvers.newton import NewtonSolver
 
 def main():
     """
-    Demonstration for creating a simple frequency response curve of a non-autonomous system with HBM.
+    Demonstration for creating a simple frequency response curve of a non-autonomous dynamical system with HBM.
 
     This function performs the following steps:
 
-    #. Creation of a :py:class:`~skhippr.Fourier` object to collect FFT parameters.
-    #. Creation of a :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic` object which defines the stability method.
-
-    #. Setup and solution of the initial :py:class:`~skhippr.cycles.hbm.hbmProblem`.
-    #. Continuation of the frequency response curve using :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator`and collecting branch point properties
-    #. plotting
+    #. Creation of :py:class:`~skhippr.Fourier`, :py:class:`~skhippr.solvers.newton.NewtonSolver`, and :py:class:`~skhippr.stability.KoopmmanHillProjection.KoopmanHillSubharmonic` objects to collect method parameters.
+    #. Instantiation of a :py:class:`~skhippr.odes.AbstractODE.AbstractODE` (here: :py:class:`~skhippr.odes.nonautonomous.Duffing`) object which contains the ODE.
+    #. Setup of an initial guess
+    #. Setup and solution of the :py:class:`~skhippr.cycles.hbm.HBMEquation`, which formalizes the Harmonic Balance equations.
+    #. Creation of an :py:class:`~skhippr.equations.EquationSystem.EquationSystem` containing only the HBM equations as input to the continuation method.
+    #. Continuation of the frequency response curve using :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator`and collecting the branch points
+    #. Analyzing and plotting the branch points
 
     Returns
     -------

@@ -37,20 +37,17 @@ def main():
     #. Creation of a :py:class:`~skhippr.Fourier` object to collect FFT parameters.
     #. Creation of a :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillProjection` object which defines the stability method. Other :py:class:`~skhippr.stability._StabilityHBM` subclasses can interchangeably be used, such as:
 
-    * :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic`
-    * :py:class:`~skhippr.stability.ClassicalHill.ClassicalHill`
-    * :py:class:`~skhippr.stability.SinglePass.SinglePassRK`
+        * :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic`
+        * :py:class:`~skhippr.stability.ClassicalHill.ClassicalHill`
+        * :py:class:`~skhippr.stability.SinglePass.SinglePassRK`
 
-    #. Setup and solution of the initial :py:class:`~skhippr.cycles.hbm.hbmProblem`.
-    #. Visualization of the initial solution and its stability properties using :py:func:`visualize_solution`.
-    #. Continuation of the force response curve using :py:func:`initial_force_response`
-    #. Generation of frequency response curves from starting from points on the previous force response using :py:func:`continue_from_continuation_curve`.
-    #. Generation of additional force responses starting from points on the frequency response curve using :py:func:`continue_from_continuation_curve`.
-    #. 3D plotting of all computed response curves, including stability information, using :py:func:`plot_3D_frc`.
+    #. Setup and solution of the initial :py:class:`~skhippr.cycles.hbm.HBMSystem`.
+    #. Visualization of the initial solution and its stability properties.
+    #. Continuation of the first force response curve.
+    #. Generation of frequency response curves starting from points on the previous force response.
+    #. Generation of additional force responses starting from points on the frequency response curve.
+    #. 3D plotting of all computed response curves, including stability information.
 
-    Returns
-    -------
-    None
     """
 
     # --- FFT, stability method and Newton solver configuration ---
@@ -119,24 +116,6 @@ def initial_force_response(
 ) -> list[BranchPoint]:
     """
     Continue the force response curve starting from the initial solution.
-
-    This function uses the :py:func:`~skhippr.cycles.continuation.pseudo_arclength_continuator` to trace the response of a system as the force parameter ``F`` is varied from ``F_min`` up to ``F_max``.
-
-    Args
-    ----
-    initial_problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
-        The initial problem or problem setup to start the continuation from. Must take a parameter ``F``.
-    F_min : float
-        The minimum value of the force parameter ``F`` to start the continuation.
-    F_max : float
-        The maximum value of the force parameter ``F`` at which to stop the continuation.
-    verbose : bool, optional
-        If ``True``, enables verbose output during continuation. Defaults to ``True``.
-
-    Returns
-    -------
-    response_F : list[BranchPoint]
-        A list of :py:class:`~skhippr.cycles.continuation.BranchPoint`` objects representing the computed points along the force response curve.
     """
 
     response_F = []
@@ -169,9 +148,11 @@ def continue_from_continuation_curve(
 
     Parameters
     ----------
+    solver : NewtonSolver
+        The solver to use for continuation.
     curve : list[BranchPoint]
         The initial continuation curve.
-    key_cont : str
+    new_cont_param : str
         The name of the new continuation parameter (e.g., `'"omega"'`).
     param_range : tuple[float, float]
         The minimum and maximum values for the (new) continuation parameter.
@@ -232,17 +213,6 @@ def continue_from_continuation_curve(
 def plot_all_responses(
     initial_response: list[BranchPoint], other_responses: list[list[BranchPoint]]
 ):
-    """
-    Plot all computed response curves using py:func:`plot_3D_frc`.
-
-    Parameters
-    ----------
-    initial_response : list[BranchPoint]
-        The initial response curve to be plotted.
-    other_responses : list[list[BranchPoint]]
-        A list of additional response curves to plot.
-
-    """
     ax = plot_3D_frc(initial_response, "Initial response", plot_stability=True)
     for response in other_responses:
         plot_3D_frc(response, ax=ax, plot_stability=True)
@@ -323,7 +293,7 @@ def visualize_solution(system: HBMSystem):
 
     Parameters
     ----------
-    problem : HBMSystem
+    system : HBMSystem
         The :py:class:`~skhippr.cycles.hbm.HBMSystem` object containing the problem formulation and the solution.
 
     Returns

@@ -1,3 +1,5 @@
+"""Van der Pol oscillator: continuation w.r.t. nu and animation of the resulting phase portrait."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation
@@ -23,8 +25,17 @@ from skhippr.solvers.continuation import BranchPoint
 
 
 def main():
+    """Demonstration of the continuation of the Van der Pol oscillator w.r.t. nu and animation of the resulting phase portrait.
+    This function performs the following steps:
 
-    print("Van der Pol oscillator: continuation w.r.t. mu")
+    #. Setup of the :py:class:`~skhippr.odes.autonomous.Vanderpol` ODE
+    #. Setup of a :py:class:`~skhippr.cycles.hbm.HBMSystem` object with the :py:class:`~skhippr.odes.autonomous.Vanderpol` ode and a :py:class:`~skhippr.Fourier.Fourier` object, encoding both the HBM equations and the phase anchor.
+    #. Continuation of the HBM system w.r.t. nu using the :py:func:`~skhippr.solvers.continuation.pseudo_arclength_continuator` and a :py:class:`~skhippr.solvers.newton.NewtonSolver`
+    #. Analysis of the resulting branch of solutions, extracting time series, amplitudes, Floquet multipliers, and stability
+    #. Visualization of the results, including an animation of the phase portrait and Floquet multipliers, as well as plots of amplitude and frequency w.r.t. nu
+    """
+
+    print("Van der Pol oscillator: continuation w.r.t. nu")
 
     # setup
     newton_solver = NewtonSolver(verbose=True)

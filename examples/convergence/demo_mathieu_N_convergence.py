@@ -1,38 +1,9 @@
-"""Demonstration of convergence of Koopman-Hill projection method for the Mathieu equation.
-This script analyzes the convergence of the Koopman-Hill projection method applied to the Mathieu equation,
-a classical example of a parametrically excited system. The convergence is studied by increasing the number
-of harmonics (N_HBM) in the Harmonic Balance Method (HBM) and comparing the resulting monodromy matrix to a
-reference solution obtained via the shooting method.
-Functions
----------
-- analyze_N_mathieu(N_max=60):
-    Runs the convergence analysis for the Mathieu equation up to N_max harmonics.
-- analyze_N_hill(f, params, Phi_T_ref=None, N_max=10, params_plot=None, ax=None, csv_path=None, key_param=None):
-    Analyzes the convergence of the Koopman-Hill projection for a general Hill-type problem by increasing
-    the number of harmonics. Plots and optionally saves the error in the monodromy matrix.
-- reference_monodromy_matrix(f, params, T):
-    Computes the reference monodromy matrix for a given system using the shooting method, ensuring that
-    the equilibrium at zero is maintained.
-- setup_plot(ax, lambdas_ref):
-    Sets up the plotting environment for visualizing convergence and Floquet multipliers.
-- initialize_errors_with_param(params, key_param, csv_path):
-    Initializes the error tracking list, optionally including a parameter value for CSV output.
-- setup_hbm_problem(f, params, N_HBM):
-    Configures and solves the HBM problem for the specified system and number of harmonics, ensuring
-    convergence at the equilibrium.
-- write_errors_to_csv(csv_path, errors):
-    Appends the current error values to a CSV file.
-Usage
------
-Run this script directly to perform the convergence analysis for the Mathieu equation and display the results.
-Example:
-    python demo_mathieu_N_convergence.py
-Dependencies
-------------
-- numpy
-- matplotlib
-- csv
-- skhippr (with modules: systems.ltp.mathieu, Fourier, problems.hbm, problems.shooting, stability.KoopmanHillProjection)
+"""
+Demonstration of convergence of Koopman-Hill projection method for the Mathieu equation.
+
+This script analyzes the convergence of the Koopman-Hill projection stability method applied to the :py:class:`~skhippr.odes.ltp.MathieuODE` and :py:class:`~skhippr.odes.ltp.SmoothedMeissner` equations around their  equilibrium at zero.
+
+The convergence is studied by increasing the number of harmonics (N_HBM) in the Harmonic Balance Method (HBM) and comparing the resulting monodromy matrix to a reference solution obtained via the shooting method.
 """
 
 import numpy as np
@@ -48,6 +19,7 @@ from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 
 def analyze_N_mathieu(N_max=60, csv_path=None):
+    """Analyze the convergence of the Koopman-Hill projection method for the Mathieu equation. Optionally, results can be saved to a csv file."""
     mathieu = MathieuODE(
         t=0, x=np.array([0.0, 0.0]), a=4, b=0.2, omega=1, damping=0.005
     )
@@ -60,13 +32,16 @@ def analyze_N_mathieu(N_max=60, csv_path=None):
 def analyze_smoothness_effects(N_max=30, csv_path=None, smoothing=None):
     """
     Analyze and visualize the effects of the smoothing parameter on the convergence of a Hill-type system.
-    For smoothing==1, the system coincides with Mathieu's equation and for smoothing==0 with the Meissner equation.
+
+    For ``smoothing`` ==1, the :py:class:`~skhippr.odes.ltp.SmoothedMeissner` ODE coincides with Mathieu's equation and for ``smoothing`` ==0 with the Meissner equation.
     This function iterates over a range of smoothing parameter values, runs a convergence analysis for each,
-    and plots both the convergence behavior and the time-domain response. Optionally, results can be saved to a CSV file.
+    and plots the corresponding excitation and the convergence behavior. Optionally, results can be saved to a CSV file.
+
     Parameters
     ----------
+
     N_max : int, optional
-        Maximum number of harmonics or terms to consider in the convergence analysis (default is 30).
+        Maximum number of harmonics to consider in the convergence analysis (default is 30).
     csv_path : str or None, optional
         Path to a CSV file where results will be saved. If None, results are not saved (default is None).
     smoothing : array-like or None, optional

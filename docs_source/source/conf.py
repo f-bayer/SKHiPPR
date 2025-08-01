@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path("..", "..").resolve()))
 project = "SKHiPPR"
 copyright = "2025, Fabia Bayer"
 author = "Fabia Bayer"
-release = "1.0"
+release = "2.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
