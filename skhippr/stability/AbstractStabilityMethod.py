@@ -3,13 +3,12 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from skhippr.solvers.newton import NewtonSolver
+    from skhippr.equations.AbstractEquation import AbstractEquation
 
 
 class AbstractStabilityMethod(ABC):
     """
     Abstract base class for stability analysis methods.
-
     This class defines the commmon interface for stability methods in SKHiPPR.
 
     Attributes:
@@ -28,14 +27,14 @@ class AbstractStabilityMethod(ABC):
         self.tol = tol
 
     @abstractmethod
-    def determine_eigenvalues(self, problem: "NewtonSolver") -> np.ndarray:
+    def determine_eigenvalues(self, equation: "AbstractEquation") -> np.ndarray:
         """
         Determine the eigenvalues that govern the stability from a given :py:class:`~skhippr.cycles.newton.NewtonProblem`.
 
         Parameters
         ----------
 
-        problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
+        equation : :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation`
             The problem instance containing the (converged) system for which eigenvalues are to be computed.
 
         Returns
@@ -55,8 +54,7 @@ class AbstractStabilityMethod(ABC):
     @abstractmethod
     def determine_stability(self, eigenvalues: np.ndarray) -> bool:
         """
-        Determine the stability based on a set of eigenvalues as returned by
-        :py:func:`~skhippr.stability._StabilityMethod._Stabilitymethod.self.determine_eigenvalues`.
+        Determine the stability based on a set of eigenvalues as returned by ``self.determine_eigenvalues()``.
 
         Parameters
         ----------
@@ -86,19 +84,7 @@ class AbstractStabilityMethod(ABC):
 
 class StabilityEquilibrium(AbstractStabilityMethod):
     """
-    Class for assessing stability of equilibria.
-
-    The solution of a :py:class:`~skhippr.cycles.newton.NewtonProblem` corresponds to an equilibrium of the system ::
-
-        x_dot = problem.residual_function(x)
-
-    The stability of this system is asserted by considering the real part of the eigenvalues of the Jacobian matrix.
-
-    Caution
-    -------
-
-    Carefully check the sign of the residual function: While the residual multiplied by, say, -1 still yields the same equilibrium,
-    the signs of the eigenvalues would flip and thus stability would be asserted wrongly.
+    Class for assessing the stability of an equilibrium of a an :py:class:`~skhippr.odes.AbstractODE.AbstractODE`.
 
     Parameters
     ----------
@@ -115,9 +101,9 @@ class StabilityEquilibrium(AbstractStabilityMethod):
         super().__init__(label="Equilibrium stability", tol=tol)
         self.n_dof = n_dof
 
-    def determine_eigenvalues(self, equation) -> np.ndarray:
+    def determine_eigenvalues(self, ode) -> np.ndarray:
         """Stability is governed immediately by the eigenvalues of the Jacobian matrix, which are returned by this function."""
-        return np.linalg.eigvals(equation.derivative("x", update=False))
+        return np.linalg.eigvals(ode.derivative("x", update=False))
 
     def determine_stability(self, eigenvalues) -> bool:
         """returns ``True`` if all eigenvalues have negative real part (smaller than ``self.tol``)."""

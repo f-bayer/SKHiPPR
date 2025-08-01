@@ -4,29 +4,29 @@ Stability methods
 .. contents::  
     :depth: 2
 
-The stability methods are implemented as subclasses of abstract :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod`. Each such class defines a method which returns stability-defining eigenvalues from the derivative information of a given problem, and a method to assert stability based on these eigenvalues.  
+The stability methods are implemented as subclasses of abstract :py:class:`~skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod`. Each such class defines a method which returns stability-defining eigenvalues from the derivative information of a given :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation`, and a method to assert stability based on these eigenvalues.  
 
 Abstract parent class
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-.. autoclass:: skhippr.stability._StabilityMethod._StabilityMethod
+.. autoclass:: skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod
     :members:
 
 Stability of equilibria 
 -----------------------------------------------------------------------------------------------
 
-.. autoclass:: skhippr.stability._StabilityMethod.StabilityEquilibrium
+.. autoclass:: skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium
     :members:
 
 
 Abstract parent class for Hill matrix methods
 -------------------------------------------------------------------------------------------------------------
 
-.. autoclass:: skhippr.stability._StabilityHBM._StabilityHBM
+.. autoclass:: skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM
     :members:
 
 Koopman-Hill projection methods
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------
 
 .. autoclass:: skhippr.stability.KoopmanHillProjection.KoopmanHillProjection
     :members:

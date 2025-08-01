@@ -12,7 +12,7 @@ class KoopmanHillProjection(AbstractStabilityHBM):
     """
     Direct Koopman Hill projection method for stability analysis of periodic solutions.
 
-    This class implements the abstract method :py:func:`~skhippr.stability._StabilityHBM._StabilityHBM.fundamental_matrix` of its parent class :py:class:`~skhippr.stability._StabilityHBM._StabilityHBM` using the direct Koopman-Hill projection formula: ::
+    This subclass of :py:class:`~skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM` implements the abstract method :py:func:`~skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.fundamental_matrix` of its parent class using the direct Koopman-Hill projection formula: ::
 
         fundamental_matrix = C @ D_time(t) @ np.expm(hill_matrix*t) @ W
 
@@ -215,7 +215,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
     The subharmonic formulation is more accurate (error bound decays twice as fast) at the cost of approximately twice the computation time of the direct method.
 
-    Upon initialization, The projection matrices ``self.C`` and ``self.W`` as well as ``self.C_subh`` and ``self.W_subh`` are constructed once-and-for-all depending on the formulation (real or complex), and stored as attributes.
+    Upon initialization, the projection matrices ``self.C`` and ``self.W`` as well as ``self.C_subh`` and ``self.W_subh`` are constructed once-and-for-all depending on the formulation (real or complex), and stored as attributes.
 
     Parameters
     ----------

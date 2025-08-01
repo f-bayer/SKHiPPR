@@ -11,7 +11,7 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
     """
     Abstract base class for stability methods for periodic solutions, applicable to HBM problems.
 
-    In addition to the methods inherited from :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod`, it requires a method to compute the fundamental solution matrix of the periodic solution.
+    In addition to the methods inherited from :py:class:`~skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod`, it requires a method to compute the fundamental solution matrix of the periodic solution.
     With this, the Floquet multipliers (eigenvalues), which govern stability based on their magnitude, can be determined.
 
 
@@ -35,9 +35,7 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
         self.autonomous = autonomous
 
     @abstractmethod
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMEquation
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Compute the fundamental matrix at a given normalized time for a specified periodic solution.
 
@@ -46,8 +44,8 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
 
         t_over_period : float
             Normalized time over the period (typically between 0 and 1).
-        problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
-            The (solved) :py:class:`~skhippr.cycles.hbm.hbmProblem` of whose solution the fundamental matrix is sought.
+        hbm : :py:class:`~skhippr.cycles.hbm.HBMEquation`
+            The (solved) :py:class:`~skhippr.cycles.hbm.HBMEquation` of whose solution the fundamental matrix is sought.
 
         Returns
         -------
@@ -56,25 +54,13 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
         """
         ...
 
-    def determine_eigenvalues(self, problem: HBMEquation) -> np.ndarray:  # type:ignore
+    def determine_eigenvalues(self, hbm: HBMEquation) -> np.ndarray:  # type:ignore
         """
         Determine the Floquet multipliers of the periodic solution (eigenvalues of the monodromy matrix) for the periodic solution encoded in the given :py:class:`~skhippr.cycles.hbm.hbmProblem`.
 
-        Parameters
-        ----------
-
-        problem : :py:class:`~skhippr.cycles.hbm.hbmProblem`
-            The (solved) harmonic balance method (HBM) problem of whose solution the Floquet multipliers are sought.
-
-        Returns
-        -------
-
-        np.ndarray
-            1-D Array of Floquet multipliers (eigenvalues of the monodromy matrix).
-
         """
 
-        monodromy = self.fundamental_matrix(t_over_period=1, hbm=problem)
+        monodromy = self.fundamental_matrix(t_over_period=1, hbm=hbm)
         floquet_multipliers = np.linalg.eigvals(monodromy)
         return floquet_multipliers
 
@@ -87,18 +73,6 @@ class AbstractStabilityHBM(AbstractStabilityMethod):
         In the autonomous case, one Floquet multiplier at (numerically) ``1`` is expected, irrespective of the stability properties (due to the freedom of phase).
         Therefore, if ``self.autonomous`` is ``True``, the method identifies and excludes the Floquet multiplier closest to ``1``.
         If this multiplier deviates from ``1`` by more than ``self.tol``, a warning is issued.
-
-        Parameters
-        ----------
-
-        eigenvalues : array_like
-            1-D Array of Floquet multipliers (eigenvalues) of the periodic solution.
-
-        Returns
-        -------
-
-        bool
-            ``True`` if the periodic solution is stable, ``False`` otherwise.
 
         Warns
         -----
