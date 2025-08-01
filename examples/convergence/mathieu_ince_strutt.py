@@ -1,17 +1,21 @@
 """This example file creates some mathieu-equation-related figures for the Bayer2025 paper:
+
 * Ince-Strutt diagram
-* Special case on the stability boundary with coinciding eigenvalues"""
+* Special case on the stability boundary with coinciding eigenvalues
+
+"""
 
 from collections.abc import Callable, Iterable
-from encodings.punycode import selective_find
 from typing import override
 import numpy as np
 from copy import copy
 
 from skhippr.Fourier import Fourier
-from skhippr.problems import HBM
-from skhippr.problems.HBM import HBMProblem
-from skhippr.systems.ltp import mathieu
+from skhippr.equations.AbstractEquation import AbstractEquation
+from skhippr.equations.EquationSystem import EquationSystem
+from skhippr.cycles.hbm import HBMEquation
+from skhippr.odes.ltp import MathieuODE
+from skhippr.solvers.newton import NewtonSolver
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
     KoopmanHillSubharmonic,
@@ -19,190 +23,64 @@ from skhippr.stability.KoopmanHillProjection import (
 import matplotlib.pyplot as plt
 
 
-class InceStruttProblem(HBMProblem):
+class FixedHarmonic(AbstractEquation):
+    """This equation fixes the cosine component of the ``harmo``-th harmonic of the ``dof``-th degree of  freedom to ``value``.
+    ``fourier`` is used during initialization to know the correct number of degrees of freedom and the formulation.
+    """
+
+    def __init__(self, X, fourier, harmo=1, dof=0, value=1.0):
+        super().__init__(None)
+        self.X = X
+        self.value = value
+        self.anchor = np.zeros(fourier.n_dof * (2 * fourier.N_HBM + 1))
+        if fourier.real_formulation:
+            self.anchor[harmo * fourier.n_dof + dof] = 1
+        else:
+            self.anchor[
+                [
+                    (self.fourier.N_HBM + harmo) * self.fourier.n_dof + dof,
+                    (self.fourier.N_HBM - harmo) * self.fourier.n_dof + dof,
+                ]
+            ] = 0.5
+
+    def residual_function(self):
+        return np.atleast_1d(np.inner(self.anchor, self.X) - self.value)
+
+    def closed_form_derivative(self, variable):
+        match variable:
+            case "X":
+                return np.atleast_2d(self.anchor)
+            case "value":
+                return np.atleast_2d(-1)
+            case _:
+                return np.atleast_2d(0)
+
+
+class InceStruttSystem(EquationSystem):
     """
     This is a subclass of :py:class:`~skhippr.problems.HBM.HBMProblem` for finding periodic solutions as stability boundaries of an Ince-Strutt-Type chart.
 
-    An additional anchor equation is used to fix a selected harmonic and degree of freedom to 1,
+    An additional equation is appended to the HBMEquation used to fix a selected harmonic and degree of freedom to 1,
     identifying one (nontrivial) periodic solution out of the dense set of periodic solutions at a stability boundary.
 
     The following attributes are added/modified compared to the parent :py:class:`~skhippr.problems.HBM.HBMProblem`:
-
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.x` has one entry more: The last entry is the y coordinate of the Ince-Strutt diagram (usually 'b').
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.<varying_parameter>` returns the last entry of :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.x`, which can change during Newton updates.
-    * :py:func:`~skhippr.problems.HBM.HBMProblem_autonomous.residual_function` now has an appended equation for the anchor, which selects exactly one out of the dense periodic solutions at a stability boundary.
-    * :py:attr:`~skhippr.problems.HBM.HBMProblem_autonomous.idx_anchor` is determined by the arguments ``harmo_anchor`` and ``dof_anchor`` and fixes the harmonic whose value is prescribed by the anchor.
 
     """
 
     def __init__(
         self,
-        f: Callable[[np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
-        initial_guess: np.ndarray,
-        omega: float,
-        fourier: Fourier,
-        variable: str = "x",
-        stability_method=None,
-        tolerance: float = 1e-8,
-        max_iterations: int = 20,
-        verbose: bool = False,
-        period_k=1,
-        harmo_anchor: int = 1,
-        dof_anchor: int = 0,
-        parameters_f: dict[str, float] = None,
+        hbm: HBMEquation,
+        harmo_anchor=1,
+        dof_anchor=0,
         varying_parameter="b",
     ):
+        anchor = FixedHarmonic(hbm.X, hbm.fourier, harmo_anchor, dof_anchor)
+
         super().__init__(
-            f=f,
-            initial_guess=initial_guess,
-            omega=omega,
-            fourier=fourier,
-            variable=variable,
-            stability_method=stability_method,
-            tolerance=tolerance,
-            max_iterations=max_iterations,
-            verbose=verbose,
-            period_k=period_k,
-            parameters_f=parameters_f,
+            equations=[hbm, anchor],
+            unknowns=["X", varying_parameter],
+            equation_determining_stability=hbm,
         )
-        self.idx_anchor = self._determine_anchor(harmo_anchor, dof_anchor)
-        self.label = "Ince-Strutt HBM"
-
-    def __getattr__(self, name):
-        """
-        Provides dynamic attribute access for the instance.
-        If the requested attribute is varying_parameter, then the last entry of x is returned.
-        """
-        # Wrap the _problem object to provide direct access to its attributes and methods.
-        # self.__getattr__(name) is ONLY called if self.name throws an AttributeError.
-        if "varying_parameter" in self.__dict__ and name == self.varying_parameter:
-            return self.x[(2 * self.fourier.N_HBM + 1) * self.fourier.n_dof]
-
-        raise AttributeError(f"InceStruttProblem has no attribute '{name}'.")
-
-    def __setattr__(self, name, value):
-        """
-        Custom attribute setter that delegates most attribute assignment of the parameter.
-        """
-        # Defer almost all parameters to the _problem
-        if name in ("_problem", "anchor", "tangent", "variable", "x"):
-            super().__setattr__(name, value)
-        elif name in ("_list_params", "f"):
-            pass
-        else:
-            setattr(self._problem, name, value)
-
-            # TODOOOO find a better strategy tomorrow
-
-    @property
-    def omega(self):
-        return self.x[-1]
-
-    @omega.setter
-    def omega(self, value):
-        if len(self.x) == (2 * self.fourier.N_HBM + 1) * self.fourier.n_dof:
-            # during initialization we set omega as the last element of x
-            self.x = np.append(self.x, value)
-        else:
-            raise AttributeError(
-                "property 'omega' of 'HBMProblem_autonomous' is read-only after initialization"
-            )
-
-    @override
-    def determine_stability(self):
-        super().determine_stability()
-        if self.stability_method is not None:
-            floquet_multipliers = self.eigenvalues
-            idx_freedom_of_phase = np.argmin(abs(floquet_multipliers - 1))
-            floquet_multipliers = np.delete(floquet_multipliers, idx_freedom_of_phase)
-            self.stable = np.all(
-                np.abs(floquet_multipliers) < 1 + self.stability_method.tol
-            )
-
-    @override
-    def residual_function(self, x=None) -> tuple[np.ndarray, dict[str, np.ndarray]]:
-        """
-        Computes the residual vector and its derivatives for the current problem,
-        including an anchor equation to constrain the phase.
-
-        Parameters
-        ----------
-        x : np.ndarray, optional
-            The input variable vector. If None, uses ``self.x``.
-
-        Returns
-        -------
-
-        R : np.ndarray
-            The residual vector. HBM residual with an additional 0 appended.
-        derivatives : dict of str to np.ndarray
-            Dictionary mapping variable names to their derivatives with respect to ``x``.
-            The derivatives for the anchor equation are included, and the ``"omega"`` key is removed.
-        """
-
-        if x is None:
-            x = self.x
-
-        R, derivatives = super().residual_function(x[:-1])
-
-        X_ext = self.x
-        # anchor equation (phase may not change):
-        # delta X[anchor[0]] = X[anchor[0]]/X[anchor[1]] * delta X[anchor[1]]
-
-        anchor = np.zeros((1, X_ext.size), dtype=X_ext.dtype)
-        anchor[0, self.idx_anchor[0]] = -1
-        anchor[0, self.idx_anchor[1]] = (
-            X_ext[self.idx_anchor[0]] / X_ext[self.idx_anchor[1]]
-        )
-        dR_dX = np.vstack(
-            (
-                np.hstack(
-                    (
-                        derivatives[self.variable],
-                        derivatives["omega"][:, np.newaxis],
-                    )
-                ),
-                anchor,
-            )
-        )
-
-        derivatives[self.variable] = dR_dX
-        del derivatives["omega"]
-
-        R = np.append(R, 0)
-        for key in derivatives:
-            if len(derivatives[key].shape) == 1:
-                derivatives[key] = np.append(derivatives[key], 0)
-
-        return R, derivatives
-
-    def _determine_anchor(self, harmo: int = 1, dof: int = 0) -> np.ndarray:
-        """Determine the index of the anchor equation.
-        The anchor equation ensures that the phase of the  harmo-th harmonic
-        and the dof-th degree of freedom does not change during HBM solution for autonomous systems.
-        """
-        if self.fourier.real_formulation:
-            # -tan(phi) = c_k/s_k = const -->  delta c = c_k/s_k * delta s
-            idx_anchor = [
-                harmo * self.fourier.n_dof + dof,
-                (harmo + self.fourier.N_HBM) * self.fourier.n_dof + dof,
-            ]
-        else:
-            # exp(i*phi) = X+/X- = const -->  delta X+ = X+/X- * delta X-
-            idx_anchor = [
-                (self.fourier.N_HBM + harmo) * self.fourier.n_dof + dof,
-                (self.fourier.N_HBM - harmo) * self.fourier.n_dof + dof,
-            ]
-
-        # Avoid large numbers and division by zero
-        if abs(self.x[idx_anchor[1]]) < (1e-4 * abs(self.x[idx_anchor[0]])):
-            idx_anchor.reverse()
-
-        return np.array(idx_anchor)
-
-    @override
-    def residual_function(self, x=None):
-        return super().residual_function(x)
 
 
 def main():
@@ -210,24 +88,31 @@ def main():
     b_grid = np.linspace(0, 5, num=101)
 
     fourier = Fourier(N_HBM=10, L_DFT=30, n_dof=2, real_formulation=True)
-    solution = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
-    problem = HBMProblem(
-        mathieu,
-        solution,
-        omega=1,
+    X = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
+    ode = MathieuODE(t=0, x=np.array([0.0, 0.0]), a=1, b=1, omega=1, damping=0)
+    hbm = HBMEquation(
+        ode=ode,
+        omega=ode.omega,
         fourier=fourier,
-        variable="y",
-        stability_method=KoopmanHillProjection(fourier=fourier, autonomous=False),
-        parameters_f={"a": 1, "b": 1, "omega": 1, "d": 0},
-        verbose=False,
+        initial_guess=X,
+        stability_method=KoopmanHillProjection(fourier=fourier),
     )
-    _, magnitudes_fm = ince_strutt_rastered(a_grid, b_grid, problem)
-    plot_magnitude(magnitudes_fm, logscale=True, a_grid=a_grid, b_grid=b_grid)
+    # _, magnitudes_fm = ince_strutt_rastered(a_grid, b_grid, hbm)
+    # ax = plot_magnitude(magnitudes_fm, logscale=True, a_grid=a_grid, b_grid=b_grid)
+
+    # Continuation along stability boundary
+    ode.a = -0.001
+    ode.b = 0
+    sys_IS = InceStruttSystem(hbm)
+    solver = NewtonSolver()
+    solver.solve(sys_IS)
+    assert sys_IS.solved
 
 
-def ince_strutt_rastered(a_grid: Iterable, b_grid: Iterable, problem: HBMProblem):
-    """Return a len(a_grid)*len(b_grid)*n_dof array of solved Ince-Strutt problems corresponding to the (a, b) grid"""
+def ince_strutt_rastered(a_grid: Iterable, b_grid: Iterable, hbm: HBMEquation):
+    """Return a len(a_grid)*len(b_grid)*n_dof array of solved HBM equations corresponding to the (a, b) grid"""
 
+    solver = NewtonSolver()
     ince_strutt = []
     magnitude_fm = np.zeros((len(a_grid), len(b_grid)))
 
@@ -236,15 +121,15 @@ def ince_strutt_rastered(a_grid: Iterable, b_grid: Iterable, problem: HBMProblem
         print(f"b = {b:.3f} ({k:2d}/{len(b_grid):2d}) ", end="\n")
 
         for l, a in enumerate(a_grid):
-            problem = copy(problem)
-            problem.a = a
-            problem.b = b
-            problem.reset()
-            problem.solve()
-            if not problem.converged:
-                raise RuntimeError(f"Ince-Strutt problem not converged at a={a}, b={b}")
-            list_b.append(problem)
-            magnitude_fm[k, l] = np.max(np.abs(problem.eigenvalues))
+            hbm = copy(hbm)
+            hbm.a = a
+            hbm.b = b
+            solver.solve_equation(equation=hbm, unknown="X")  # solved at initial guess
+            # Update the derivative as it was not used when solved at initial guess
+            hbm.derivative("X", update=True)
+            stable = hbm.determine_stability(update=True)
+            list_b.append(hbm)
+            magnitude_fm[k, l] = np.max(np.abs(hbm.eigenvalues))
 
         ince_strutt.append(list_b)
 
@@ -268,19 +153,13 @@ def plot_magnitude(magnitude_fm, logscale=True, a_grid=None, b_grid=None):
         norm = "linear"
 
     # Show image
-    plt.pcolormesh(a_grid, b_grid, shade, cmap="gray_r", norm=norm)
+    fig, ax = plt.subplots()
+    ax.pcolormesh(a_grid, b_grid, shade, cmap="gray_r", norm=norm)
     cbar = plt.colorbar(label="largest FM (magnitude)")
-    plt.xlabel("$a$")
-    plt.ylabel("$b$")
+    ax.xlabel("$a$")
+    ax.ylabel("$b$")
 
-    # # Manually rectify the ticks to remove the scaling/shifting:
-    # ticks = cbar.get_ticks()
-    # if logscale:
-    #     cbar.set_ticks(ticks)
-    #     cbar.set_ticklabels([f"10^{tick}" for tick in ticks])
-    # else:
-    #     cbar.set_ticks(ticks - 1)
-    #     cbar.set_ticklabels([f"{tick}" for tick in ticks])
+    return ax
 
 
 def test_plotting_magnitudes():
