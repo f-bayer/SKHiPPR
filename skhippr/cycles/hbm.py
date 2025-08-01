@@ -15,71 +15,20 @@ if TYPE_CHECKING:
 
 class HBMEquation(AbstractCycleEquation):
     """
-    HBMEquation encodes the harmonic balance equations to find a periodic solution of a non-autonomous
-    ordinary differential equation (ODE) with periodic excitation.
+    :py:class:`~ skhippr.cycles.hbm.HBMEquation` is a subclass of :py:class:`~ skhippr.equations.AbstractEquation.AbstractEquation` which encodes the harmonic balance equations to find a periodic solution of a non-autonomous :py:class:`~skhippr.odes.AbstractODE.AbstractODE` with periodic excitation.
 
-    This class transports a non-autonomous ODE into the frequency domain using a :py:class:`~skhippr.Fourier.Fourier` configuration. The resulting nonlinear harmonic balance equations in the frequency domain are then solved using the methods of the parent :py:class:`~skhippr.cycles.newton.NewtonProblem` class.
+    This class computes a nonlinear harmonic balance residual in the frequency domain using a :py:class:`~skhippr.Fourier.Fourier` object. The resulting nonlinear harmonic balance equations in the frequency domain are then solved using the methods of the parent :py:class:`~skhippr.cycles.newton.NewtonProblem` class.
 
-    In addition to the attributes and methods of the parent :py:class:`~skhippr.cycles.newton.NewtonProblem`, there are the following attributes.
+    As the :py:class:`~ skhippr.cycles.hbm.HBMEquation` is a subclass of :py:class:`~skhippr.cycles.AbstractCycleEquation.AbstractCycleEquation`, attribute calls and updates are delegated to the underlying :py:class:`~skhippr.odes.AbstractODE.AbstractODE` whenever applicable.
 
-    Problem configuration:
+    Attributes:
 
-    * :py:func:`~skhippr.cycles.hbm.hbmProblem.f_with_params` now encodes the *time-domain* ODE which is passed to the constructor. The first two arguments must be time ``t`` and state.
-    * :py:attr:`~skhippr.cycles.hbm.hbmProblem.omega`
-    * :py:attr:`~skhippr.cycles.hbm.hbmProblem.period_k`
-    * :py:attr:`~skhippr.cycles.hbm.hbmProblem.omega_solution`
-    * :py:attr:`~skhippr.cycles.hbmProblem.fourier`
-
-    Extracting information about the solution:
-
-    * :py:func:`~skhippr.cycleslem.x_time`
-    * :py:func:`~skhippr.cyclesm.hill_matrix`
-    * :py:func:`~skhippr.cycles.hbm.hbmProblem.ode_coeffs`
-    * :py:func:`~skhippr.cycles.hbm.hbmProblem.ode_samples`
-    * :py:func:`~skhippr.cycles.hbm.hbmProblem.exponential_decay_parameters`
-    * :py:func:`~skhippr.cycles.hbm.hbmProblem.error_bound_fundamental_matrix`
-
-
-
-    All attributes:
-    ----------------
-
-    f : Callable[[float, np.ndarray, ...], tuple[np.ndarray, dict[str, np.ndarray]]]
-        The ODE function in the time domain.
-        Should take as first two arguments time t and state vector, then parameters as named arguments.
-        Should return the residual and its derivatives (at minimum with respect to state vector and continuation parameter(s)) in the time domain.
-    initial_guess : np.ndarray
-        Initial guess for the solution. Can be passed either in the frequency domain (:py:attr:`~skhippr.cycles.hbm.hbmProblem.fourier.n_dof` * (2 * :py:attr:`~skhippr.cycles.hbm.hbmProblem.fourier.N_HBM` + 1) 1-D array) or time domain ( ( :py:attr:`~skhippr.cycles.hbm.hbmProblem.fourier.n_dof`, :py:attr:`~skhippr.cycles.hbm.hbmProblem.fourier.L_DFT` 2-D array).
-    omega : float
-        Fundamental frequency of the excitation.
-    fourier : Fourier
-        Discrete Fourier Transform configuration object. Encodes number of harmonics and length of FFT.
-    variable : str, optional
-        Name of the state variable of f (default is "x").
-    stability_method : "_StabilityHBM", optional
-        Method for stability analysis (default is None).
-    tolerance : float, optional
-        Convergence tolerance for the Newton solver (default is 1e-8).
-    max_iterations : int, optional
-        Maximum number of Newton iterations (default is 20).
-    verbose : bool, optional
-        If True, enables verbose output (default is False).
-    period_k : float, optional
-        The solver searches of periodic solutions whose period time is
-        period_k times the period time of the excitation (default is 1).
-    parameters_f : dict[str, Any], optional
-        Additional parameters passed to the ODE function (default is None).
-        Must contain any eventually desired continuation parameters, can contain more.
-
-    factor_k : float
-        Inverse of period_k, used to scale the frequency.
-    omega : float
-        Fundamental frequency of the periodic solution.
-    x : np.ndarray
-        Current solution in the frequency domain.
-    derivatives : dict
-        Dictionary of derivatives computed during the last residual evaluation.
-
+    * :py:attr:`~skhippr.hbm.HBMEquation.ode`: :py:class:`~skhippr.odes.AbstractODE.AbstractODE` object representing the non-autonomous ODE of which a periodic solution is sought.
+    * :py:attr:`~skhippr.hbm.HBMEquation.omega`: Frequency of the system forcing.
+    * :py:attr:`~skhippr.hbm.HBMEquation.fourier: :py:class:`~skhippr.Fourier.Fourier` object used to perform the FFT.
+    * :py:attr:`~skhippr.hbm.HBMEquation.X`: Vector of Fourier coefficients of the periodic solution.
+    * :py:attr:`~skhippr.hbm.HBMEquation.period_k`: The period time of the sought-after periodic solution is ``period_k`` times the forcing period given by ``omega``.
+    * :py:attr:`~skhippr.hbm.HBMEquation.stability_method`: The stability method.
     """
 
     def __init__(
@@ -93,9 +42,6 @@ class HBMEquation(AbstractCycleEquation):
     ):
         """
         Initialize the HBM equations.
-        Parameters:
-        -----------
-        TO DOOOOO
         """
         super().__init__(
             ode=ode, omega=omega, period_k=period_k, stability_method=stability_method
@@ -108,19 +54,14 @@ class HBMEquation(AbstractCycleEquation):
 
         self.X = initial_guess
 
-    def x_time(self):
+    def x_time(self) -> np.ndarray:
         """
-        Return the time series of the solution at the FFT sample points.
-
-        Return
-        -------
-        numpy.ndarray
-            The time-domain signal obtained by applying the inverse DFT to :py:attr:`~skhippr.cycles.hbm.hbmProblem.x`.
+        Return the time series of the solution at the FFT sample points as a ``self.ode.n_dof`` x ``self.fourier.L_DFT`` array.
         """
 
         return self.fourier.inv_DFT(self.X)
 
-    def aft(self, X=None) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+    def aft(self, X=None) -> np.ndarray:
         """
         Compute the HBM residual and its derivatives using the AFT (Alternating Frequency/Time) method.
 
@@ -133,9 +74,6 @@ class HBMEquation(AbstractCycleEquation):
         -------
         R : np.ndarray
             Residual vector in the frequency domain.
-        derivatives : dict of str to np.ndarray
-            Dictionary of derivatives with respect to each variable.
-            Includes both frequency-domain (``"<key>"``) and time-sampled (``"<key>_samp"``) derivatives.
         """
 
         if X is None:
@@ -163,9 +101,11 @@ class HBMEquation(AbstractCycleEquation):
 
     @override
     def residual_function(self):
+        """Returns ``self.aft(self.X)`` as the residual function of the HBM equations."""
         return self.aft(self.X)
 
     def closed_form_derivative(self, variable):
+        """Return the closed-form derivative of the residual function w.r.t. the variable. by Fourier transforming the corresponding derivatives in the time domain,evaluated at the samples."""
         if variable == "X":
             return self.dR_dX(self.X)
         elif variable == "omega":
@@ -241,6 +181,15 @@ class HBMEquation(AbstractCycleEquation):
         return self.fourier.DFT(derivatives_time)
 
     def hill_matrix(self, real_formulation: bool = None) -> np.ndarray:
+        """Return the Hill matrix, which is the derivative of the HBM equations w.r.t. ``X``.
+
+        Parameters
+        ----------
+        real_formulation : bool, optional
+            If True, returns the Hill matrix in real formulation, otherwise in complex formulation.
+            If None, uses the value of ``self.fourier.real_formulation``.
+
+        """
 
         H = self.derivative("X", update=False)
 
@@ -259,7 +208,7 @@ class HBMEquation(AbstractCycleEquation):
 
     def ode_coeffs(self) -> np.ndarray:
         """
-        Extract and return the Fourier coefficients of the Jacobian matrix J(t) from the Hill matrix.
+        Extract and return the Fourier coefficients of the Jacobian matrix df/dx(x(t)) from the Hill matrix.
 
         Note
         ----
@@ -270,7 +219,7 @@ class HBMEquation(AbstractCycleEquation):
         Returns
         -------
         np.ndarray
-            A 3D array of shape (n_dof, n_dof, 2*N_HBM+1) containing the Fourier coefficients of the system Jacobian.
+            A 3D array of shape (n_dof, n_dof, 2*N_HBM+1) containing the Fourier coefficients of df/dx(x(t))
 
         References
         ----------
@@ -308,11 +257,6 @@ class HBMEquation(AbstractCycleEquation):
         """
         Generate samples of the Jacobian matrix J(t) in time from the Hill matrix.
 
-        Note
-        ----
-        Usually, the same coefficients (but not transformed back and forth) are found as a result from the construction process in
-        ``self.derivatives[f"{self.variable}_samp"]``.
-
         Parameters
         ----------
 
@@ -323,7 +267,7 @@ class HBMEquation(AbstractCycleEquation):
         -------
 
         np.ndarray
-            The system matriy J(t) at the FFT samples.
+            The df/dx(x(t)) at the FFT samples.
         """
 
         if fourier is None:
@@ -331,7 +275,12 @@ class HBMEquation(AbstractCycleEquation):
         return fourier.matrix_inv_DFT(self.hill_matrix())
 
     @override
-    def stability_criterion(self, eigenvalues):
+    def stability_criterion(self, eigenvalues) -> bool:
+        """
+        The stability criterion for the HBM equations is that all Floquet multipliers must have a modulus less than 1.
+        If the ode is autonomous, the Floquet multiplier corresponding to the phase freedom is removed from the stability criterion.
+        """
+
         if self.stability_method is None:
             raise ValueError("No stability method available!")
         else:
@@ -349,12 +298,12 @@ class HBMEquation(AbstractCycleEquation):
         Estimate the exponential decay of the Fourier coefficients of the Jacobian matrix J(t).
 
         This method computes parameters ``a`` and ``b`` such that the norm of the ``k``-th Fourier coefficient
-        of the ODE Jacobian, is bounded by ``max(threshold, a * exp(-b * |k|))``.
+        of df/dx(x(t)) is bounded by ``max(threshold, a * exp(-b * |k|))``.
 
         Note
         ----
 
-        These decay parameters are central in the error bound of Bayer and Leine, 2025 (https://arxiv.org/pdf/2503.21318).
+        These decay parameters play a central role in the error bound of Bayer and Leine, 2025 (https://arxiv.org/pdf/2503.21318).
 
         Parameters
         ----------
@@ -473,6 +422,11 @@ class HBMEquation(AbstractCycleEquation):
 
 
 class HBMSystem(EquationSystem):
+    """This subclass of :py:class:`~skhippr.equations.EquationSystem.EquationSystem` instantiates a :py:class:`~skhippr.cycles.hbm.HBMEquation` and considers it as the first equation. The Fourier coefficient vector ``X`` is the first unknown.
+
+    If the underlying ODE is autonomous, the frequency ``omega`` of the periodic solution is not known in advance and is appended to the unknowns. Correspondingly, a :py:class:`~skhippr.cycles.hbm.HBMPhaseAnchor` equation is appended to the equations.
+    """
+
     def __init__(
         self,
         ode,
@@ -509,6 +463,17 @@ class HBMSystem(EquationSystem):
 
 
 class HBMPhaseAnchor(AbstractEquation):
+    """This class implements an anchor equation for the harmonic balance method (HBM) in autonomous systems to ensure that the phase of a specified degree of freedom and harmonic of the periodic solution does not change during the HBM solution procedure.
+
+    * Complex formulation:
+        exp(i*phi) = X+/X- = const
+    * Real formulation:
+        -tan(phi) = c_k/s_k = const
+
+    Hereby, ``harmo`` and ``dof``   specify the harmonic and degree of freedom for which the phase is anchored.
+
+    """
+
     def __init__(self, fourier, X, harmo, dof):
         super().__init__(None)
         self.X = X
@@ -518,6 +483,7 @@ class HBMPhaseAnchor(AbstractEquation):
         # self.phase_required = self.X[self.idx_anchor[0]] / self.X[self.idx_anchor[1]]
 
     def residual_function(self):
+        """Always returns zero."""
         # anchor equation (phase may not change):
         # delta X[anchor[0]] = X[anchor[0]]/X[anchor[1]] * delta X[anchor[1]]
 
@@ -526,6 +492,7 @@ class HBMPhaseAnchor(AbstractEquation):
         return np.atleast_1d(0)
 
     def closed_form_derivative(self, variable):
+        """Return the anchor as derivative w.r.t ``X`` and zero otherwise."""
         if variable == "X":
             self.anchor[0, self.idx_anchor[1]] = (
                 self.X[self.idx_anchor[0]] / self.X[self.idx_anchor[1]]

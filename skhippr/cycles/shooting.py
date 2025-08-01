@@ -13,40 +13,9 @@ from skhippr.equations.EquationSystem import EquationSystem
 
 class ShootingBVP(AbstractCycleEquation):
     """
-    ShootingBVP implements the boundary value problem with shooting method for finding periodic solutions of nonautonomous ODEs.
+    ShootingBVP implements the shooting method to solve the boundary value problem for finding periodic solutions of nonautonomous ODEs.
 
-    This class extends :py:class:`~skhippr.cycles.newton.NewtonProblem` to solve the boundary value problem given by integrating the initial value problem over a period using ``scipy.integrate.solve_ivp`` and matching the state at start and end time.
-    It supports both autonomous and non-autonomous systems, and can compute stability via Floquet multipliers.
-
-    * For non-autonomous systems, the unknown ``x`` is the state at time ``t = 0``.
-    * For autonomous system, the unknown ``x`` is the state at time ```t = 0`` and, as last entry, the period time ``T``. Every Newton update is performed orthogonal to the flow at ``x``.
-
-    Parameters:
-    -----------
-
-    f : Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]]
-        The system of ODEs. Must return the right-hand side of the ODE and a dictionary containing the Jacobian. First input argument must be the time ``t`` and second input argument must be the state. May have additional keyword arguments.
-    x0 : np.ndarray
-        Initial guess for the state of the periodic solution at time ``t = 0``.
-    T : float
-        Period of the orbit.
-    autonomous : bool, optional
-        If ``True``, treats the system as autonomous and includes the period as an unknown (default: ``False``).
-    variable : str, optional
-        Name of the variable of the first argument of ``f`` (default: ``"x"``).
-    tolerance : float, optional
-        Tolerance for Newton's method convergence (default: 1e-8).
-    max_iterations : int, optional
-        Maximum number of Newton iterations (default: 20).
-    verbose : bool, optional
-        If ``True``, prints detailed output during solving (default: ``False``).
-    kwargs_odesolver : dict[str, Any], optional
-        Additional keyword arguments for the ODE solver, cf. ``scipy.integrate.solve_ivp()`` (default: ``None``).
-    parameters : dict, optional
-        Additional keyword arguments for ``f`` (default: ``None``).
-    period_k : int, optional
-        For non-autonomous systems: The period time of the sought-after periodic solution is ``period_k`` times the excitation period (default: 1).
-
+    The residual is determined by integrating the initial value problem over a period from ``self.ode.t`` to ``self.ode.t+self.T`` using ``scipy.integrate.solve_ivp`` and comparing the state at start and end time.
     """
 
     def __init__(
@@ -66,22 +35,23 @@ class ShootingBVP(AbstractCycleEquation):
         self.kwargs_odesolver = kwargs_odesolver
 
     @override
-    def residual_function(self):
+    def residual_function(self) -> np.ndarray:
         """
         Computes the residual function ``r = x(T) - x(0)`` of the shooting problem.
-
-        Using :py:func:`~skhippr.cycles.shooting.ShootingProblem.integrate_with_fundamental_matrix`, integrate over the period and return the result and the monodromy matrix. Then subtract the initial condition and the identity matrix, respectively.
-
-        Returns
-        -------
-        tuple[np.ndarray, dict[str, np.ndarray]]
-            the residual and the derivative dictionary
         """
         x_T = self.x_time(t_eval=self.t_0 + self.T_solution)
         return x_T[:, -1] - self.x
 
     @override
-    def closed_form_derivative(self, variable):
+    def closed_form_derivative(self, variable) -> np.ndarray:
+        """
+        Returns the closed-form derivative of the residual function with respect to the specified variable.
+
+        * If the variable is "x", it returns ``Phi_T - np.eye(ode.n_dof)``, where ``Phi_T`` is the monodromy matrix.
+        * If the variable is "T" and the system is autonomous, it returns the dynamics evaluated at the final time.
+        * Otherwise, it raises a NotImplementedError to enforce the use of finite differences.
+
+        """
         match variable:
             case "x":
                 _, _, Phi_t = self.integrate_with_fundamental_matrix(
@@ -105,9 +75,9 @@ class ShootingBVP(AbstractCycleEquation):
 
     @override
     def stability_criterion(self, eigenvalues):
-        # eigenvalues are eigenvalues of Jacobian Phi_T - I.
-        # Floquet multipliers are eigs of Phi_T (i.e., eigenvalues + 1)
-        # Stable if all Floquet multipliers lie inside unit circle.
+        """Checks if all Floquet multipliers lie inside the unit circle.
+        The Floquet multipliers are computed as the eigenvalues of the monodromy matrix ``Phi_T``, i.e., the eigenvalues of the derivative w.r.t. ```x`` plus one.
+        """
 
         floquet_multipliers = eigenvalues + 1
         if self.ode.autonomous:
@@ -122,12 +92,14 @@ class ShootingBVP(AbstractCycleEquation):
 
         Parameters
         ----------
+
         t_eval : array_like or None, optional
             Time points at which to store the computed solution. If None, a default
             linspace from 0 to ``self.T`` with 150 points is used.
 
         Returns
         -------
+
         np.ndarray
             (``n_dof``, ``L``) 2-D array containing the state trajectory evaluated at the specified time points.
         """
@@ -162,8 +134,6 @@ class ShootingBVP(AbstractCycleEquation):
             Initial state vector of the system.
         t : float
             Final time up to which the integration is performed.
-        **kwargs
-            Additional keyword arguments to pass to the dynamics.
 
         Returns
         -------
@@ -224,15 +194,19 @@ class ShootingBVP(AbstractCycleEquation):
 
 
 class ShootingPhaseAnchor(AbstractEquation):
+    """This class implements an anchor equation for the shooting method in autonomous systems. EachNewton update must be orthogonal to the flow at x_0."""
+
     def __init__(self, ode, x):
         super().__init__(None)
         self.ode = ode
         self.x = x
 
     def residual_function(self):
+        """Always returns zero."""
         return np.atleast_1d(0)
 
     def closed_form_derivative(self, variable):
+        """Return the anchor (flow at ``(self.t, self.x)``) as derivative w.r.t ``x`` and zero otherwise."""
         if variable == "x":
             return self.ode.dynamics(x=self.x)[np.newaxis, :]
         else:
@@ -240,6 +214,8 @@ class ShootingPhaseAnchor(AbstractEquation):
 
 
 class ShootingSystem(EquationSystem):
+    """This subclass of :py:class:`~skhippr.equations.EquationSystem.EquationSystem` instantiates a :py:class:`~skhippr.cycles.shooting.ShootingBVP` and considers it as the first equation. The state vector ``x`` is the first unknown. If the underlying ODE is autonomous, the period ``T`` of the periodic solution is not known in advance and is appended to the unknowns. Correspondingly, a :py:class:`~skhippr.cycles.shooting.ShootingPhaseAnchor` equation is appended to the equations."""
+
     def __init__(
         self,
         ode: Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]],
