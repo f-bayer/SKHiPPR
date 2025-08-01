@@ -1,33 +1,8 @@
 """
-Module for pseudo-arclength continuation of nonlinear problems.
 
-This module provides tools for performing pseudo-arclength continuation using Newton's method.
-It includes a generator function for continuation and a :py:class:`~skhippr.cycles.continuation.BranchPoint` wrapper class that extends :py:class:`~skhippr.cycles.newton.NewtonProblem`
-with continuation-specific features.
+The :py:module:`skhippr.solvers.continuation` module offers the functionality to perform pseudo-arclength continuation on equation systems encoded by :py:class:`~skhippr.equations.EquationSystem.EquationSystem` objects.
 
-Classes
--------
-
-BranchPoint
-    Represents a point on a continuation branch. Wraps a NewtonProblem instance and provides
-    augmented residuals, tangent computation, and prediction methods. Most attributes and methods
-    are delegated to the underlying NewtonProblem.
-
-Functions
----------
-
-pseudo_arclength_continuator(initial_problem, stepsize=None, stepsize_range=(1e-4, 1e-1), initial_direction=1, key_param=None, value_param=None, verbose=False, num_steps=1000)
-    Performs pseudo-arclength continuation for a nonlinear problem. Yields a sequence of BranchPoint
-    objects representing solutions at different parameter values along the branch.
-
-Dependencies
-------------
-
-numpy
-copy
-typing.override
-collections.abc.Iterable, Iterator
-skhippr.cycles.newton.NewtonProblem
+It provides the generator function :py:func:`~skhippr.solvers.continuation.pseudo_arclength_continuator` for continuation. This generator returns in each iteration a :py:class:`~skhippr.solvers.continuation.BranchPoint` object, which is a subclass of :py:class:`~skhippr.equations.EquationSystem.EquationSystem` and includes all equations of the initial system, along  with an additional :py:class:`~skhippr.solvers.continuation.ContinuationAnchor` equation that ensures all updates are orthogonal to the tangent.
 """
 
 from collections.abc import Iterable, Iterator
@@ -48,18 +23,17 @@ def pseudo_arclength_continuator(
     num_steps: int = 1000,
 ) -> Iterator["BranchPoint"]:
     """
-    Perform pseudo-arclength continuation of the solution branch emerging from a nonlinear :py:class:`~skhippr.cycles.newton.NewtonProblem`.
+    Perform pseudo-arclength continuation of the solution branch emerging from a nonlinear :py:class:`~skhippr.equations.EquationSystem.EquationSystem`.
 
-    This generator yields a sequence of :py:class:`~skhippr.cycles.continuation.BranchPoint` objects, each representing an individual solution
-    to the problem, by following the solution branch using the pseudo-arclength continuation method.
+    This generator yields a sequence of :py:class:`~skhippr.solvers.continuation.BranchPoint` objects, each representing an individual solution of the problem, by following the solution branch using the pseudo-arclength continuation method.
 
     Parameters
     ----------
 
-    initial_problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
-        The initial :py:class:`~skhippr.cycles.newton.NewtonProblem` instance to start continuation from. It need not be solved already.
+    initial_problem : :py:class:`~skhippr.equations.EquationSystem.EquationSystem`
+        The initial :py:class:`~skhippr.equations.EquationSystem.EquationSystem` to start continuation from. It need not be solved already. All branch points will duplicte the equations of this system,
 
-        * Explicit case: If the problem has as many equations as unknowns, an explicit continuation parameter (``key_param``) is required.
+        * Explicit case: If the :py:class:`~skhippr.equations.EquationSystem.EquationSystem` is ``well_posed``, an explicit ``continuation_parameter``, which must be an attribute of at least one equation, is required.
         * Implicit case: Otherwise, the problem must have exactly one equation more than unknowns.
 
     stepsize : float, optional
@@ -80,7 +54,7 @@ def pseudo_arclength_continuator(
     Yields
     ------
 
-    :py:class:`~skhippr.cycles.continuation.BranchPoint`
+    :py:class:`~skhippr.solvers.continuation.BranchPoint`
         The next converged solution point along the continuation branch.
 
     Raises
@@ -152,62 +126,9 @@ def pseudo_arclength_continuator(
 
 class BranchPoint(EquationSystem):
     """
-    A :py:class:`~skhippr.cycles.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
+    A :py:class:`~skhippr.solvers.continuation.BranchPoint` represents a point on an implicit or explicit continuation branch.
 
-    An object of this class wraps a :py:class:`~skhippr.cycles.newton.NewtonProblem` instance (or subclasses) and provides additional functionality for continuation methods:
-
-    * stores the tangent vector at the branch point
-    * predicts the next point on the branch
-    * If an explicit continuation parameter is passed, it is appended to the vector ``x`` of unknowns.
-
-    Notes
-    -----
-
-    All attributes that are not explicitly set in the :py:class:`~skhippr.cycles.continuation.BranchPoint` (and mentioned below) are delegated directly to the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem`.
-
-    For example, if ``branch_point`` is a :py:class:`~skhippr.cycles.continuation.BranchPoint` with an underlying :py:class:`~skhippr.cycles.hbm.hbmProblem`, the frequency of the solution can be accessed immediately by ``branch_point.omega``.
-
-    Attributes which are *not* delegated:
-    -------------------------------------
-
-    _problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
-        The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` instance being wrapped.
-    anchor : np.ndarray
-        The anchor vector used in the augmented system for continuation. Newton updates are performed orthogonal to the anchor.
-        If a scalar is passed during initialization, the last entry of ``x`` is kept constant.
-    tangent : np.ndarray or None
-        The tangent to the branch at the branch point, used for prediction of the next point.
-        Is set after the Newton updates have converged.
-    variable: str
-        Has the value ``f"{problem.variable}_ext"`` to distinguish original problem variable and extended problem variable.
-    key_param: str or None
-        Name of the continuation parameter.
-
-        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` has one equation less than unknowns.
-        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
-
-        .. caution::
-
-            ``key_param`` is set as attribute of the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem`, but can (like all other attributes) be immediately accessed by ``branch_point.key_param`` .
-
-
-    Parameters
-    ----------
-    problem : :py:class:`~skhippr.cycles.newton.NewtonProblem`
-        The underlying problem to be solved along the branch. May have one equation less than unknowns (implicit case) or as many
-    x0: np.ndarray, optional
-        Initial guess. If ``None``, defaults to the current ``x`` value fo the underlying problem.
-    key_param: str or None, optional
-        Name of the continuation parameter.
-
-        * If ``None``, the problem is assumed to be implicit, i.e., the underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` has one equation less than unknowns.
-        * If not ``None``, the problem is assumed to be explicit. The underlying :py:class:`~skhippr.cycles.newton.NewtonProblem` must have as many equations as unknowns and ``<key_param>`` must be a keyword argument to the system function. The ``derivatives`` dictionary returned by the system function must have an entry for ``key_param``.
-
-    value_param: float or None, optional
-        Initial value of the continuation parameter. Must be passed if ``key_param`` is not None.
-    anchor : np.ndarray or float, optional
-        Anchor vector (np.ndarray, Newton updates are orthogonal) or initial direction (scalar, ``1`` or ``-1``). Defaults to ``1``.
-
+    An object of this class contains all equations of the underlying :py:class:`~skhippr.equations.EquationSystem.EquationSystem`, and additionally one :py:class:`~skhippr.solvers.continuation.ContinuationAnchor` as the  last equation. If a continuation parameter is passed, the unknowns are extended by this continuation parameter.
     """
 
     def __init__(
@@ -236,10 +157,10 @@ class BranchPoint(EquationSystem):
 
     def determine_tangent(self):
         """
-        Compute and normalize the tangent vector at the branch point.
+        Compute, normalize and store the tangent vector at the branch point.
 
-        This method checks if the current solution has converged. If not, it raises a ``RuntimeError``.
-        It then constructs the tangent vector by solving a linear system. The resulting normalized tangent vector forms an acute angle with the previous tangent vector. It is stored in the ``self.tangent`` attribute.
+        This method checks if the :py:class:`~skhippr.solvers.continuation.BranchPoint` equation system is solved. If not, it raises a ``RuntimeError``.
+        It then constructs the tangent vector by solving a linear system. with the same Jacobian matrix as for the Newton updates. The resulting normalized tangent vector forms an acute angle with the previous tangent vector. It is stored in the ``self.tangent`` attribute.
 
         Raises
         -------
@@ -276,11 +197,8 @@ class BranchPoint(EquationSystem):
         -------
 
         BranchPoint
-            A new :py:class:`~skhippr.cycles.continuation.BranchPoint` instance (not converged) representing the predicted next point along the continuation path.
+            A new :py:class:`~skhippr.solvers.continuation.BranchPoint` instance (not converged) representing the predicted next point along the continuation path. all equations are shallow-copied to prevent that updates in the next point affect the current point.
 
-        Notes
-        -----
-        The system is shallow-copied to avoid modifying the state of the current point during future Newton iterations of the next point.
         """
         if self.tangent is None:
             self.determine_tangent()
@@ -296,6 +214,11 @@ class BranchPoint(EquationSystem):
 
 
 class ContinuationAnchor(AbstractEquation):
+    """A scalar :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` subclass that ensures orthogonality to the tangent direction in the continuation process. While the residual function is always zero, the closed-form derivative is the tangent vector at the previous branch point, ensuring that all Newton updates of the branch point are orthogonal to the tangent.
+
+    During instantiation, either a previous tangent vector or an initial direction must be provided.
+    """
+
     def __init__(
         self,
         equation_system,
@@ -337,9 +260,11 @@ class ContinuationAnchor(AbstractEquation):
         self.initialize_anchor(anchor)
 
     def residual_function(self):
+        """Always returns zero."""
         return np.atleast_1d(0)
 
     def closed_form_derivative(self, variable):
+        """Returns the segment of the tangent vector at the previous branch point corresponding to the unknown ``variable``."""
         try:
             return self.anchor[variable][np.newaxis, :]
         except KeyError:

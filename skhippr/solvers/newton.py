@@ -7,46 +7,14 @@ from skhippr.equations.EquationSystem import EquationSystem
 
 class NewtonSolver:
     """
-    Implements Newton's method for solving nonlinear equations. Also supports optional stability analysis after convergence.
-
-    Definition of the underlying equation system:
-
-    * :py:func:`~skhippr.cycles.newton.NewtonProblem.f_with_params`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.variable`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.x0` (initial guess)
-    * ``<param>``, when passed to the constructor as optional keyword argument, becomes an attribute with the corresponding value and is passed as keyword argument to the residual function.
-
-    Newton solver parameters:
-
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.tolerance`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.max_iterations`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.verbose`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.stability_method`
-
-    Attributes (updated during the solution process):
-
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.x`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.derivatives`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.converged`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.stable`
-    * :py:attr:`~skhippr.cycles.newton.NewtonProblem.eigenvalues`
-
-    Important class methods:
-
-    * :py:func:`~skhippr.cycles.newton.NewtonProblem.solve`
-    * :py:func:`~skhippr.cycles.newton.NewtonProblem.reset`
+    Implements Newton's method for solving nonlinear equations and equation systems given by :py:class:`~skhippr.equations.EquationSystem.EquationSystem` or :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` objects.
 
     Attributes:
     -----------
-    # TODO
     num_iter : int
         Number of iterations performed.
-    stability_method : :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod` or ``None``
-        Object encoding stability method. Defaults to ``None`` (no stability analysis performed).
-    stable : bool or None
-        Indicates whether the solution is stable (if stability analysis is performed). ``None`` if no stability analysis was performed.
-    eigenvalues : np.ndarray or None
-        Eigenvalues computed during stability analysis. ``None`` if no stability analysis was performed.
+    converged : bool or None
+        Indicates whether the solution procedure has converged.
     max_iterations : int
         Maximum number of allowed iterations.
     verbose : bool
@@ -90,18 +58,7 @@ class NewtonSolver:
 
     def reset(self) -> None:
         """
-        Reset the state of the solver, optionally with a new initial guess.
-
-        If a new initial guess ``x0_new`` is provided, updates the internal state accordingly.
-        Resets convergence status, iteration count, and other diagnostic attributes.
-
-        Parameters
-        ----------
-
-        x0_new : array-like, optional
-            New initial guess for the solver. If provided, replaces the current initial guess
-            and resets related state variables.
-
+        Reset the state of the solver.
         """
 
         self.converged = False
@@ -122,7 +79,13 @@ class NewtonSolver:
             equation_system.solved = True
         return residual
 
-    def solve_equation(self, equation: AbstractEquation, unknown: str):
+    def solve_equation(
+        self, equation: AbstractEquation, unknown: str
+    ) -> EquationSystem:
+        """Solve a single equation with a single unknown. The method creates an :py:class:`~skhippr.equations.EquationSystem.EquationSystem` from the given equation and unknown, solves it using :py:func:`~skhippr.newton.NewtonSolver.NewtonSolver.solve`, and checks for convergence.
+
+        While the solved :py:class:`~skhippr.equations.EquationSystem.EquationSystem` is returned, the ``equation`` itself is also updated, storing the resulting system is optional.
+        """
         system = EquationSystem([equation], [unknown], equation)
         self.solve(system)
         if not system.solved:
@@ -131,22 +94,19 @@ class NewtonSolver:
             )
         return system
 
-    def solve(self, equation_system: EquationSystem):
+    def solve(self, equation_system: EquationSystem) -> None:
         """
-        Applies Newton's method to solve the system of nonlinear equations given by :py:func:`~skhippr.cycles.newton.NewtonProblem.residual_function`.
+        Applies Newton's method to solve the system of nonlinear equations given by a :py:class:`~skhippr.equations.EquationSystem.EquationSystem`.
 
-        Performs iterative correction steps starting from the current vector of unknowns until the residual norm is sufficiently small or the maximum number of iterations is reached. After convergence, performs a stability check if applicable.
+        Performs iterative correction steps starting from the current vector of unknowns until the residual norm is sufficiently small or the maximum number of iterations is reached. In every step the unknown attributes of ``equation_system`` are updated. After convergence, performs a stability check if applicable.
 
-        Notes
-        -----
-        * Solution is stored in :py:attr:`~skhippr.cycles.newton.NewtonProblem.unknowns`,constructed by the members of :py:attr:`~skhippr.cycles.newton.NewtonProblem.unknowns_dict`
-        * Prints progress and convergence information if :py:attr:`~skhippr.cycles.newton.NewtonProblem.verbose` is ``True``.
+        Prints progress and convergence information if :py:attr:`~skhippr.cycles.newton.NewtonProblem.verbose` is ``True``.
         """
         if not equation_system.well_posed:
             raise ValueError(
                 "Equation system is not well-posed: Number of unknowns and number of equations differ"
             )
-        visualize = False
+
         self.reset()
 
         if self.verbose:
@@ -159,31 +119,7 @@ class NewtonSolver:
                     f"Newton iteration {self.num_iter:2d}", end=""
                 )  # , x = {equation_system.vector_of_unknowns}", end="")
 
-            if visualize:
-                print("visualizing")
-                ax = plt.gca()
-                ax.plot(
-                    equation_system.vector_of_unknowns[-1],
-                    equation_system.vector_of_unknowns[0],
-                    equation_system.vector_of_unknowns[1],
-                    ".",
-                    color="blue",
-                )
-                pass
-
             self.correction_step(equation_system)
-
-            if visualize:
-                print("visualizing")
-                ax = plt.gca()
-                ax.plot(
-                    equation_system.vector_of_unknowns[-1],
-                    equation_system.vector_of_unknowns[0],
-                    equation_system.vector_of_unknowns[1],
-                    ".",
-                    color="green",
-                )
-                pass
 
             if self.verbose:
                 print(

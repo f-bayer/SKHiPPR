@@ -1,14 +1,14 @@
-Usage -- Important classes and functions
+Usage -- Classes and functions
 ========================================
 
 .. toctree::
     :maxdepth: 2
 
     equations
-    problem
+    solvers
+    odes
     hbm
     stability
-    continuation
     shooting
 
     

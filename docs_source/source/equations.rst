@@ -1,4 +1,4 @@
-Formalizing equations and equation systems: ``skhippr.equations``
+Formalizing equations and equation systems
 =================================================================
 
 .. contents::
@@ -26,13 +26,13 @@ Concrete subclasses of :py:class:`~skhippr.equations.AbstractEquation.AbstractEq
 
 The following subclasses of :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` are documented elsewhere:
 
-    * :py:class:`~skhippr.odes.AbstractODE.AbstractODE`
+    * :py:class:`~skhippr.odes.AbstractODE.AbstractODE`,
     * :py:class:`~skhippr.solvers.continuation.ContinuationAnchor`, 
-    * :py:class:`~skhippr.cycles.AbstractCycleEquation.AbstractCycleEquation`
-    * :py:class:`~skhippr.cycles.hbm.HBMEquation` and :py:class:`~skhippr.cycles.hbm.HBMPhaseAnchor`
+    * :py:class:`~skhippr.cycles.AbstractCycleEquation.AbstractCycleEquation`,
+    * :py:class:`~skhippr.cycles.hbm.HBMEquation` and :py:class:`~skhippr.cycles.hbm.HBMPhaseAnchor`,
     * :py:class:`~skhippr.cycles.shooting.ShootingBVP` and :py:class:`~skhippr.cycles.shooting.ShootingPhaseAnchor`
 
-Other concrete subclass for demonstration purposes encode radius and angle conditions on a circle.
+Two concrete subclass for demonstration purposes encode radius and angle conditions on a circle.
 
 .. autoclass:: skhippr.equations.Circle.CircleEquation
 
