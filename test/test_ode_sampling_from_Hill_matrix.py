@@ -2,18 +2,15 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.systems.autonomous import vanderpol
-from skhippr.problems.HBM import HBMProblem_autonomous
+from skhippr.odes.autonomous import Vanderpol
+from skhippr.cycles.hbm import HBMSystem
 from skhippr.stability.SinglePass import SinglePassRK4
 
 
-def f(t, x):
-    return vanderpol(t, x, nu=0.5)
+def test_ode_sampling(solver, fourier):
 
-
-def test_ode_sampling(fourier):
+    ode = Vanderpol(x=np.array([2.0, 0.0]), nu=0.2)
     omega0 = 1
-
     ts_samp = fourier.time_samples(omega=omega0)
 
     x0_samples = np.vstack(
@@ -21,22 +18,16 @@ def test_ode_sampling(fourier):
     )
     X0 = fourier.DFT(x0_samples)
 
-    prb = HBMProblem_autonomous(f=f, initial_guess=X0, omega=omega0, fourier=fourier)
-    prb.solve()
-    assert prb.converged
-    x_samp = prb.x_time()
+    hbm = HBMSystem(ode, omega0, fourier, X0)
+    solver.verbose = True
+    solver.solve(hbm)
+
+    x_samp = hbm.equations[0].x_time()
     assert np.max(np.abs(x_samp)) > 1e-1
 
-    _, derivatives_ref = f(ts_samp, x_samp)
-    J_ref = derivatives_ref["x"]
-    _, derivatives = prb.residual_function()
-
-    J_samp = derivatives["x_samp"]
-    assert np.allclose(J_ref, J_samp)
-
-    SP = SinglePassRK4(fourier)
-    J_SP = prb.ode_samples()
-    assert np.allclose(J_ref, J_SP)
+    J_ref = ode.derivative(variable="x", t=ts_samp, x=x_samp)
+    J_samp = hbm.equations[0].ode_samples()
+    assert np.allclose(J_ref, J_samp, atol=1e-6, rtol=1e-6)
 
 
 if __name__ == "__main__":

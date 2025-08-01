@@ -1,24 +1,28 @@
-Periodic solutions and FFT
+FFT and harmonic balance
 ==========================
 
 .. contents:: 
 
 
-Defining FFT parameters
-------------------------------------------------------------
+:py:class:`~ skhippr.cycles.hbm.HBMEquation`: Harmonic balance for nonautonomous ODEs
+-----------------------------------------------------------------------------------------
+
+.. autoclass:: skhippr.cycles.hbm.HBMEquation
+    :members:
+
+
+:py:class:`~ skhippr.cycles.hbm.HBMSystem`: Treating autonomous and nonautonomous ODEs
+------------------------------------------------------------------------------------------------
+
+.. autoclass:: skhippr.cycles.hbm.HBMSystem
+    :members:
+
+.. autoclass:: skhippr.cycles.hbm.HBMPhaseAnchor
+    :members:
+
+:py:class:`~ skhippr.Fourier.Fourier`: Fast Fourier transform methods
+--------------------------------------------------------------------------
 
 .. automodule:: skhippr.Fourier
     :members:
     :special-members: __replace__
-
-Solving non-autonomous Harmonic Balance problems
------------------------------------------------------------------------------------------
-
-.. autoclass:: skhippr.problems.HBM.HBMProblem
-    :members:
-
-Solving autonomous Harmonic Balance problems
-------------------------------------------------------------------------------------------------
-
-.. autoclass:: skhippr.problems.HBM.HBMProblem_autonomous
-    :members:

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Continuation &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Continuation &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,15 +36,13 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'continuation';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Addendum: Shooting method" href="shooting.html" />
-    <link rel="prev" title="Stability methods" href="stability.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -107,6 +105,8 @@
       
       
       
+        
+      
       <div class="bd-sidebar-primary bd-sidebar">
         
 
@@ -132,7 +132,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -148,14 +148,15 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <ul class="current nav bd-sidenav">
+        <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -308,20 +309,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapper-class-for-continuation-problems">Wrapper class for continuation problems</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint"><code class="docutils literal notranslate"><span class="pre">BranchPoint</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.copy_problem"><code class="docutils literal notranslate"><span class="pre">BranchPoint.copy_problem()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.residual_function"><code class="docutils literal notranslate"><span class="pre">BranchPoint.residual_function()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.determine_tangent"><code class="docutils literal notranslate"><span class="pre">BranchPoint.determine_tangent()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.predict"><code class="docutils literal notranslate"><span class="pre">BranchPoint.predict()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuation-function">Continuation function</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.pseudo_arclength_continuator"><code class="docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapper-class-for-continuation-problems">Wrapper class for continuation problems</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuation-function">Continuation function</a></li>
 </ul>
             </nav>
         </div>
@@ -348,169 +337,9 @@ document.write(`
 </nav>
 <section id="wrapper-class-for-continuation-problems">
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">Wrapper class for continuation problems</a><a class="headerlink" href="#wrapper-class-for-continuation-problems" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.BranchPoint">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.problems.continuation.</span></span><span class="sig-name descname"><span class="pre">BranchPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><span class="pre">NewtonProblem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anchor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.continuation.BranchPoint" title="Link to this definition">#</a></dt>
-<dd><p>A <a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> represents a point on an implicit or explicit continuation branch.</p>
-<p>An object of this class wraps a <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> instance (or subclasses) and provides additional functionality for continuation methods:</p>
-<ul class="simple">
-<li><p>stores the tangent vector at the branch point</p></li>
-<li><p>predicts the next point on the branch</p></li>
-<li><p>If an explicit continuation parameter is passed, it is appended to the vector <code class="docutils literal notranslate"><span class="pre">x</span></code> of unknowns.</p></li>
-</ul>
-<p class="rubric">Notes</p>
-<p>All attributes that are not explicitly set in the <a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> (and mentioned below) are delegated directly to the underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a>.</p>
-<p>For example, if <code class="docutils literal notranslate"><span class="pre">branch_point</span></code> is a <a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> with an underlying <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>, the frequency of the solution can be accessed immediately by <code class="docutils literal notranslate"><span class="pre">branch_point.omega</span></code>.</p>
-<section id="attributes-which-are-not-delegated">
-<h3>Attributes which are <em>not</em> delegated:<a class="headerlink" href="#attributes-which-are-not-delegated" title="Link to this heading">#</a></h3>
-<dl>
-<dt>_problem<span class="classifier"><a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a></span></dt><dd><p>The underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> instance being wrapped.</p>
-</dd>
-<dt>anchor<span class="classifier">np.ndarray</span></dt><dd><p>The anchor vector used in the augmented system for continuation. Newton updates are performed orthogonal to the anchor.
-If a scalar is passed during initialization, the last entry of <code class="docutils literal notranslate"><span class="pre">x</span></code> is kept constant.</p>
-</dd>
-<dt>tangent<span class="classifier">np.ndarray or None</span></dt><dd><p>The tangent to the branch at the branch point, used for prediction of the next point.
-Is set after the Newton updates have converged.</p>
-</dd>
-<dt>variable: str</dt><dd><p>Has the value <code class="docutils literal notranslate"><span class="pre">f&quot;{problem.variable}_ext&quot;</span></code> to distinguish original problem variable and extended problem variable.</p>
-</dd>
-<dt>key_param: str or None</dt><dd><p>Name of the continuation parameter.</p>
-<ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the problem is assumed to be implicit, i.e., the underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> has one equation less than unknowns.</p></li>
-<li><p>If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, the problem is assumed to be explicit. The underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> must have as many equations as unknowns and <code class="docutils literal notranslate"><span class="pre">&lt;key_param&gt;</span></code> must be a keyword argument to the system function. The <code class="docutils literal notranslate"><span class="pre">derivatives</span></code> dictionary returned by the system function must have an entry for <code class="docutils literal notranslate"><span class="pre">key_param</span></code>.</p></li>
-</ul>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p><code class="docutils literal notranslate"><span class="pre">key_param</span></code> is set as attribute of the underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a>, but can (like all other attributes) be immediately accessed by <code class="docutils literal notranslate"><span class="pre">branch_point.key_param</span></code> .</p>
-</div>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">param problem<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The underlying problem to be solved along the branch. May have one equation less than unknowns (implicit case) or as many</p>
-</dd>
-<dt class="field-even">type problem<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a></p>
-</dd>
-<dt class="field-odd">param x0<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Initial guess. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, defaults to the current <code class="docutils literal notranslate"><span class="pre">x</span></code> value fo the underlying problem.</p>
-</dd>
-<dt class="field-even">type x0<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray, optional</p>
-</dd>
-<dt class="field-odd">param key_param<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Name of the continuation parameter.</p>
-<ul class="simple">
-<li><p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the problem is assumed to be implicit, i.e., the underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> has one equation less than unknowns.</p></li>
-<li><p>If not <code class="docutils literal notranslate"><span class="pre">None</span></code>, the problem is assumed to be explicit. The underlying <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> must have as many equations as unknowns and <code class="docutils literal notranslate"><span class="pre">&lt;key_param&gt;</span></code> must be a keyword argument to the system function. The <code class="docutils literal notranslate"><span class="pre">derivatives</span></code> dictionary returned by the system function must have an entry for <code class="docutils literal notranslate"><span class="pre">key_param</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">type key_param<span class="colon">:</span></dt>
-<dd class="field-even"><p>str or None, optional</p>
-</dd>
-<dt class="field-odd">param value_param<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Initial value of the continuation parameter. Must be passed if <code class="docutils literal notranslate"><span class="pre">key_param</span></code> is not None.</p>
-</dd>
-<dt class="field-even">type value_param<span class="colon">:</span></dt>
-<dd class="field-even"><p>float or None, optional</p>
-</dd>
-<dt class="field-odd">param anchor<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Anchor vector (np.ndarray, Newton updates are orthogonal) or initial direction (scalar, <code class="docutils literal notranslate"><span class="pre">1</span></code> or <code class="docutils literal notranslate"><span class="pre">-1</span></code>). Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd>
-<dt class="field-even">type anchor<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray or float, optional</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.BranchPoint.copy_problem">
-<span class="sig-name descname"><span class="pre">copy_problem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a></span></span><a class="headerlink" href="#skhippr.problems.continuation.BranchPoint.copy_problem" title="Link to this definition">#</a></dt>
-<dd><p>Returns a shallow copy of <code class="docutils literal notranslate"><span class="pre">self._problem</span></code> with disconnected parameters.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.BranchPoint.residual_function">
-<span class="sig-name descname"><span class="pre">residual_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.problems.continuation.BranchPoint.residual_function" title="Link to this definition">#</a></dt>
-<dd><p>Returns the residual and its derivatives for the augmented problem, including the anchor equation.</p>
-<p>Appends a 0 to the residual of the underlying problem and adds the anchor equation to the Jacobian.
-If applicable (explicit continuation), also adds the derivative w.r.t the continuation parameter to the Jacobian.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.BranchPoint.determine_tangent">
-<span class="sig-name descname"><span class="pre">determine_tangent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.continuation.BranchPoint.determine_tangent" title="Link to this definition">#</a></dt>
-<dd><p>Compute and normalize the tangent vector at the branch point.</p>
-<p>This method checks if the current solution has converged. If not, it raises a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code>.
-It then constructs the tangent vector by solving a linear system. The resulting normalized tangent vector forms an acute angle with the previous tantent vector. It is stored in the <code class="docutils literal notranslate"><span class="pre">self.tangent</span></code> attribute.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RuntimeError</strong> – If the solution has not converged and the tangent would thus be meaningless.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.BranchPoint.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a></span></span><a class="headerlink" href="#skhippr.problems.continuation.BranchPoint.predict" title="Link to this definition">#</a></dt>
-<dd><p>Predict the next branch point in the continuation process.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>stepsize</strong> (<em>float</em>) – The step size to advance along the tangent direction.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A new <a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> instance (not converged) representing the predicted next point along the continuation path.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint">BranchPoint</a></p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The solution is shallow-copied to avoid modifying the state of the current point during future Newton iterations of the next point.</p>
-</dd></dl>
-
-</section>
-</dd></dl>
-
 </section>
 <section id="continuation-function">
 <h2><a class="toc-backref" href="#id3" role="doc-backlink">Continuation function</a><a class="headerlink" href="#continuation-function" title="Link to this heading">#</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="skhippr.problems.continuation.pseudo_arclength_continuator">
-<span class="sig-prename descclassname"><span class="pre">skhippr.problems.continuation.</span></span><span class="sig-name descname"><span class="pre">pseudo_arclength_continuator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><span class="pre">NewtonProblem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepsize_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.0001,</span> <span class="pre">0.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.problems.continuation.pseudo_arclength_continuator" title="Link to this definition">#</a></dt>
-<dd><p>Perform pseudo-arclength continuation of the solution branch emerging from a nonlinear <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a>.</p>
-<p>This generator yields a sequence of <a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> objects, each representing an individual solution
-to the problem, by following the solution branch using the pseudo-arclength continuation method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_problem</strong> (<a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a>) – <p>The initial <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> instance to start continuation from. It need not be solved already.</p>
-<ul>
-<li><p>Explicit case: If the problem has as many equations as unknowns, an explicit continuation parameter (<code class="docutils literal notranslate"><span class="pre">key_param</span></code>) is required.</p></li>
-<li><p>Implicit case: Otherwise, the problem must have exactly one equation more than unknowns.</p></li>
-</ul>
-</p></li>
-<li><p><strong>stepsize</strong> (<em>float</em><em>, </em><em>optional</em>) – Initial step size for continuation. If None, uses the lower bound of <code class="docutils literal notranslate"><span class="pre">stepsize_range</span></code>.</p></li>
-<li><p><strong>stepsize_range</strong> (<em>Iterable</em><em> of </em><em>float</em><em>, </em><em>optional</em>) – Tuple specifying the minimum and maximum allowed step sizes. Default is (1e-4, 1e-1).</p></li>
-<li><p><strong>initial_direction</strong> (<em>int</em><em>, </em><em>optional</em>) – Direction (+1 or -1) to start continuation along the branch. If positive, the continuation parameter (explicit case) or the last entry of the unknowns (implicit case) increases initially.</p></li>
-<li><p><strong>key_param</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the parameter to track during continuation.</p></li>
-<li><p><strong>value_param</strong> (<em>Any</em><em>, </em><em>optional</em>) – Value of the parameter at the initial point. Defaults to <code class="docutils literal notranslate"><span class="pre">initial_problem.&lt;key_param&gt;</span></code>.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, prints progress and diagnostic information. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
-<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of continuation steps to perform. Default is 1000.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Yields<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> – The next converged solution point along the continuation branch.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RuntimeError</strong> – If the initial problem does not converge.</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>If the minimal stepsize does not converge, the continuation stops.</p></li>
-<li><p>The continuator does not check whether the branch point lies within any value bounds. Such checks should be made within the <code class="docutils literal notranslate"><span class="pre">for</span></code> loop over which the continuator is iterated.</p></li>
-</ul>
-</dd></dl>
-
 </section>
 </section>
 
@@ -525,24 +354,6 @@ to the problem, by following the solution branch using the pseudo-arclength cont
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="stability.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Stability methods</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="shooting.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Addendum: Shooting method</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
@@ -559,20 +370,8 @@ to the problem, by following the solution branch using the pseudo-arclength cont
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapper-class-for-continuation-problems">Wrapper class for continuation problems</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint"><code class="docutils literal notranslate"><span class="pre">BranchPoint</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.copy_problem"><code class="docutils literal notranslate"><span class="pre">BranchPoint.copy_problem()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.residual_function"><code class="docutils literal notranslate"><span class="pre">BranchPoint.residual_function()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.determine_tangent"><code class="docutils literal notranslate"><span class="pre">BranchPoint.determine_tangent()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.BranchPoint.predict"><code class="docutils literal notranslate"><span class="pre">BranchPoint.predict()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuation-function">Continuation function</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.continuation.pseudo_arclength_continuator"><code class="docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#wrapper-class-for-continuation-problems">Wrapper class for continuation problems</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#continuation-function">Continuation function</a></li>
 </ul>
   </nav></div>
 

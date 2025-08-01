@@ -5,16 +5,16 @@ from math import lcm
 from copy import replace
 from scipy import fft
 
-from skhippr.problems.HBM import HBMProblem
-from skhippr.stability._StabilityHBM import _StabilityHBM
+from skhippr.cycles.hbm import HBMEquation
+from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 from skhippr.Fourier import Fourier
 
 
-class SinglePassRK(_StabilityHBM):
+class SinglePassRK(AbstractStabilityHBM):
     """
     SinglePassRK implements single-pass fixed-step explicit Runge-Kutta methods for stability analysis in the context of Harmonic Balance Methods (HBM).
 
-    Parameters
+    Parameters:
     ----------
     fourier : Fourier
         Fourier object containing discretization and transformation information.
@@ -29,27 +29,6 @@ class SinglePassRK(_StabilityHBM):
     tol : float, optional
         Tolerance for the stability computation (default is 0).
 
-    Attributes
-    ----------
-
-    samples_per_step : int
-        Number of equally spaced samples per integration step, determined by the common demonimator of the ``c`` values.
-    steps_per_period : int
-        Number of integration steps per period, determined by the stepsize and ``samples_per_step``.
-    A : np.ndarray
-        Butcher A matrix (scaled by step size).
-    b : np.ndarray
-        Butcher b weights (scaled by step size).
-    c : np.ndarray
-        Butcher c, scaled by the common denominator and converted to integer.
-    h0 : float
-        Normalized step size, such that ``h0 * steps_per_period == 1``.
-
-    Raises
-    ------
-
-    ValueError
-        If the Butcher tableau c values are not between 0 and 1, or if the Fourier discretization is incompatible with the single-pass method.
     """
 
     def __init__(
@@ -97,13 +76,11 @@ class SinglePassRK(_StabilityHBM):
             self.samples_per_step / fourier.L_DFT
         )  # normalized step size: one period is at tau=1
 
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Computes the fundamental matrix for a given normalized time.
 
-        This method integrates the variational equation up to ``t`` using the precomputed Jacobians at the time samples, if available.
+        This method fixed-step-integrates the variational equation up to ``t``.
 
         Parameters
         ----------
@@ -121,11 +98,8 @@ class SinglePassRK(_StabilityHBM):
 
         """
 
-        if problem.fourier.L_DFT == self.fourier.L_DFT:
-            J_samples = problem.derivatives[f"{problem.variable}_samp"]
-        else:
-            J_samples = problem.ode_samples(self.fourier)
-        T = 2 * np.pi / problem.omega
+        J_samples = hbm.ode_samples(self.fourier)
+        T = 2 * np.pi / hbm.omega
         dt = self.h0 * T
         A = self.A * dt
         b = self.b * dt

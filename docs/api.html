@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Usage – Important classes and functions &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Usage – Classes and functions &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,14 +36,14 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Problem statement" href="problem.html" />
+    <link rel="next" title="Formalizing equations and equation systems" href="equations.html" />
     <link rel="prev" title="Examples" href="examples.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -132,7 +132,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -151,11 +151,12 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Usage – Important classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Usage – Classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -296,7 +297,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Usage – Important classes and functions</h1>
+    <h1>Usage – Classes and functions</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -310,19 +311,32 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="usage-important-classes-and-functions">
-<h1>Usage – Important classes and functions<a class="headerlink" href="#usage-important-classes-and-functions" title="Link to this heading">#</a></h1>
+  <section id="usage-classes-and-functions">
+<h1>Usage – Classes and functions<a class="headerlink" href="#usage-classes-and-functions" title="Link to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="problem.html">Problem statement</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html#residual-functions">Residual functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="problem.html#module-skhippr.problems.newton">Solving nonlinear equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html#algebraic-equations">Algebraic equations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations.html#equation-systems">Equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equations.html#concrete-subclasses-of-abstractequation">Concrete subclasses of <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEquation</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html#module-skhippr.Fourier">Defining FFT parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html#solving-non-autonomous-harmonic-balance-problems">Solving non-autonomous Harmonic Balance problems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html#solving-autonomous-harmonic-balance-problems">Solving autonomous Harmonic Balance problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solvers.html">Solvers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html#newton-solver">Newton solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html#module-skhippr.solvers.continuation">Pseudo-arclength continuation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="odes.html">ODEs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="odes.html#skhippr.odes.AbstractODE.AbstractODE"><code class="docutils literal notranslate"><span class="pre">AbstractODE</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html#nonautonomous-odes">Nonautonomous ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html#autonomous-odes">Autonomous ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html#linear-time-periodic-odes">Linear time-periodic ODEs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html#hbmequation-harmonic-balance-for-nonautonomous-odes"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMEquation</span></code>: Harmonic balance for nonautonomous ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html#hbmsystem-treating-autonomous-and-nonautonomous-odes"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code>: Treating autonomous and nonautonomous ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html#module-skhippr.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code>: Fast Fourier transform methods</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="stability.html">Stability methods</a><ul>
@@ -334,13 +348,10 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="stability.html#explicit-runge-kutta-single-pass-time-integration-method">Explicit Runge Kutta single-pass time integration method</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="continuation.html">Continuation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html#wrapper-class-for-continuation-problems">Wrapper class for continuation problems</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html#continuation-function">Continuation function</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="shooting.html#skhippr.problems.shooting.ShootingProblem"><code class="docutils literal notranslate"><span class="pre">ShootingProblem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="shooting.html#skhippr.cycles.shooting.ShootingBVP"><code class="docutils literal notranslate"><span class="pre">ShootingBVP</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="shooting.html#skhippr.cycles.shooting.ShootingSystem"><code class="docutils literal notranslate"><span class="pre">ShootingSystem</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="shooting.html#skhippr.cycles.shooting.ShootingPhaseAnchor"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -368,11 +379,11 @@ document.write(`
       </div>
     </a>
     <a class="right-next"
-       href="problem.html"
+       href="equations.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Problem statement</p>
+        <p class="prev-next-title">Formalizing equations and equation systems</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

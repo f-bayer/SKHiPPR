@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Examples &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Examples &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,14 +36,14 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage – Important classes and functions" href="api.html" />
+    <link rel="next" title="Usage – Classes and functions" href="api.html" />
     <link rel="prev" title="Installation guide" href="installation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -132,7 +132,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -151,11 +151,12 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -308,23 +309,29 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.pseudo_arclength_implicit">examples.pseudo_arclength_implicit</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.pseudo_arclength_implicit.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.pseudo_arclength_implicit.circle"><code class="docutils literal notranslate"><span class="pre">circle()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.circle">examples.circle</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.circle.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.template">examples.template</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.template.system_function"><code class="docutils literal notranslate"><span class="pre">system_function()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.template.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing">examples.duffing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing_frc">examples.duffing_frc</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.initial_force_response"><code class="docutils literal notranslate"><span class="pre">initial_force_response()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.continue_from_continuation_curve"><code class="docutils literal notranslate"><span class="pre">continue_from_continuation_curve()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.plot_all_responses"><code class="docutils literal notranslate"><span class="pre">plot_all_responses()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.plot_3D_frc"><code class="docutils literal notranslate"><span class="pre">plot_3D_frc()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.visualize_solution"><code class="docutils literal notranslate"><span class="pre">visualize_solution()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.vanderpol_animation">examples.vanderpol_animation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.vanderpol_animation.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing_3d">examples.duffing_3d</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_3d.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-convergence-studies">numerical convergence studies</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.convergence.demo_mathieu_N_convergence">examples.convergence.demo_mathieu_N_convergence</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.convergence.demo_mathieu_N_convergence.analyze_N_mathieu"><code class="docutils literal notranslate"><span class="pre">analyze_N_mathieu()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.convergence.demo_mathieu_N_convergence.analyze_smoothness_effects"><code class="docutils literal notranslate"><span class="pre">analyze_smoothness_effects()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.convergence.demo_meissner_aliasing">examples.convergence.demo_meissner_aliasing</a></li>
 </ul>
 </li>
 </ul>
@@ -339,35 +346,49 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="examples">
-<h1><a class="toc-backref" href="#id3" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
-<p>The following examples illustrate SKHiPPR capabilities and usage. All files runnable as Python scripts and are explained by exhaustive in-line commenting.</p>
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
+<p>The following examples illustrate SKHiPPR capabilities and usage. All files are runnable as Python scripts and are explained by exhaustive in-line commenting.</p>
 <nav class="contents" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#examples" id="id3">Examples</a></p>
+<li><p><a class="reference internal" href="#examples" id="id1">Examples</a></p>
 <ul>
-<li><p><a class="reference internal" href="#module-examples.pseudo_arclength_implicit" id="id4">examples.pseudo_arclength_implicit</a></p></li>
-<li><p><a class="reference internal" href="#module-examples.template" id="id5">examples.template</a></p></li>
-<li><p><a class="reference internal" href="#module-examples.duffing_frc" id="id6">examples.duffing_frc</a></p></li>
+<li><p><a class="reference internal" href="#module-examples.circle" id="id2">examples.circle</a></p></li>
+<li><p><a class="reference internal" href="#module-examples.duffing" id="id3">examples.duffing</a></p></li>
+<li><p><a class="reference internal" href="#module-examples.vanderpol_animation" id="id4">examples.vanderpol_animation</a></p></li>
+<li><p><a class="reference internal" href="#module-examples.duffing_3d" id="id5">examples.duffing_3d</a></p></li>
+<li><p><a class="reference internal" href="#numerical-convergence-studies" id="id6">numerical convergence studies</a></p>
+<ul>
+<li><p><a class="reference internal" href="#module-examples.convergence.demo_mathieu_N_convergence" id="id7">examples.convergence.demo_mathieu_N_convergence</a></p></li>
+<li><p><a class="reference internal" href="#module-examples.convergence.demo_meissner_aliasing" id="id8">examples.convergence.demo_meissner_aliasing</a></p></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </nav>
-<section id="module-examples.pseudo_arclength_implicit">
-<span id="examples-pseudo-arclength-implicit"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">examples.pseudo_arclength_implicit</a><a class="headerlink" href="#module-examples.pseudo_arclength_implicit" title="Link to this heading">#</a></h2>
-<p>Demonstration example for the pseudo-arclength continuation workflow with no explicit parameter, i.e., with one more equation than unknowns.</p>
+<section id="module-examples.circle">
+<span id="examples-circle"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">examples.circle</a><a class="headerlink" href="#module-examples.circle" title="Link to this heading">#</a></h2>
+<p>Demonstrates the complete the pseudo-arclength continuation workflow on a nonlinear equation.</p>
+<ul class="simple">
+<li><p>Use of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Circle</span></code> class as a concrete subclass of <a class="reference internal" href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation" title="skhippr.equations.AbstractEquation.AbstractEquation"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEquation</span></code></a> for a problem formulation.</p></li>
+<li><p>Illustrates how (one or multiple) multiple <a class="reference internal" href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation" title="skhippr.equations.AbstractEquation.AbstractEquation"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEquation</span></code></a> objects are collected into an <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a></p></li>
+<li><p>Continuation of a solution branch emerging from the <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> with and without an explicit continuation parameter.</p></li>
+</ul>
 <dl class="py function">
-<dt class="sig sig-object py" id="examples.pseudo_arclength_implicit.main">
-<span class="sig-prename descclassname"><span class="pre">examples.pseudo_arclength_implicit.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.pseudo_arclength_implicit.main" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="examples.circle.main">
+<span class="sig-prename descclassname"><span class="pre">examples.circle.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.circle.main" title="Link to this definition">#</a></dt>
 <dd><p>Runs a demonstration of pseudo-arclength continuation for solving a nonlinear problem
 using Newton’s method on the circle equation.
 The process includes:</p>
 <ol class="arabic simple">
-<li><p>Instantiating a <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> with the initial guess and the <a class="reference internal" href="#examples.pseudo_arclength_implicit.circle" title="examples.pseudo_arclength_implicit.circle"><code class="xref py py-func docutils literal notranslate"><span class="pre">circle()</span></code></a> function.</p></li>
-<li><p>Using the <a class="reference internal" href="continuation.html#skhippr.problems.continuation.pseudo_arclength_continuator" title="skhippr.problems.continuation.pseudo_arclength_continuator"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a> to iterate along the solution branch.</p></li>
-<li><p>Plotting predictors, corrected solutions, and tangents at each <a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a>.</p></li>
-<li><p>After one circle is completed, <code class="docutils literal notranslate"><span class="pre">radius</span></code> is dynamically updated.</p></li>
-<li><p>Finally, the resulting branches are displayed using <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>.</p></li>
+<li><p>Instantiating a <a class="reference internal" href="solvers.html#skhippr.solvers.newton.NewtonSolver" title="skhippr.solvers.newton.NewtonSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonSolver</span></code></a> with the solver configuration</p></li>
+<li><p>Instantiating a <code class="xref py py-class docutils literal notranslate"><span class="pre">Circle</span></code> object which contains the residual</p></li>
+<li><p>Demonstrating that the <a class="reference internal" href="solvers.html#skhippr.solvers.newton.NewtonSolver" title="skhippr.solvers.newton.NewtonSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonSolver</span></code></a> can immediately solve the <code class="xref py py-class docutils literal notranslate"><span class="pre">Circle</span></code> for the scalar unknown <code class="docutils literal notranslate"><span class="pre">radius</span></code>, but not for the array unknown <code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
+<li><p>Constructing an <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> for the unknown <code class="docutils literal notranslate"><span class="pre">y</span></code> and using the <code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code> to iterate along the solution branch.</p></li>
+<li><p>Constructing another <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> by appending a second <a class="reference internal" href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation" title="skhippr.equations.AbstractEquation.AbstractEquation"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractEquation</span></code></a> subclass and solving it directly for <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p></li>
+<li><p>Using the <code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code> to iterate along the solution branch with the extended <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> and the explicit continuation parameter <code class="docutils literal notranslate"><span class="pre">theta</span></code></p></li>
+<li><p>Plotting the results.</p></li>
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -376,88 +397,24 @@ The process includes:</p>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.pseudo_arclength_implicit.circle">
-<span class="sig-prename descclassname"><span class="pre">examples.pseudo_arclength_implicit.</span></span><span class="sig-name descname"><span class="pre">circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#examples.pseudo_arclength_implicit.circle" title="Link to this definition">#</a></dt>
-<dd><p>Computes the residual and derivatives for a circle equation in 2D.</p>
-<p>Given a point <code class="docutils literal notranslate"><span class="pre">y</span></code> in 2D space and a circle of given <code class="docutils literal notranslate"><span class="pre">radius</span></code>, this function returns:</p>
-<ul class="simple">
-<li><p>The residual of the circle equation: <code class="docutils literal notranslate"><span class="pre">y[0]**2</span> <span class="pre">+</span> <span class="pre">y[1]**2</span> <span class="pre">-</span> <span class="pre">radius**2</span></code></p></li>
-<li><p>The derivatives of the residual with respect to <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">radius</span></code>.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>y</strong> (<em>np.ndarray</em>) – A 1D array of shape (2,) representing the coordinates (x, y) of a point in 2D space.</p></li>
-<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – The radius of the circle (default is 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>residual</strong> (<em>np.ndarray</em>) – A 1D numpy array containing the residual of the circle equation.</p></li>
-<li><p><strong>derivatives</strong> (<em>dict[str, np.ndarray]</em>) – A dictionary containing the derivatives of the residual with respect to the inputs.</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
-<section id="module-examples.template">
-<span id="examples-template"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">examples.template</a><a class="headerlink" href="#module-examples.template" title="Link to this heading">#</a></h2>
-<p>Template for getting started immediately on setting up a frc continuation problem.
-This example uses a Duffing oscillator, but by modifying the content of system_function, one can immediately continue other nonautonomous systems.</p>
+<section id="module-examples.duffing">
+<span id="examples-duffing"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">examples.duffing</a><a class="headerlink" href="#module-examples.duffing" title="Link to this heading">#</a></h2>
+<p>Demonstration / Template for creating a simple frequency response curve of a non-autonomous dynamical system with HBM.
+This example uses a Duffing oscillator, but <code class="docutils literal notranslate"><span class="pre">ode</span></code> can be instantiated as any non-autonomous <a class="reference internal" href="odes.html#skhippr.odes.AbstractODE.AbstractODE" title="skhippr.odes.AbstractODE.AbstractODE"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractODE</span></code></a>.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="examples.template.system_function">
-<span class="sig-prename descclassname"><span class="pre">examples.template.</span></span><span class="sig-name descname"><span class="pre">system_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.template.system_function" title="Link to this definition">#</a></dt>
-<dd><p>Exemplary system function: Duffing oscillator</p>
-<p>Computes the state derivatives and their Jacobians for the Duffing oscillator system.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float</em>) – time</p></li>
-<li><p><strong>x</strong> (<em>array_like</em><em>, </em><em>shape</em><em> (</em><em>2</em><em>,</em><em>)</em>) – State vector of the system, where x[0] is position and x[1] is velocity.</p></li>
-<li><p><strong>omega</strong> (<em>float</em><em>, </em><em>optional</em>) – Angular frequency of the driving force (default is 1).</p></li>
-<li><p><strong>F</strong> (<em>float</em><em>, </em><em>optional</em>) – Amplitude of the driving force (default is 1).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul>
-<li><p><strong>f</strong> (<em>ndarray, shape (2,)</em>) – Time derivatives of the state vector.</p></li>
-<li><p><strong>derivatives</strong> (<em>dict</em>) –</p>
-<dl class="simple">
-<dt>Dictionary containing the Jacobians:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>”x”: ndarray, shape (2, 2)</dt><dd><p>Partial derivatives of <code class="docutils literal notranslate"><span class="pre">f</span></code> with respect to <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>”F”: ndarray, shape (2,)</dt><dd><p>Partial derivatives of <code class="docutils literal notranslate"><span class="pre">f</span></code> with respect to <code class="docutils literal notranslate"><span class="pre">F</span></code>.</p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.template.main">
-<span class="sig-prename descclassname"><span class="pre">examples.template.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.template.main" title="Link to this definition">#</a></dt>
-<dd><p>Demonstration for creating a simple frequency response curve with HBM.</p>
+<dt class="sig sig-object py" id="examples.duffing.main">
+<span class="sig-prename descclassname"><span class="pre">examples.duffing.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing.main" title="Link to this definition">#</a></dt>
+<dd><p>Demonstration for creating a simple frequency response curve of a non-autonomous dynamical system with HBM.</p>
 <p>This function performs the following steps:</p>
 <ol class="arabic simple">
-<li><p>Creation of a <a class="reference internal" href="hbm.html#module-skhippr.Fourier" title="skhippr.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code></a> object to collect FFT parameters.</p></li>
-<li><p>Creation of a <a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic" title="skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillSubharmonic</span></code></a> object which defines the stability method.</p></li>
-<li><p>Setup and solution of the initial <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>.</p></li>
-<li><p>Continuation of the frequency response curve using :py:func:<a href="#id1"><span class="problematic" id="id2">`</span></a>~skhippr.problems.continuation.pseudo_arclength_continuator`and collecting branch point properties</p></li>
-<li><p>plotting</p></li>
+<li><p>Creation of <a class="reference internal" href="hbm.html#module-skhippr.Fourier" title="skhippr.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code></a>, <a class="reference internal" href="solvers.html#skhippr.solvers.newton.NewtonSolver" title="skhippr.solvers.newton.NewtonSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonSolver</span></code></a>, and <code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillSubharmonic</span></code> objects to collect method parameters.</p></li>
+<li><p>Instantiation of a <a class="reference internal" href="odes.html#skhippr.odes.AbstractODE.AbstractODE" title="skhippr.odes.AbstractODE.AbstractODE"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractODE</span></code></a> (here: <a class="reference internal" href="odes.html#skhippr.odes.nonautonomous.Duffing" title="skhippr.odes.nonautonomous.Duffing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Duffing</span></code></a>) object which contains the ODE.</p></li>
+<li><p>Setup of an initial guess</p></li>
+<li><p>Setup and solution of the <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMEquation" title="skhippr.cycles.hbm.HBMEquation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMEquation</span></code></a>, which formalizes the Harmonic Balance equations.</p></li>
+<li><p>Creation of an <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> containing only the HBM equations as input to the continuation method.</p></li>
+<li><p>Continuation of the frequency response curve using <code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code> and collecting the branch points</p></li>
+<li><p>Analyzing and plotting the branch points</p></li>
 </ol>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -467,144 +424,98 @@ This example uses a Duffing oscillator, but by modifying the content of system_f
 </dd></dl>
 
 </section>
-<section id="module-examples.duffing_frc">
-<span id="examples-duffing-frc"></span><h2><a class="toc-backref" href="#id6" role="doc-backlink">examples.duffing_frc</a><a class="headerlink" href="#module-examples.duffing_frc" title="Link to this heading">#</a></h2>
+<section id="module-examples.vanderpol_animation">
+<span id="examples-vanderpol-animation"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">examples.vanderpol_animation</a><a class="headerlink" href="#module-examples.vanderpol_animation" title="Link to this heading">#</a></h2>
+<p>Van der Pol oscillator: continuation w.r.t. nu and animation of the resulting phase portrait.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="examples.vanderpol_animation.main">
+<span class="sig-prename descclassname"><span class="pre">examples.vanderpol_animation.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.vanderpol_animation.main" title="Link to this definition">#</a></dt>
+<dd><p>Demonstration of the continuation of the Van der Pol oscillator w.r.t. nu and animation of the resulting phase portrait.
+This function performs the following steps:</p>
+<ol class="arabic simple">
+<li><p>Setup of the <a class="reference internal" href="odes.html#skhippr.odes.autonomous.Vanderpol" title="skhippr.odes.autonomous.Vanderpol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vanderpol</span></code></a> ODE</p></li>
+<li><p>Setup of a <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMSystem" title="skhippr.cycles.hbm.HBMSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code></a> object with the <a class="reference internal" href="odes.html#skhippr.odes.autonomous.Vanderpol" title="skhippr.odes.autonomous.Vanderpol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vanderpol</span></code></a> ode and a <a class="reference internal" href="hbm.html#skhippr.Fourier.Fourier" title="skhippr.Fourier.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code></a> object, encoding both the HBM equations and the phase anchor.</p></li>
+<li><p>Continuation of the HBM system w.r.t. nu using the <a class="reference internal" href="solvers.html#skhippr.solvers.continuation.pseudo_arclength_continuator" title="skhippr.solvers.continuation.pseudo_arclength_continuator"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a> and a <a class="reference internal" href="solvers.html#skhippr.solvers.newton.NewtonSolver" title="skhippr.solvers.newton.NewtonSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonSolver</span></code></a></p></li>
+<li><p>Analysis of the resulting branch of solutions, extracting time series, amplitudes, Floquet multipliers, and stability</p></li>
+<li><p>Visualization of the results, including an animation of the phase portrait and Floquet multipliers, as well as plots of amplitude and frequency w.r.t. nu</p></li>
+</ol>
+</dd></dl>
+
+</section>
+<section id="module-examples.duffing_3d">
+<span id="examples-duffing-3d"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">examples.duffing_3d</a><a class="headerlink" href="#module-examples.duffing_3d" title="Link to this heading">#</a></h2>
 <p>Analyze oscillations of the Duffing oscillator using SKHiPPR by performing
 continuation along both excitation frequency and excitation amplitude.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.main">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing_frc.main" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="examples.duffing_3d.main">
+<span class="sig-prename descclassname"><span class="pre">examples.duffing_3d.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing_3d.main" title="Link to this definition">#</a></dt>
 <dd><p>Runs a demonstration for analyzing the Duffing oscillator with HBM, to illustrate SKHiPPR usage.</p>
 <p>This function performs the following steps:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>Parameter setup.</p></li>
 <li><p>Creation of a <a class="reference internal" href="hbm.html#module-skhippr.Fourier" title="skhippr.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code></a> object to collect FFT parameters.</p></li>
-<li><p>Creation of a <a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection" title="skhippr.stability.KoopmanHillProjection.KoopmanHillProjection"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillProjection</span></code></a> object which defines the stability method. Other <code class="xref py py-class docutils literal notranslate"><span class="pre">_StabilityHBM</span></code> subclasses can interchangeably be used, such as:</p></li>
-</ol>
-<ul class="simple">
+<li><p>Creation of a <a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection" title="skhippr.stability.KoopmanHillProjection.KoopmanHillProjection"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillProjection</span></code></a> object which defines the stability method. Other <code class="xref py py-class docutils literal notranslate"><span class="pre">_StabilityHBM</span></code> subclasses can interchangeably be used, such as:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic" title="skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillSubharmonic</span></code></a></p></li>
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill" title="skhippr.stability.ClassicalHill.ClassicalHill"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalHill</span></code></a></p></li>
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.SinglePass.SinglePassRK" title="skhippr.stability.SinglePass.SinglePassRK"><code class="xref py py-class docutils literal notranslate"><span class="pre">SinglePassRK</span></code></a></p></li>
 </ul>
-<ol class="arabic simple">
-<li><p>Setup and solution of the initial <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>.</p></li>
-<li><p>Visualization of the initial solution and its stability properties using <a class="reference internal" href="#examples.duffing_frc.visualize_solution" title="examples.duffing_frc.visualize_solution"><code class="xref py py-func docutils literal notranslate"><span class="pre">visualize_solution()</span></code></a>.</p></li>
-<li><p>Continuation of the force response curve using <a class="reference internal" href="#examples.duffing_frc.initial_force_response" title="examples.duffing_frc.initial_force_response"><code class="xref py py-func docutils literal notranslate"><span class="pre">initial_force_response()</span></code></a></p></li>
-<li><p>Generation of frequency response curves from starting from points on the previous force response using <a class="reference internal" href="#examples.duffing_frc.continue_from_continuation_curve" title="examples.duffing_frc.continue_from_continuation_curve"><code class="xref py py-func docutils literal notranslate"><span class="pre">continue_from_continuation_curve()</span></code></a>.</p></li>
-<li><p>Generation of additional force responses starting from points on the frequency response curve using <a class="reference internal" href="#examples.duffing_frc.continue_from_continuation_curve" title="examples.duffing_frc.continue_from_continuation_curve"><code class="xref py py-func docutils literal notranslate"><span class="pre">continue_from_continuation_curve()</span></code></a>.</p></li>
-<li><p>3D plotting of all computed response curves, including stability information, using <a class="reference internal" href="#examples.duffing_frc.plot_3D_frc" title="examples.duffing_frc.plot_3D_frc"><code class="xref py py-func docutils literal notranslate"><span class="pre">plot_3D_frc()</span></code></a>.</p></li>
+</div></blockquote>
+</li>
+<li><p>Setup and solution of the initial <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMSystem" title="skhippr.cycles.hbm.HBMSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code></a>.</p></li>
+<li><p>Visualization of the initial solution and its stability properties.</p></li>
+<li><p>Continuation of the first force response curve.</p></li>
+<li><p>Generation of frequency response curves starting from points on the previous force response.</p></li>
+<li><p>Generation of additional force responses starting from points on the frequency response curve.</p></li>
+<li><p>3D plotting of all computed response curves, including stability information.</p></li>
 </ol>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
-</dd>
-</dl>
+</dd></dl>
+
+</section>
+<section id="numerical-convergence-studies">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">numerical convergence studies</a><a class="headerlink" href="#numerical-convergence-studies" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">examples.convergence</span></code> package provides two examples which illustrate the convergence properties of the Koopman-Hill stability method.</p>
+<section id="module-examples.convergence.demo_mathieu_N_convergence">
+<span id="examples-convergence-demo-mathieu-n-convergence"></span><h3><a class="toc-backref" href="#id7" role="doc-backlink">examples.convergence.demo_mathieu_N_convergence</a><a class="headerlink" href="#module-examples.convergence.demo_mathieu_N_convergence" title="Link to this heading">#</a></h3>
+<p>Demonstration of convergence of Koopman-Hill projection method for the Mathieu equation.</p>
+<p>This script analyzes the convergence of the Koopman-Hill projection stability method applied to the <a class="reference internal" href="odes.html#skhippr.odes.ltp.MathieuODE" title="skhippr.odes.ltp.MathieuODE"><code class="xref py py-class docutils literal notranslate"><span class="pre">MathieuODE</span></code></a> and <a class="reference internal" href="odes.html#skhippr.odes.ltp.SmoothedMeissner" title="skhippr.odes.ltp.SmoothedMeissner"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmoothedMeissner</span></code></a> equations around their  equilibrium at zero.</p>
+<p>The convergence is studied by increasing the number of harmonics (N_HBM) in the Harmonic Balance Method (HBM) and comparing the resulting monodromy matrix to a reference solution obtained via the shooting method.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="examples.convergence.demo_mathieu_N_convergence.analyze_N_mathieu">
+<span class="sig-prename descclassname"><span class="pre">examples.convergence.demo_mathieu_N_convergence.</span></span><span class="sig-name descname"><span class="pre">analyze_N_mathieu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.convergence.demo_mathieu_N_convergence.analyze_N_mathieu" title="Link to this definition">#</a></dt>
+<dd><p>Analyze the convergence of the Koopman-Hill projection method for the Mathieu equation. Optionally, results can be saved to a csv file.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.initial_force_response">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">initial_force_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><span class="pre">HBMProblem</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">F_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#examples.duffing_frc.initial_force_response" title="Link to this definition">#</a></dt>
-<dd><p>Continue the force response curve starting from the initial solution.</p>
-<p>This function uses the <a class="reference internal" href="continuation.html#skhippr.problems.continuation.pseudo_arclength_continuator" title="skhippr.problems.continuation.pseudo_arclength_continuator"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a> to trace the response of a system as the force parameter <code class="docutils literal notranslate"><span class="pre">F</span></code> is varied from <code class="docutils literal notranslate"><span class="pre">F_min</span></code> up to <code class="docutils literal notranslate"><span class="pre">F_max</span></code>.</p>
+<dt class="sig sig-object py" id="examples.convergence.demo_mathieu_N_convergence.analyze_smoothness_effects">
+<span class="sig-prename descclassname"><span class="pre">examples.convergence.demo_mathieu_N_convergence.</span></span><span class="sig-name descname"><span class="pre">analyze_smoothness_effects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.convergence.demo_mathieu_N_convergence.analyze_smoothness_effects" title="Link to this definition">#</a></dt>
+<dd><p>Analyze and visualize the effects of the smoothing parameter on the convergence of a Hill-type system.</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">smoothing</span></code> ==1, the <a class="reference internal" href="odes.html#skhippr.odes.ltp.SmoothedMeissner" title="skhippr.odes.ltp.SmoothedMeissner"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmoothedMeissner</span></code></a> ODE coincides with Mathieu’s equation and for <code class="docutils literal notranslate"><span class="pre">smoothing</span></code> ==0 with the Meissner equation.
+This function iterates over a range of smoothing parameter values, runs a convergence analysis for each,
+and plots the corresponding excitation and the convergence behavior. Optionally, results can be saved to a CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_problem</strong> (<a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>) – The initial problem or problem setup to start the continuation from. Must take a parameter <code class="docutils literal notranslate"><span class="pre">F</span></code>.</p></li>
-<li><p><strong>F_min</strong> (<em>float</em>) – The minimum value of the force parameter <code class="docutils literal notranslate"><span class="pre">F</span></code> to start the continuation.</p></li>
-<li><p><strong>F_max</strong> (<em>float</em>) – The maximum value of the force parameter <code class="docutils literal notranslate"><span class="pre">F</span></code> at which to stop the continuation.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, enables verbose output during continuation. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>response_F</strong> – A list of <code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint`</span></code> objects representing the computed points along the force response curve.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[<a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint">BranchPoint</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.continue_from_continuation_curve">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">continue_from_continuation_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_cont</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values_spark</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#examples.duffing_frc.continue_from_continuation_curve" title="Link to this definition">#</a></dt>
-<dd><p>Finds and computes frequency response curves emanating from specified points on a force response curve.</p>
-<p>This function iterates over a given continuation curve (list of <a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> objects). When the continuation parameter first exceeds the next value in <code class="docutils literal notranslate"><span class="pre">values_spark</span></code>, the method it initiates a new continuation along the different parameter <code class="docutils literal notranslate"><span class="pre">key_cont</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;omega&quot;</span></code>). The resulting branches are collected and returned as a list of lists of <a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> objects.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>curve</strong> (<em>list</em><em>[</em><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><em>BranchPoint</em></a><em>]</em>) – The initial continuation curve.</p></li>
-<li><p><strong>key_cont</strong> (<em>str</em>) – The name of the new continuation parameter (e.g., <cite>‘“omega”’</cite>).</p></li>
-<li><p><strong>param_range</strong> (<em>tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – The minimum and maximum values for the (new) continuation parameter.</p></li>
-<li><p><strong>values_spark</strong> (<em>list</em><em>[</em><em>float</em><em>]</em>) – The values of the (old) continuation parameter of the initial curve at which to start new continuation curves along the new parameter.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>responses</strong> – A list containing the new continuation curves.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list[list[<a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint">BranchPoint</a>]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.plot_all_responses">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">plot_all_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other_responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing_frc.plot_all_responses" title="Link to this definition">#</a></dt>
-<dd><p>Plot all computed response curves using py:func:<cite>plot_3D_frc</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>initial_response</strong> (<em>list</em><em>[</em><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><em>BranchPoint</em></a><em>]</em>) – The initial response curve to be plotted.</p></li>
-<li><p><strong>other_responses</strong> (<em>list</em><em>[</em><em>list</em><em>[</em><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><em>BranchPoint</em></a><em>]</em><em>]</em>) – A list of additional response curves to plot.</p></li>
+<li><p><strong>N_max</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of harmonics to consider in the convergence analysis (default is 30).</p></li>
+<li><p><strong>csv_path</strong> (<em>str</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Path to a CSV file where results will be saved. If None, results are not saved (default is None).</p></li>
+<li><p><strong>smoothing</strong> (<em>array-like</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Sequence of smoothing parameter values to analyze. If None, a default sequence from 1 to 0 is used.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.plot_3D_frc">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">plot_3D_frc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_points</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><span class="pre">BranchPoint</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_stability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing_frc.plot_3D_frc" title="Link to this definition">#</a></dt>
-<dd><p>Plot a 3D curve of branch points with stability information.</p>
-<p>Visualize a list of BranchPoint objects in 3D space, where the axes represent
-the frequency (<code class="docutils literal notranslate"><span class="pre">omega</span></code>), forcing amplitude (<code class="docutils literal notranslate"><span class="pre">F</span></code>), and the maximum absolute value of the first
-state variable (<code class="docutils literal notranslate"><span class="pre">|x_1|</span></code>). Points can be colored according to their stability.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>list_of_points</strong> (<em>Iterable</em><em>[</em><a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><em>BranchPoint</em></a><em>]</em>) – A continuation curve to plot. Every <a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> must have the attributes <code class="docutils literal notranslate"><span class="pre">point.F</span></code> and <code class="docutils literal notranslate"><span class="pre">point.omega</span></code>.</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – Label for the curve. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>.</p></li>
-<li><p><strong>ax</strong> (<em>matplotlib.axes._subplots.Axes3DSubplot</em><em>, </em><em>optional</em>) – Existing 3D axes to plot on. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, a new figure and axes are created. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-<li><p><strong>plot_stability</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to highlight stable and unstable points with different colors. Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+</section>
+<section id="module-examples.convergence.demo_meissner_aliasing">
+<span id="examples-convergence-demo-meissner-aliasing"></span><h3><a class="toc-backref" href="#id8" role="doc-backlink">examples.convergence.demo_meissner_aliasing</a><a class="headerlink" href="#module-examples.convergence.demo_meissner_aliasing" title="Link to this heading">#</a></h3>
+<p>This script demonstrates the effect of aliasing error on the accuracy of the Koopman-Hill projection (KHP) for the Meissner equation by varying the Discrete Fourier Transform (DFT) length. It compares the accuracy of computed Floquet multipliers for different DFT lengths and visualizes the results.</p>
+<p>Run the script directly to generate plots and optionally save results to a CSV file. The main function <code class="xref py py-func docutils literal notranslate"><span class="pre">analyze_N_meissner_aliasing()</span></code> is called with example parameters to showcase the influence of aliasing on prediction accuracy.</p>
+<ul class="simple">
+<li><p>The Meissner equation’s Fourier coefficients decay as <code class="docutils literal notranslate"><span class="pre">O(1/|k|)</span></code>, with every even coefficient being zero and odd ones alternating in sign.</p></li>
+<li><p>Aliasing errors affect the accuracy of the computed Floquet multipliers.</p></li>
+<li><p>Knowledge about the sign of the (true) Fourier coefficients can significantly improve the results: In the case of Meissner choosing a DFT length that is divisible by 2 but not by 4</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ax</strong> – The 3D axes with the plotted data.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>matplotlib.axes._subplots.Axes3DSubplot</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="examples.duffing_frc.visualize_solution">
-<span class="sig-prename descclassname"><span class="pre">examples.duffing_frc.</span></span><span class="sig-name descname"><span class="pre">visualize_solution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><span class="pre">HBMProblem</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#examples.duffing_frc.visualize_solution" title="Link to this definition">#</a></dt>
-<dd><p>Visualizes and analyzes properties of one solved <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>.</p>
-<p>This function generates two subplots:</p>
-<ol class="arabic simple">
-<li><p>A phase plot of the solution, plotting the first two state variables over time.</p></li>
-<li><p>A plot of the Floquet multipliers in the complex plane, along with the unit circle for reference.</p></li>
-</ol>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>problem</strong> (<a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><em>HBMProblem</em></a>) – The <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a> object containing the state trajectory and Floquet multipliers. It is assumed that <code class="docutils literal notranslate"><span class="pre">problem.converged</span> <span class="pre">==</span> <span class="pre">True</span></code>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-</dd></dl>
-
+</section>
 </section>
 </section>
 
@@ -633,7 +544,7 @@ state variable (<code class="docutils literal notranslate"><span class="pre">|x_
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Usage – Important classes and functions</p>
+        <p class="prev-next-title">Usage – Classes and functions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -653,23 +564,29 @@ state variable (<code class="docutils literal notranslate"><span class="pre">|x_
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.pseudo_arclength_implicit">examples.pseudo_arclength_implicit</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.pseudo_arclength_implicit.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.pseudo_arclength_implicit.circle"><code class="docutils literal notranslate"><span class="pre">circle()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.circle">examples.circle</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.circle.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.template">examples.template</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.template.system_function"><code class="docutils literal notranslate"><span class="pre">system_function()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.template.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing">examples.duffing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing_frc">examples.duffing_frc</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.initial_force_response"><code class="docutils literal notranslate"><span class="pre">initial_force_response()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.continue_from_continuation_curve"><code class="docutils literal notranslate"><span class="pre">continue_from_continuation_curve()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.plot_all_responses"><code class="docutils literal notranslate"><span class="pre">plot_all_responses()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.plot_3D_frc"><code class="docutils literal notranslate"><span class="pre">plot_3D_frc()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_frc.visualize_solution"><code class="docutils literal notranslate"><span class="pre">visualize_solution()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.vanderpol_animation">examples.vanderpol_animation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.vanderpol_animation.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.duffing_3d">examples.duffing_3d</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.duffing_3d.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numerical-convergence-studies">numerical convergence studies</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.convergence.demo_mathieu_N_convergence">examples.convergence.demo_mathieu_N_convergence</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.convergence.demo_mathieu_N_convergence.analyze_N_mathieu"><code class="docutils literal notranslate"><span class="pre">analyze_N_mathieu()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#examples.convergence.demo_mathieu_N_convergence.analyze_smoothness_effects"><code class="docutils literal notranslate"><span class="pre">analyze_smoothness_effects()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#module-examples.convergence.demo_meissner_aliasing">examples.convergence.demo_meissner_aliasing</a></li>
 </ul>
 </li>
 </ul>
