@@ -13,6 +13,21 @@ from skhippr.equations.AbstractEquation import AbstractEquation
 
 # still an abstract class
 class AbstractODE(AbstractEquation):
+    """Abstract base class for first-order differential equations. The equilibrium problem can immediately solved bypassing the ODE into the :py:class:`~skhippr.solvers.newton.NewtonSolver`. If no stability method is provided during instantiation, the default :py:class:`~skhippr.stability.StabilityEquilibrium` is used for the equilibrium problem.
+
+    Attributes:
+    -----------
+
+    autonomous : bool
+        Whether the ODE is autonomous (does not depend on time).
+    n_dof : int
+        Number of degrees of freedom of the ODE.
+    x : np.ndarray
+        State vector.
+    t : float
+        Time variable.
+    """
+
     def __init__(self, autonomous: bool, n_dof: int, stability_method=None):
         """The constructor must set the number of degrees of freedom as well as all required parameter values (including the initial state) as properties."""
         if stability_method is None:
@@ -23,9 +38,18 @@ class AbstractODE(AbstractEquation):
 
     @abstractmethod
     def dynamics(self, t=None, x=None) -> np.ndarray:
-        """Return the right-hand side of the first-order ode x_dot = f(t, x) as a numpy array of size self.n_dof.
-        All parameters are to be obtained as attributes.
-        Subclass implementations are expected to check the correct dimensions of x and t.
+        """Return the right-hand side of the first-order ode x_dot = f(t, x) as a 1-D numpy array of size ``self.n_dof``. This method can be passed into ``scipy.integrate.solve_ivp`.
+        All parameters are to be obtained from the corresponding attributes by default.
+        Subclass implementations are expected to check the correct dimensions of ``x`` and ``t``.
+
+        Parameters
+        ----------
+        t : float | np.ndarray, optional
+            Time variable. If ``None``, ``self.t`` is used.
+        x : np.ndarray, optional
+            State vector. If ``None``, ``self.x`` is used.
+
+            If ``t`` is a scalar, ``x`` must be 1-D or have exactly one column. If ``t`` is a vector, ``x`` must have the same number of columns as ``t``.
         """
         if x is None:
             x = self.x
@@ -49,15 +73,20 @@ class AbstractODE(AbstractEquation):
             )
 
     @override
-    def residual_function(self):
+    def residual_function(self) -> np.ndarray:
+        """Evaluates ``self.dynamics()`` at ``self.t`` and ``self.x``. The residual is zero at an equilibrium."""
         return self.dynamics()
 
     @override
-    def stability_criterion(self, eigenvalues):
+    def stability_criterion(self, eigenvalues) -> bool:
+        """Checks if all eigenvalues have a non-positive real part."""
         return np.all(np.real(eigenvalues) < self.stability_method.tol)
 
     @override
-    def derivative(self, variable, update=False, h_fd=1e-4, t=None, x=None):
+    def derivative(
+        self, variable, update=False, h_fd=1e-4, t=None, x=None
+    ) -> np.ndarray:
+        """Provides an interface for optional arguments ``t`` and ``x`` into the derivative method."""
         if t is not None or x is not None:
             update = True
 
@@ -114,6 +143,7 @@ class AbstractODE(AbstractEquation):
         self._derivative_dict[variable] = derivative
         return derivative
 
-    def closed_form_derivative(self, variable, t=None, x=None):
-        # Provide an interface which offers t and x
+    def closed_form_derivative(self, variable, t=None, x=None) -> np.ndarray:
+        """Requires subclasses to implement a closed-form derivative with optional arguments ``t`` and ``x``."""
+
         return super().closed_form_derivative(variable)

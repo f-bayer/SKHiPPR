@@ -43,7 +43,7 @@ class AbstractEquation(ABC):
     def visualize(self):
         pass
 
-    def derivative(self, variable: str, update=False, h_fd=1e-4):
+    def derivative(self, variable: str, update=False, h_fd=1e-4) -> np.ndarray:
         """
         Compute the derivative of the residual with respect to a given variable.
         This method should be called whenever a derivative is desired.
@@ -116,7 +116,7 @@ class AbstractEquation(ABC):
 
         return derivative
 
-    def closed_form_derivative(self, variable: str) -> np.array:  # -> Any:
+    def closed_form_derivative(self, variable: str) -> np.ndarray:  # -> Any:
         """
         Compute the closed-form derivative of the residual with respect to a given variable.  To be implemented in subclasses. Must raise a ``NotImplementedError`` if closed-form derivative is nonzero and not available analytically.
 
