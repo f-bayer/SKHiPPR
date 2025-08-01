@@ -12,6 +12,12 @@ Algebraic equations
 Equation systems
 -----------------
 
+Equation systems collect a set of :py:class:`~skhippr.equations.AbstractEquation.AbstractEquation` objects, together with their unknowns. Notable subclasses of :py:class:`~skhippr.equations.EquationSystem.EquationSystem` are documented elsewhere:
+
+    * :py:class:`~skhippr.solvers.continuation.BranchPoint`
+    * :py:class:`~skhippr.cycles.hbm.HBMSystem`
+    * :py:class:`~skhippr.cycles.shooting.ShootingSystem`
+
 .. autoclass:: skhippr.equations.EquationSystem.EquationSystem
     :members:
 
@@ -22,6 +28,7 @@ The following subclasses of :py:class:`~skhippr.equations.AbstractEquation.Abstr
 
     * :py:class:`~skhippr.odes.AbstractODE.AbstractODE`
     * :py:class:`~skhippr.solvers.continuation.ContinuationAnchor`, 
+    * :py:class:`~skhippr.cycles.AbstractCycleEquation.AbstractCycleEquation`
     * :py:class:`~skhippr.cycles.hbm.HBMEquation` and :py:class:`~skhippr.cycles.hbm.HBMPhaseAnchor`
     * :py:class:`~skhippr.cycles.shooting.ShootingBVP` and :py:class:`~skhippr.cycles.shooting.ShootingPhaseAnchor`
 
