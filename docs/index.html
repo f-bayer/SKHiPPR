@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SKHiPPR documentation &#8212; SKHiPPR 1.0 documentation</title>
+    <title>SKHiPPR documentation &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -133,7 +133,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -152,11 +152,12 @@
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -338,14 +339,14 @@ document.write(`
 <li><p>Project website: <a class="reference external" href="https://www.inm.uni-stuttgart.de/research_nonlinear_mechanics/project_bayer/">https://www.inm.uni-stuttgart.de/research_nonlinear_mechanics/project_bayer/</a></p></li>
 </ul>
 </div></blockquote>
-<p>This toolbox is object-oriented and modularized. It generates continuation curves with stability information by combining four modular aspects:</p>
+<p>This toolbox is object-oriented and modularized. It can generate continuation curves along arbitrary (differentiable)  systems of algebraic equations and also branches of periodic solutions with stability information. This requires the following workflow:</p>
 <ol class="arabic simple">
-<li><p>A user-defined system function returns the right-hand side of a system of (either algebraic or differential) equations as well as the derivatives.</p></li>
-<li><p>A <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> (or subclasses) instance, initialized with the system function, encodes a nonlinear equation problem (i.e., a rootfinding problem), and solves it using Newton’s method.</p></li>
-<li><p>An instance of a subclass of <a class="reference internal" href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod" title="skhippr.stability._StabilityMethod._StabilityMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">_StabilityMethod</span></code></a> provides the functionality to evaluate stability of the problem.</p></li>
-<li><p>The <a class="reference internal" href="continuation.html#skhippr.problems.continuation.pseudo_arclength_continuator" title="skhippr.problems.continuation.pseudo_arclength_continuator"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a> wraps a <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> into a <a class="reference internal" href="continuation.html#skhippr.problems.continuation.BranchPoint" title="skhippr.problems.continuation.BranchPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">BranchPoint</span></code></a> and iteratively predicts, solves and yields the subsequent points on the continuation branch.</p></li>
+<li><p>The user provides a first-order ordinary differential equation as a concrete subclass of <a class="reference internal" href="odes.html#skhippr.odes.AbstractODE.AbstractODE" title="skhippr.odes.AbstractODE.AbstractODE"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractODE</span></code></a>.</p></li>
+<li><p>Using the ODE, a <a class="reference internal" href="hbm.html#skhippr.Fourier.Fourier" title="skhippr.Fourier.Fourier"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fourier</span></code></a> object for configuration of the FFT, and optionally a <a class="reference internal" href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM" title="skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractStabilityHBM</span></code></a> object, a <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMSystem" title="skhippr.cycles.hbm.HBMSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code></a> object is instantiated to encode the harmonic balance problem.</p></li>
+<li><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonSolver</span></code> (or subclasses) instance can solve the <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMSystem" title="skhippr.cycles.hbm.HBMSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code></a> immediately and determine stability.</p></li>
+<li><p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code> iterates through a solution branch along a specified continuation parameter.</p></li>
 </ol>
-<p>The main purpose of SKHiPPR is to provide a framework for comparing various stability analysis methods for periodic solutions and resonance curves in dynamical systems based on the Harmonic Balance method. For this reason, the toolbox is designed to be extensible and modular. For stability determination based on the Hill matrix (Jacobian of the HBM problem), the following classes are available and can be used interchangeably:</p>
+<p>The main purpose of SKHiPPR is to provide a framework for comparing various stability analysis methods for periodic solutions and resonance curves in dynamical systems based on the Harmonic Balance method. For stability determination based on the Hill matrix (Jacobian of the HBM problem), the following classes are available and can be used interchangeably:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection" title="skhippr.stability.KoopmanHillProjection.KoopmanHillProjection"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillProjection</span></code></a> (direct Koopman-Hill projection method, cf. Bayer and Leine (2023))</p></li>
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic" title="skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic"><code class="xref py py-class docutils literal notranslate"><span class="pre">KoopmanHillSubharmonic</span></code></a> (Koopman-Hill projection with subharmonics, cf. Bayer and Leine (2025))</p></li>
@@ -353,7 +354,7 @@ document.write(`
 <li><p><a class="reference internal" href="stability.html#skhippr.stability.SinglePass.SinglePassRK" title="skhippr.stability.SinglePass.SinglePassRK"><code class="xref py py-class docutils literal notranslate"><span class="pre">SinglePassRK</span></code></a> (numerical integration using single-pass fixed-step explicit Runge-Kutta methods, cf. Peletan et al. (2013), <a class="reference external" href="https://doi.org/10.1007/s11071-012-0744-0">https://doi.org/10.1007/s11071-012-0744-0</a>)</p></li>
 </ul>
 <p>The modular framework enables easy addition of new problem formulations and comparison of stability methods.</p>
-<p>To install SKHiPPR locally on your machine, take a look at the <a class="reference internal" href="installation.html"><span class="doc">installation guide</span></a>. To get started, check out the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> or the <a class="reference internal" href="api.html"><span class="doc">Usage – Important classes and functions</span></a>.</p>
+<p>To install SKHiPPR locally on your machine, take a look at the <a class="reference internal" href="installation.html"><span class="doc">installation guide</span></a>. To get started, check out the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> or the <a class="reference internal" href="api.html"><span class="doc">Usage – Classes and functions</span></a> section.</p>
 <section id="contents">
 <h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">#</a></h2>
 <div class="toctree-wrapper compound">
@@ -363,16 +364,19 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.pseudo_arclength_implicit">examples.pseudo_arclength_implicit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.template">examples.template</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.duffing_frc">examples.duffing_frc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.circle">examples.circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.duffing">examples.duffing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.vanderpol_animation">examples.vanderpol_animation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#module-examples.duffing_3d">examples.duffing_3d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#numerical-convergence-studies">numerical convergence studies</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Usage – Classes and functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </li>

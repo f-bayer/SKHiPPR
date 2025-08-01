@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Index &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Index &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -35,7 +35,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -131,7 +131,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -150,11 +150,12 @@
         <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -272,9 +273,9 @@ document.write(`
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
- | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
  | <a href="#K"><strong>K</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -284,6 +285,7 @@ document.write(`
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
  
 </div>
@@ -293,18 +295,28 @@ document.write(`
       <li><a href="hbm.html#skhippr.Fourier.Fourier.__replace__">__replace__() (skhippr.Fourier.Fourier method)</a>
 </li>
   </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability._StabilityHBM._StabilityHBM">_StabilityHBM (class in skhippr.stability._StabilityHBM)</a>
-</li>
-      <li><a href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod">_StabilityMethod (class in skhippr.stability._StabilityMethod)</a>
-</li>
-  </ul></td>
 </tr></table>
 
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.A">A (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
+      <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation">AbstractEquation (class in skhippr.equations.AbstractEquation)</a>
+</li>
+      <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE">AbstractODE (class in skhippr.odes.AbstractODE)</a>
+</li>
+      <li><a href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM">AbstractStabilityHBM (class in skhippr.stability.AbstractStabilityHBM)</a>
+</li>
+      <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod">AbstractStabilityMethod (class in skhippr.stability.AbstractStabilityMethod)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.aft">aft() (skhippr.cycles.hbm.HBMEquation method)</a>
+</li>
+      <li><a href="examples.html#examples.convergence.demo_mathieu_N_convergence.analyze_N_mathieu">analyze_N_mathieu() (in module examples.convergence.demo_mathieu_N_convergence)</a>
+</li>
+      <li><a href="examples.html#examples.convergence.demo_mathieu_N_convergence.analyze_smoothness_effects">analyze_smoothness_effects() (in module examples.convergence.demo_mathieu_N_convergence)</a>
+</li>
+      <li><a href="equations.html#skhippr.equations.Circle.AngleEquation">AngleEquation (class in skhippr.equations.Circle)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -312,11 +324,11 @@ document.write(`
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.b">b (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
+      <li><a href="odes.html#skhippr.odes.autonomous.BlockOnBelt">BlockOnBelt (class in skhippr.odes.autonomous)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="continuation.html#skhippr.problems.continuation.BranchPoint">BranchPoint (class in skhippr.problems.continuation)</a>
+      <li><a href="solvers.html#skhippr.solvers.continuation.BranchPoint">BranchPoint (class in skhippr.solvers.continuation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -324,21 +336,35 @@ document.write(`
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.c">c (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
-</li>
       <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic.C_subh_time">C_subh_time() (skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic method)</a>
 </li>
       <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection.C_time">C_time() (skhippr.stability.KoopmanHillProjection.KoopmanHillProjection method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="examples.html#examples.pseudo_arclength_implicit.circle">circle() (in module examples.pseudo_arclength_implicit)</a>
+      <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.check_dimensions">check_dimensions() (skhippr.odes.AbstractODE.AbstractODE method)</a>
+</li>
+      <li><a href="equations.html#skhippr.equations.Circle.CircleEquation">CircleEquation (class in skhippr.equations.Circle)</a>
 </li>
       <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill">ClassicalHill (class in skhippr.stability.ClassicalHill)</a>
 </li>
-      <li><a href="examples.html#examples.duffing_frc.continue_from_continuation_curve">continue_from_continuation_curve() (in module examples.duffing_frc)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.closed_form_derivative">closed_form_derivative() (skhippr.cycles.hbm.HBMEquation method)</a>
+
+      <ul>
+        <li><a href="hbm.html#skhippr.cycles.hbm.HBMPhaseAnchor.closed_form_derivative">(skhippr.cycles.hbm.HBMPhaseAnchor method)</a>
 </li>
-      <li><a href="continuation.html#skhippr.problems.continuation.BranchPoint.copy_problem">copy_problem() (skhippr.problems.continuation.BranchPoint method)</a>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP.closed_form_derivative">(skhippr.cycles.shooting.ShootingBVP method)</a>
+</li>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingPhaseAnchor.closed_form_derivative">(skhippr.cycles.shooting.ShootingPhaseAnchor method)</a>
+</li>
+        <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.closed_form_derivative">(skhippr.equations.AbstractEquation.AbstractEquation method)</a>
+</li>
+        <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.closed_form_derivative">(skhippr.odes.AbstractODE.AbstractODE method)</a>
+</li>
+        <li><a href="solvers.html#skhippr.solvers.continuation.ContinuationAnchor.closed_form_derivative">(skhippr.solvers.continuation.ContinuationAnchor method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="solvers.html#skhippr.solvers.continuation.ContinuationAnchor">ContinuationAnchor (class in skhippr.solvers.continuation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -348,35 +374,47 @@ document.write(`
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection.D_time">D_time() (skhippr.stability.KoopmanHillProjection.KoopmanHillProjection method)</a>
 </li>
-      <li><a href="hbm.html#skhippr.Fourier.Fourier.derivative_coeffs">derivative_coeffs() (skhippr.Fourier.Fourier method)</a>
-</li>
-      <li><a href="stability.html#skhippr.stability._StabilityHBM._StabilityHBM.determine_eigenvalues">determine_eigenvalues() (skhippr.stability._StabilityHBM._StabilityHBM method)</a>
+      <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.derivative">derivative() (skhippr.equations.AbstractEquation.AbstractEquation method)</a>
 
       <ul>
-        <li><a href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod.determine_eigenvalues">(skhippr.stability._StabilityMethod._StabilityMethod method)</a>
+        <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.derivative">(skhippr.odes.AbstractODE.AbstractODE method)</a>
 </li>
-        <li><a href="stability.html#skhippr.stability._StabilityMethod.StabilityEquilibrium.determine_eigenvalues">(skhippr.stability._StabilityMethod.StabilityEquilibrium method)</a>
+      </ul></li>
+      <li><a href="hbm.html#skhippr.Fourier.Fourier.derivative_coeffs">derivative_coeffs() (skhippr.Fourier.Fourier method)</a>
+</li>
+      <li><a href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.determine_eigenvalues">determine_eigenvalues() (skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM method)</a>
+
+      <ul>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod.determine_eigenvalues">(skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod method)</a>
+</li>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium.determine_eigenvalues">(skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium method)</a>
 </li>
         <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.determine_eigenvalues">(skhippr.stability.ClassicalHill.ClassicalHill method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="shooting.html#skhippr.problems.shooting.ShootingProblem.determine_stability">determine_stability() (skhippr.problems.shooting.ShootingProblem method)</a>
+      <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.determine_stability">determine_stability() (skhippr.equations.AbstractEquation.AbstractEquation method)</a>
 
       <ul>
-        <li><a href="stability.html#skhippr.stability._StabilityHBM._StabilityHBM.determine_stability">(skhippr.stability._StabilityHBM._StabilityHBM method)</a>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.determine_stability">(skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM method)</a>
 </li>
-        <li><a href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod.determine_stability">(skhippr.stability._StabilityMethod._StabilityMethod method)</a>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod.determine_stability">(skhippr.stability.AbstractStabilityMethod.AbstractStabilityMethod method)</a>
 </li>
-        <li><a href="stability.html#skhippr.stability._StabilityMethod.StabilityEquilibrium.determine_stability">(skhippr.stability._StabilityMethod.StabilityEquilibrium method)</a>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium.determine_stability">(skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium method)</a>
 </li>
       </ul></li>
-      <li><a href="continuation.html#skhippr.problems.continuation.BranchPoint.determine_tangent">determine_tangent() (skhippr.problems.continuation.BranchPoint method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="solvers.html#skhippr.solvers.continuation.BranchPoint.determine_tangent">determine_tangent() (skhippr.solvers.continuation.BranchPoint method)</a>
 </li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier.DFT">DFT() (skhippr.Fourier.Fourier method)</a>
 </li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier.differentiate">differentiate() (skhippr.Fourier.Fourier method)</a>
+</li>
+      <li><a href="odes.html#skhippr.odes.nonautonomous.Duffing">Duffing (class in skhippr.odes.nonautonomous)</a>
+</li>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.duplicate">duplicate() (skhippr.equations.EquationSystem.EquationSystem method)</a>
+</li>
+      <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.dynamics">dynamics() (skhippr.odes.AbstractODE.AbstractODE method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -384,7 +422,11 @@ document.write(`
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability._StabilityHBM._StabilityHBM.error_bound">error_bound() (skhippr.stability._StabilityHBM._StabilityHBM method)</a>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.eigenvalues">eigenvalues (skhippr.equations.EquationSystem.EquationSystem property)</a>
+</li>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem">EquationSystem (class in skhippr.equations.EquationSystem)</a>
+</li>
+      <li><a href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.error_bound">error_bound() (skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM method)</a>
 
       <ul>
         <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection.error_bound">(skhippr.stability.KoopmanHillProjection.KoopmanHillProjection method)</a>
@@ -392,32 +434,53 @@ document.write(`
         <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic.error_bound">(skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic method)</a>
 </li>
       </ul></li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.error_bound_fundamental_matrix">error_bound_fundamental_matrix() (skhippr.problems.HBM.HBMProblem method)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.error_bound_fundamental_matrix">error_bound_fundamental_matrix() (skhippr.cycles.hbm.HBMEquation method)</a>
 </li>
       <li>
-    examples.duffing_frc
+    examples.circle
 
       <ul>
-        <li><a href="examples.html#module-examples.duffing_frc">module</a>
+        <li><a href="examples.html#module-examples.circle">module</a>
+</li>
+      </ul></li>
+      <li>
+    examples.convergence.demo_mathieu_N_convergence
+
+      <ul>
+        <li><a href="examples.html#module-examples.convergence.demo_mathieu_N_convergence">module</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    examples.pseudo_arclength_implicit
+    examples.convergence.demo_meissner_aliasing
 
       <ul>
-        <li><a href="examples.html#module-examples.pseudo_arclength_implicit">module</a>
+        <li><a href="examples.html#module-examples.convergence.demo_meissner_aliasing">module</a>
 </li>
       </ul></li>
       <li>
-    examples.template
+    examples.duffing
 
       <ul>
-        <li><a href="examples.html#module-examples.template">module</a>
+        <li><a href="examples.html#module-examples.duffing">module</a>
 </li>
       </ul></li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.exponential_decay_parameters">exponential_decay_parameters() (skhippr.problems.HBM.HBMProblem method)</a>
+      <li>
+    examples.duffing_3d
+
+      <ul>
+        <li><a href="examples.html#module-examples.duffing_3d">module</a>
+</li>
+      </ul></li>
+      <li>
+    examples.vanderpol_animation
+
+      <ul>
+        <li><a href="examples.html#module-examples.vanderpol_animation">module</a>
+</li>
+      </ul></li>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.exponential_decay_parameters">exponential_decay_parameters() (skhippr.cycles.hbm.HBMEquation method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -425,15 +488,17 @@ document.write(`
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="problem.html#skhippr.problems.newton.NewtonProblem.f_with_params">f_with_params() (skhippr.problems.newton.NewtonProblem method)</a>
+      <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.finite_difference_derivative">finite_difference_derivative() (skhippr.equations.AbstractEquation.AbstractEquation method)</a>
 </li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier">Fourier (class in skhippr.Fourier)</a>
 </li>
-      <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.fourier">fourier (skhippr.stability.ClassicalHill.ClassicalHill attribute)</a>
-</li>
-      <li><a href="stability.html#skhippr.stability._StabilityHBM._StabilityHBM.fundamental_matrix">fundamental_matrix() (skhippr.stability._StabilityHBM._StabilityHBM method)</a>
+      <li><a href="odes.html#skhippr.odes.ltp.HillLTI.fundamental_matrix">fundamental_matrix() (skhippr.odes.ltp.HillLTI method)</a>
 
       <ul>
+        <li><a href="odes.html#skhippr.odes.ltp.SmoothedMeissner.fundamental_matrix">(skhippr.odes.ltp.SmoothedMeissner method)</a>
+</li>
+        <li><a href="stability.html#skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.fundamental_matrix">(skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM method)</a>
+</li>
         <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.fundamental_matrix">(skhippr.stability.ClassicalHill.ClassicalHill method)</a>
 </li>
         <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillProjection.fundamental_matrix">(skhippr.stability.KoopmanHillProjection.KoopmanHillProjection method)</a>
@@ -446,30 +511,26 @@ document.write(`
   </ul></td>
 </tr></table>
 
-<h2 id="G">G</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="problem.html#skhippr.problems.newton.NewtonProblem.get_params">get_params() (skhippr.problems.newton.NewtonProblem method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.h0">h0 (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation">HBMEquation (class in skhippr.cycles.hbm)</a>
 </li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem">HBMProblem (class in skhippr.problems.HBM)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMPhaseAnchor">HBMPhaseAnchor (class in skhippr.cycles.hbm)</a>
 </li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem_autonomous">HBMProblem_autonomous (class in skhippr.problems.HBM)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMSystem">HBMSystem (class in skhippr.cycles.hbm)</a>
+</li>
+      <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.hill_EVP">hill_EVP() (skhippr.stability.ClassicalHill.ClassicalHill method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.hill_EVP">hill_EVP() (skhippr.stability.ClassicalHill.ClassicalHill method)</a>
-</li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.hill_matrix">hill_matrix() (skhippr.problems.HBM.HBMProblem method)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.hill_matrix">hill_matrix() (skhippr.cycles.hbm.HBMEquation method)</a>
 </li>
       <li><a href="stability.html#skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic.hill_subh">hill_subh() (skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic method)</a>
+</li>
+      <li><a href="odes.html#skhippr.odes.ltp.HillLTI">HillLTI (class in skhippr.odes.ltp)</a>
+</li>
+      <li><a href="odes.html#skhippr.odes.ltp.HillODE">HillODE (class in skhippr.odes.ltp)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -477,13 +538,19 @@ document.write(`
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="examples.html#examples.duffing_frc.initial_force_response">initial_force_response() (in module examples.duffing_frc)</a>
+      <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP.integrate_with_fundamental_matrix">integrate_with_fundamental_matrix() (skhippr.cycles.shooting.ShootingBVP method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="shooting.html#skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix">integrate_with_fundamental_matrix() (skhippr.problems.shooting.ShootingProblem method)</a>
-</li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier.inv_DFT">inv_DFT() (skhippr.Fourier.Fourier method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.jacobian">jacobian() (skhippr.equations.EquationSystem.EquationSystem method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -503,33 +570,41 @@ document.write(`
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="examples.html#examples.duffing_frc.main">main() (in module examples.duffing_frc)</a>
+      <li><a href="examples.html#examples.circle.main">main() (in module examples.circle)</a>
 
       <ul>
-        <li><a href="examples.html#examples.pseudo_arclength_implicit.main">(in module examples.pseudo_arclength_implicit)</a>
+        <li><a href="examples.html#examples.duffing.main">(in module examples.duffing)</a>
 </li>
-        <li><a href="examples.html#examples.template.main">(in module examples.template)</a>
+        <li><a href="examples.html#examples.duffing_3d.main">(in module examples.duffing_3d)</a>
+</li>
+        <li><a href="examples.html#examples.vanderpol_animation.main">(in module examples.vanderpol_animation)</a>
 </li>
       </ul></li>
+      <li><a href="odes.html#skhippr.odes.ltp.MathieuODE">MathieuODE (class in skhippr.odes.ltp)</a>
+</li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier.matrix_DFT">matrix_DFT() (skhippr.Fourier.Fourier method)</a>
 </li>
       <li><a href="hbm.html#skhippr.Fourier.Fourier.matrix_inv_DFT">matrix_inv_DFT() (skhippr.Fourier.Fourier method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     module
 
       <ul>
-        <li><a href="examples.html#module-examples.duffing_frc">examples.duffing_frc</a>
+        <li><a href="examples.html#module-examples.circle">examples.circle</a>
 </li>
-        <li><a href="examples.html#module-examples.pseudo_arclength_implicit">examples.pseudo_arclength_implicit</a>
+        <li><a href="examples.html#module-examples.convergence.demo_mathieu_N_convergence">examples.convergence.demo_mathieu_N_convergence</a>
 </li>
-        <li><a href="examples.html#module-examples.template">examples.template</a>
+        <li><a href="examples.html#module-examples.convergence.demo_meissner_aliasing">examples.convergence.demo_meissner_aliasing</a>
+</li>
+        <li><a href="examples.html#module-examples.duffing">examples.duffing</a>
+</li>
+        <li><a href="examples.html#module-examples.duffing_3d">examples.duffing_3d</a>
+</li>
+        <li><a href="examples.html#module-examples.vanderpol_animation">examples.vanderpol_animation</a>
 </li>
         <li><a href="hbm.html#module-skhippr.Fourier">skhippr.Fourier</a>
 </li>
-        <li><a href="problem.html#module-skhippr.problems.newton">skhippr.problems.newton</a>
+        <li><a href="solvers.html#module-skhippr.solvers.continuation">skhippr.solvers.continuation</a>
 </li>
       </ul></li>
   </ul></td>
@@ -538,7 +613,7 @@ document.write(`
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="problem.html#skhippr.problems.newton.NewtonProblem">NewtonProblem (class in skhippr.problems.newton)</a>
+      <li><a href="solvers.html#skhippr.solvers.newton.NewtonSolver">NewtonSolver (class in skhippr.solvers.newton)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -546,13 +621,11 @@ document.write(`
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.ode_coeffs">ode_coeffs() (skhippr.problems.HBM.HBMProblem method)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.ode_coeffs">ode_coeffs() (skhippr.cycles.hbm.HBMEquation method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.ode_samples">ode_samples() (skhippr.problems.HBM.HBMProblem method)</a>
-</li>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.omega_solution">omega_solution (skhippr.problems.HBM.HBMProblem property)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.ode_samples">ode_samples() (skhippr.cycles.hbm.HBMEquation method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -560,15 +633,11 @@ document.write(`
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="examples.html#examples.duffing_frc.plot_3D_frc">plot_3D_frc() (in module examples.duffing_frc)</a>
-</li>
-      <li><a href="examples.html#examples.duffing_frc.plot_all_responses">plot_all_responses() (in module examples.duffing_frc)</a>
+      <li><a href="solvers.html#skhippr.solvers.continuation.BranchPoint.predict">predict() (skhippr.solvers.continuation.BranchPoint method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="continuation.html#skhippr.problems.continuation.BranchPoint.predict">predict() (skhippr.problems.continuation.BranchPoint method)</a>
-</li>
-      <li><a href="continuation.html#skhippr.problems.continuation.pseudo_arclength_continuator">pseudo_arclength_continuator() (in module skhippr.problems.continuation)</a>
+      <li><a href="solvers.html#skhippr.solvers.continuation.pseudo_arclength_continuator">pseudo_arclength_continuator() (in module skhippr.solvers.continuation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -576,18 +645,24 @@ document.write(`
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="problem.html#skhippr.problems.newton.NewtonProblem.reset">reset() (skhippr.problems.newton.NewtonProblem method)</a>
+      <li><a href="solvers.html#skhippr.solvers.newton.NewtonSolver.reset">reset() (skhippr.solvers.newton.NewtonSolver method)</a>
 </li>
-      <li><a href="continuation.html#skhippr.problems.continuation.BranchPoint.residual_function">residual_function() (skhippr.problems.continuation.BranchPoint method)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.residual_function">residual_function() (skhippr.cycles.hbm.HBMEquation method)</a>
 
       <ul>
-        <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.residual_function">(skhippr.problems.HBM.HBMProblem method)</a>
+        <li><a href="hbm.html#skhippr.cycles.hbm.HBMPhaseAnchor.residual_function">(skhippr.cycles.hbm.HBMPhaseAnchor method)</a>
 </li>
-        <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem_autonomous.residual_function">(skhippr.problems.HBM.HBMProblem_autonomous method)</a>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP.residual_function">(skhippr.cycles.shooting.ShootingBVP method)</a>
 </li>
-        <li><a href="problem.html#skhippr.problems.newton.NewtonProblem.residual_function">(skhippr.problems.newton.NewtonProblem method)</a>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingPhaseAnchor.residual_function">(skhippr.cycles.shooting.ShootingPhaseAnchor method)</a>
 </li>
-        <li><a href="shooting.html#skhippr.problems.shooting.ShootingProblem.residual_function">(skhippr.problems.shooting.ShootingProblem method)</a>
+        <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.residual_function">(skhippr.equations.AbstractEquation.AbstractEquation method)</a>
+</li>
+        <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.residual_function">(skhippr.equations.EquationSystem.EquationSystem method)</a>
+</li>
+        <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.residual_function">(skhippr.odes.AbstractODE.AbstractODE method)</a>
+</li>
+        <li><a href="solvers.html#skhippr.solvers.continuation.ContinuationAnchor.residual_function">(skhippr.solvers.continuation.ContinuationAnchor method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -596,9 +671,13 @@ document.write(`
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.samples_per_step">samples_per_step (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
+      <li><a href="odes.html#skhippr.odes.ltp.ShirleyODE">ShirleyODE (class in skhippr.odes.ltp)</a>
 </li>
-      <li><a href="shooting.html#skhippr.problems.shooting.ShootingProblem">ShootingProblem (class in skhippr.problems.shooting)</a>
+      <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP">ShootingBVP (class in skhippr.cycles.shooting)</a>
+</li>
+      <li><a href="shooting.html#skhippr.cycles.shooting.ShootingPhaseAnchor">ShootingPhaseAnchor (class in skhippr.cycles.shooting)</a>
+</li>
+      <li><a href="shooting.html#skhippr.cycles.shooting.ShootingSystem">ShootingSystem (class in skhippr.cycles.shooting)</a>
 </li>
       <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK">SinglePassRK (class in skhippr.stability.SinglePass)</a>
 </li>
@@ -613,24 +692,34 @@ document.write(`
         <li><a href="hbm.html#module-skhippr.Fourier">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    skhippr.problems.newton
+    skhippr.solvers.continuation
 
       <ul>
-        <li><a href="problem.html#module-skhippr.problems.newton">module</a>
+        <li><a href="solvers.html#module-skhippr.solvers.continuation">module</a>
 </li>
       </ul></li>
-      <li><a href="problem.html#skhippr.problems.newton.NewtonProblem.solve">solve() (skhippr.problems.newton.NewtonProblem method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="odes.html#skhippr.odes.ltp.SmoothedMeissner">SmoothedMeissner (class in skhippr.odes.ltp)</a>
 </li>
-      <li><a href="stability.html#skhippr.stability.ClassicalHill.ClassicalHill.sorting_criterion">sorting_criterion (skhippr.stability.ClassicalHill.ClassicalHill attribute)</a>
+      <li><a href="solvers.html#skhippr.solvers.newton.NewtonSolver.solve">solve() (skhippr.solvers.newton.NewtonSolver method)</a>
 </li>
-      <li><a href="stability.html#skhippr.stability._StabilityMethod.StabilityEquilibrium">StabilityEquilibrium (class in skhippr.stability._StabilityMethod)</a>
+      <li><a href="solvers.html#skhippr.solvers.newton.NewtonSolver.solve_equation">solve_equation() (skhippr.solvers.newton.NewtonSolver method)</a>
 </li>
-      <li><a href="stability.html#skhippr.stability.SinglePass.SinglePassRK.steps_per_period">steps_per_period (skhippr.stability.SinglePass.SinglePassRK attribute)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.stability_criterion">stability_criterion() (skhippr.cycles.hbm.HBMEquation method)</a>
+
+      <ul>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP.stability_criterion">(skhippr.cycles.shooting.ShootingBVP method)</a>
 </li>
-      <li><a href="examples.html#examples.template.system_function">system_function() (in module examples.template)</a>
+        <li><a href="equations.html#skhippr.equations.AbstractEquation.AbstractEquation.stability_criterion">(skhippr.equations.AbstractEquation.AbstractEquation method)</a>
+</li>
+        <li><a href="odes.html#skhippr.odes.AbstractODE.AbstractODE.stability_criterion">(skhippr.odes.AbstractODE.AbstractODE method)</a>
+</li>
+      </ul></li>
+      <li><a href="stability.html#skhippr.stability.AbstractStabilityMethod.StabilityEquilibrium">StabilityEquilibrium (class in skhippr.stability.AbstractStabilityMethod)</a>
+</li>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.stable">stable (skhippr.equations.EquationSystem.EquationSystem property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -642,9 +731,9 @@ document.write(`
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="problem.html#skhippr.systems.examples.trivial_hbm_system">trivial_hbm_system() (in module skhippr.systems.examples)</a>
+      <li><a href="odes.html#skhippr.odes.ltp.TruncatedMeissner">TruncatedMeissner (class in skhippr.odes.ltp)</a>
 </li>
-      <li><a href="problem.html#skhippr.systems.examples.trivial_newton_residual">trivial_newton_residual() (in module skhippr.systems.examples)</a>
+      <li><a href="odes.html#skhippr.odes.autonomous.Truss">Truss (class in skhippr.odes.autonomous)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -652,7 +741,19 @@ document.write(`
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="examples.html#examples.duffing_frc.visualize_solution">visualize_solution() (in module examples.duffing_frc)</a>
+      <li><a href="odes.html#skhippr.odes.autonomous.Vanderpol">Vanderpol (class in skhippr.odes.autonomous)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.vector_of_unknowns">vector_of_unknowns (skhippr.equations.EquationSystem.EquationSystem property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="equations.html#skhippr.equations.EquationSystem.EquationSystem.well_posed">well_posed (skhippr.equations.EquationSystem.EquationSystem property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -660,10 +761,10 @@ document.write(`
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="hbm.html#skhippr.problems.HBM.HBMProblem.x_time">x_time() (skhippr.problems.HBM.HBMProblem method)</a>
+      <li><a href="hbm.html#skhippr.cycles.hbm.HBMEquation.x_time">x_time() (skhippr.cycles.hbm.HBMEquation method)</a>
 
       <ul>
-        <li><a href="shooting.html#skhippr.problems.shooting.ShootingProblem.x_time">(skhippr.problems.shooting.ShootingProblem method)</a>
+        <li><a href="shooting.html#skhippr.cycles.shooting.ShootingBVP.x_time">(skhippr.cycles.shooting.ShootingBVP method)</a>
 </li>
       </ul></li>
   </ul></td>

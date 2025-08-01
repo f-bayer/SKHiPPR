@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Addendum: Shooting method &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Addendum: Shooting method &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
@@ -44,7 +44,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Legal notice / Impressum" href="legal_notice.html" />
-    <link rel="prev" title="Continuation" href="continuation.html" />
+    <link rel="prev" title="Stability methods" href="stability.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -132,7 +132,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -151,11 +151,12 @@
         <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="problem.html">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -308,11 +309,18 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem"><code class="docutils literal notranslate"><span class="pre">ShootingProblem</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.residual_function()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.determine_stability"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.determine_stability()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.x_time"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.x_time()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.integrate_with_fundamental_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP"><code class="docutils literal notranslate"><span class="pre">ShootingBVP</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.residual_function()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.closed_form_derivative"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.closed_form_derivative()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.stability_criterion"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.stability_criterion()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.x_time"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.x_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.integrate_with_fundamental_matrix"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.integrate_with_fundamental_matrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingSystem"><code class="docutils literal notranslate"><span class="pre">ShootingSystem</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor.residual_function()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.closed_form_derivative"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor.closed_form_derivative()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -328,81 +336,39 @@ document.write(`
                   
   <section id="addendum-shooting-method">
 <h1>Addendum: Shooting method<a class="headerlink" href="#addendum-shooting-method" title="Link to this heading">#</a></h1>
-<p>As a reference to compare/check against the HBM methods which are the focus of the toolbox, the shooting method is also implemented as a subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code>.</p>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>In the shooting method, the frequency of the sought-after periodic solution is governed by the period time <code class="docutils literal notranslate"><span class="pre">T</span></code> and not by <code class="docutils literal notranslate"><span class="pre">omega</span></code>. This leads to the following pitfalls:</p>
-<ul class="simple">
-<li><p>For autonomous systems, the last state of the unknown has a different interpretation than in the <code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code>.</p></li>
-<li><p>For nonautonomous systems with frequency-dependent excitation, the computation of frequency response curves using <a class="reference internal" href="continuation.html#skhippr.problems.continuation.pseudo_arclength_continuator" title="skhippr.problems.continuation.pseudo_arclength_continuator"><code class="xref py py-func docutils literal notranslate"><span class="pre">pseudo_arclength_continuator()</span></code></a> starting from a <a class="reference internal" href="#skhippr.problems.shooting.ShootingProblem" title="skhippr.problems.shooting.ShootingProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShootingProblem</span></code></a> is prone to usage errors due to the nontrivial interaction between the continuation parameter <code class="docutils literal notranslate"><span class="pre">T</span></code> and the input argument <code class="docutils literal notranslate"><span class="pre">omega</span></code> of the system. It is recommended to compute the frequency response curve instead using the Harmonic Balance method (i.e., starting from a <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>), which is immediately parameterized by <code class="docutils literal notranslate"><span class="pre">omega</span></code>.</p></li>
-</ul>
-</div>
+<p>As a reference to compare/check against the HBM methods which are the focus of the toolbox, the shooting method is also implemented as a subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractCycleEquation</span></code>. Similarly as with the <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMEquation" title="skhippr.cycles.hbm.HBMEquation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMEquation</span></code></a> and the <a class="reference internal" href="hbm.html#skhippr.cycles.hbm.HBMSystem" title="skhippr.cycles.hbm.HBMSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMSystem</span></code></a>, there also exists a corresponding <a class="reference internal" href="#skhippr.cycles.shooting.ShootingSystem" title="skhippr.cycles.shooting.ShootingSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShootingSystem</span></code></a> class which may have a <a class="reference internal" href="#skhippr.cycles.shooting.ShootingPhaseAnchor" title="skhippr.cycles.shooting.ShootingPhaseAnchor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShootingPhaseAnchor</span></code></a>.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="skhippr.problems.shooting.ShootingProblem">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.problems.shooting.</span></span><span class="sig-name descname"><span class="pre">ShootingProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autonomous</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs_odesolver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.shooting.ShootingProblem" title="Link to this definition">#</a></dt>
-<dd><p>ShootingProblem implements the shooting method for finding periodic solutions of ODEs.</p>
-<p>This class extends <a class="reference internal" href="problem.html#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> to solve the boundary value problem given by integrating the initial value problem over a period using <code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp</span></code> and matching the state at start and end time.
-It supports both autonomous and non-autonomous systems, and can compute stability via Floquet multipliers.</p>
-<ul class="simple">
-<li><p>For non-autonomous systems, the unknown <code class="docutils literal notranslate"><span class="pre">x</span></code> is the state at time <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">0</span></code>.</p></li>
-<li><p>For autonomous system, the unknown <code class="docutils literal notranslate"><span class="pre">x</span></code> is the state at time <code class="docutils literal notranslate"><span class="pre">`t</span> <span class="pre">=</span> <span class="pre">0</span></code> and, as last entry, the period time <code class="docutils literal notranslate"><span class="pre">T</span></code>. Every Newton update is performed orthogonal to the flow at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
-</ul>
-<section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
-<dl class="simple">
-<dt>f<span class="classifier">Callable[[float, np.ndarray], tuple[np.ndarray, dict[str, np.ndarray]]]</span></dt><dd><p>The system of ODEs. Must return the right-hand side of the ODE and a dictionary containing the Jacobian. First input argument must be the time <code class="docutils literal notranslate"><span class="pre">t</span></code> and second input argument must be the state. May have additional keyword arguments.</p>
-</dd>
-<dt>x0<span class="classifier">np.ndarray</span></dt><dd><p>Initial guess for the state of the periodic solution at time <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">0</span></code>.</p>
-</dd>
-<dt>T<span class="classifier">float</span></dt><dd><p>Period of the orbit.</p>
-</dd>
-<dt>autonomous<span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, treats the system as autonomous and includes the period as an unknown (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p>
-</dd>
-<dt>variable<span class="classifier">str, optional</span></dt><dd><p>Name of the variable of the first argument of <code class="docutils literal notranslate"><span class="pre">f</span></code> (default: <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>).</p>
-</dd>
-<dt>tolerance<span class="classifier">float, optional</span></dt><dd><p>Tolerance for Newton’s method convergence (default: 1e-8).</p>
-</dd>
-<dt>max_iterations<span class="classifier">int, optional</span></dt><dd><p>Maximum number of Newton iterations (default: 20).</p>
-</dd>
-<dt>verbose<span class="classifier">bool, optional</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, prints detailed output during solving (default: <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p>
-</dd>
-<dt>kwargs_odesolver<span class="classifier">dict[str, Any], optional</span></dt><dd><p>Additional keyword arguments for the ODE solver, cf. <code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp()</span></code> (default: <code class="docutils literal notranslate"><span class="pre">None</span></code>).</p>
-</dd>
-<dt>parameters<span class="classifier">dict, optional</span></dt><dd><p>Additional keyword arguments for <code class="docutils literal notranslate"><span class="pre">f</span></code> (default: <code class="docutils literal notranslate"><span class="pre">None</span></code>).</p>
-</dd>
-<dt>period_k<span class="classifier">int, optional</span></dt><dd><p>For non-autonomous systems: The period time of the sought-after periodic solution is <code class="docutils literal notranslate"><span class="pre">period_k</span></code> times the excitation period (default: 1).</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.cycles.shooting.</span></span><span class="sig-name descname"><span class="pre">ShootingBVP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs_odesolver</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP" title="Link to this definition">#</a></dt>
+<dd><p>ShootingBVP implements the shooting method to solve the boundary value problem for finding periodic solutions of nonautonomous ODEs.</p>
+<p>The residual is determined by integrating the initial value problem over a period from <code class="docutils literal notranslate"><span class="pre">self.ode.t</span></code> to <code class="docutils literal notranslate"><span class="pre">self.ode.t+self.T</span></code> using <code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp</span></code> and comparing the state at start and end time.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.shooting.ShootingProblem.residual_function">
-<span class="sig-name descname"><span class="pre">residual_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.shooting.ShootingProblem.residual_function" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP.residual_function">
+<span class="sig-name descname"><span class="pre">residual_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP.residual_function" title="Link to this definition">#</a></dt>
 <dd><p>Computes the residual function <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">=</span> <span class="pre">x(T)</span> <span class="pre">-</span> <span class="pre">x(0)</span></code> of the shooting problem.</p>
-<p>Using <a class="reference internal" href="#skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix" title="skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">integrate_with_fundamental_matrix()</span></code></a>, integrate over the period and return the result and the monodromy matrix. Then subtract the initial condition and the identity matrix, respectively.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>the residual and the derivative dictionary</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>tuple[np.ndarray, dict[str, np.ndarray]]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.shooting.ShootingProblem.determine_stability">
-<span class="sig-name descname"><span class="pre">determine_stability</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.shooting.ShootingProblem.determine_stability" title="Link to this definition">#</a></dt>
-<dd><p>Determines the stability of the periodic solution by analyzing the Floquet multipliers.</p>
-<p>This method computes the monodromy matrix from the Jacobian matrix
-and determines if the system is stable based on its eigenvalues.
-It then updates the <code class="docutils literal notranslate"><span class="pre">self.stable</span></code> attribute to indicate system stability.</p>
-<p class="rubric">Notes</p>
-<p>For autonomous systems, the Floquet multiplier
-corresponding to the freedom of phase is excluded from the stability check.</p>
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP.closed_form_derivative">
+<span class="sig-name descname"><span class="pre">closed_form_derivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP.closed_form_derivative" title="Link to this definition">#</a></dt>
+<dd><p>Returns the closed-form derivative of the residual function with respect to the specified variable.</p>
+<ul class="simple">
+<li><p>If the variable is “x”, it returns <code class="docutils literal notranslate"><span class="pre">Phi_T</span> <span class="pre">-</span> <span class="pre">np.eye(ode.n_dof)</span></code>, where <code class="docutils literal notranslate"><span class="pre">Phi_T</span></code> is the monodromy matrix.</p></li>
+<li><p>If the variable is “T” and the system is autonomous, it returns the dynamics evaluated at the final time.</p></li>
+<li><p>Otherwise, it raises a NotImplementedError to enforce the use of finite differences.</p></li>
+</ul>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.shooting.ShootingProblem.x_time">
-<span class="sig-name descname"><span class="pre">x_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.shooting.ShootingProblem.x_time" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP.stability_criterion">
+<span class="sig-name descname"><span class="pre">stability_criterion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eigenvalues</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP.stability_criterion" title="Link to this definition">#</a></dt>
+<dd><p>Checks if all Floquet multipliers lie inside the unit circle.
+The Floquet multipliers are computed as the eigenvalues of the monodromy matrix <code class="docutils literal notranslate"><span class="pre">Phi_T</span></code>, i.e., the eigenvalues of the derivative w.r.t. <code class="docutils literal notranslate"><span class="pre">`x</span></code> plus one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP.x_time">
+<span class="sig-name descname"><span class="pre">x_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP.x_time" title="Link to this definition">#</a></dt>
 <dd><p>Computes the state trajectory over time by integrating the system dynamics using <code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -419,8 +385,8 @@ linspace from 0 to <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix">
-<span class="sig-name descname"><span class="pre">integrate_with_fundamental_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingBVP.integrate_with_fundamental_matrix">
+<span class="sig-name descname"><span class="pre">integrate_with_fundamental_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingBVP.integrate_with_fundamental_matrix" title="Link to this definition">#</a></dt>
 <dd><p>Integrates the system dynamics along with its fundamental matrix.</p>
 <p>This method solves the initial value problem for the system’s state and its associated fundamental matrix over a given time interval.</p>
 <dl class="field-list simple">
@@ -428,7 +394,6 @@ linspace from 0 to <code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x0</strong> (<em>np.ndarray</em>) – Initial state vector of the system.</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – Final time up to which the integration is performed.</p></li>
-<li><p><strong>**kwargs</strong> – Additional keyword arguments to pass to the dynamics.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -444,7 +409,30 @@ linspace from 0 to <code class="docutils literal notranslate"><span class="pre">
 <p>The method integrates both the state and the fundamental matrix by augmenting the state vector with the flattened fundamental matrix and integrating both simultaneously.</p>
 </dd></dl>
 
-</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingSystem">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.cycles.shooting.</span></span><span class="sig-name descname"><span class="pre">ShootingSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs_odesolver</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingSystem" title="Link to this definition">#</a></dt>
+<dd><p>This subclass of <a class="reference internal" href="equations.html#skhippr.equations.EquationSystem.EquationSystem" title="skhippr.equations.EquationSystem.EquationSystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">EquationSystem</span></code></a> instantiates a <a class="reference internal" href="#skhippr.cycles.shooting.ShootingBVP" title="skhippr.cycles.shooting.ShootingBVP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShootingBVP</span></code></a> and considers it as the first equation. The state vector <code class="docutils literal notranslate"><span class="pre">x</span></code> is the first unknown. If the underlying ODE is autonomous, the period <code class="docutils literal notranslate"><span class="pre">T</span></code> of the periodic solution is not known in advance and is appended to the unknowns. Correspondingly, a <a class="reference internal" href="#skhippr.cycles.shooting.ShootingPhaseAnchor" title="skhippr.cycles.shooting.ShootingPhaseAnchor"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShootingPhaseAnchor</span></code></a> equation is appended to the equations.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingPhaseAnchor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.cycles.shooting.</span></span><span class="sig-name descname"><span class="pre">ShootingPhaseAnchor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingPhaseAnchor" title="Link to this definition">#</a></dt>
+<dd><p>This class implements an anchor equation for the shooting method in autonomous systems. EachNewton update must be orthogonal to the flow at x_0.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingPhaseAnchor.residual_function">
+<span class="sig-name descname"><span class="pre">residual_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.residual_function" title="Link to this definition">#</a></dt>
+<dd><p>Always returns zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skhippr.cycles.shooting.ShootingPhaseAnchor.closed_form_derivative">
+<span class="sig-name descname"><span class="pre">closed_form_derivative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.closed_form_derivative" title="Link to this definition">#</a></dt>
+<dd><p>Return the anchor (flow at <code class="docutils literal notranslate"><span class="pre">(self.t,</span> <span class="pre">self.x)</span></code>) as derivative w.r.t <code class="docutils literal notranslate"><span class="pre">x</span></code> and zero otherwise.</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -461,12 +449,12 @@ linspace from 0 to <code class="docutils literal notranslate"><span class="pre">
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="continuation.html"
+       href="stability.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Continuation</p>
+        <p class="prev-next-title">Stability methods</p>
       </div>
     </a>
     <a class="right-next"
@@ -494,11 +482,18 @@ linspace from 0 to <code class="docutils literal notranslate"><span class="pre">
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem"><code class="docutils literal notranslate"><span class="pre">ShootingProblem</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.residual_function()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.determine_stability"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.determine_stability()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.x_time"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.x_time()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.shooting.ShootingProblem.integrate_with_fundamental_matrix"><code class="docutils literal notranslate"><span class="pre">ShootingProblem.integrate_with_fundamental_matrix()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP"><code class="docutils literal notranslate"><span class="pre">ShootingBVP</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.residual_function()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.closed_form_derivative"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.closed_form_derivative()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.stability_criterion"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.stability_criterion()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.x_time"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.x_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingBVP.integrate_with_fundamental_matrix"><code class="docutils literal notranslate"><span class="pre">ShootingBVP.integrate_with_fundamental_matrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingSystem"><code class="docutils literal notranslate"><span class="pre">ShootingSystem</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.residual_function"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor.residual_function()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.cycles.shooting.ShootingPhaseAnchor.closed_form_derivative"><code class="docutils literal notranslate"><span class="pre">ShootingPhaseAnchor.closed_form_derivative()</span></code></a></li>
 </ul>
 </li>
 </ul>
