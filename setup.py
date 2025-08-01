@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 name = "skhippr"
-version = "1.0"
+version = "2.0"
 author = "Fabia Bayer"
 author_email = "skhippr@inm.uni-stuttgart.de"
 url = "SKHiPPR <https://github.com/f-bayer/SKHiPPR>"
