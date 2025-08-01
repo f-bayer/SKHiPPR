@@ -31,7 +31,7 @@ examples.duffing_3d
     :members: main
 
 numerical convergence studies
---------------------
+-------------------------------------
 The ``examples.convergence`` package provides two examples which illustrate the convergence properties of the Koopman-Hill stability method.
 
 

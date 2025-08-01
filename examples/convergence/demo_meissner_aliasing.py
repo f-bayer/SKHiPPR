@@ -1,13 +1,11 @@
 """
 This script demonstrates the effect of aliasing error on the accuracy of the Koopman-Hill projection (KHP) for the Meissner equation by varying the Discrete Fourier Transform (DFT) length. It compares the accuracy of computed Floquet multipliers for different DFT lengths and visualizes the results.
-Functions:
-    analyze_N_meissner_aliasing(N_max=60, Ls_DFT=(1024,), csv_path=None):
-        Analyzes and visualizes the impact of DFT length (L_DFT) on the accuracy of the Koopman-Hill projection for the Meissner equation. Optionally saves results to a CSV file.
-Usage:
-    Run the script directly to generate plots and optionally save results to a CSV file. The main function `analyze_N_meissner_aliasing` is called with example parameters to showcase the influence of aliasing on prediction accuracy.
-    - The Meissner equation's Fourier coefficients decay as O(1/|k|), with every even coefficient being zero and odd ones alternating in sign.
-    - Aliasing errors affect the accuracy of the computed Floquet multipliers.
-    - Knowledge about the sign of the (true) Fourier coefficients can significally improve the results -in the case of Meissner choosing a DFT length that is divisible by 2 but not by 4
+
+Run the script directly to generate plots and optionally save results to a CSV file. The main function :py:func:`analyze_N_meissner_aliasing` is called with example parameters to showcase the influence of aliasing on prediction accuracy.
+
+* The Meissner equation's Fourier coefficients decay as ``O(1/|k|)``, with every even coefficient being zero and odd ones alternating in sign.
+* Aliasing errors affect the accuracy of the computed Floquet multipliers.
+* Knowledge about the sign of the (true) Fourier coefficients can significantly improve the results: In the case of Meissner choosing a DFT length that is divisible by 2 but not by 4
 """
 
 import numpy as np
