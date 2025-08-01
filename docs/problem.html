@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Problem statement &#8212; SKHiPPR 1.0 documentation</title>
+    <title>Problem statement &#8212; SKHiPPR 2.0 documentation</title>
   
   
   
@@ -36,15 +36,13 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="_static/documentation_options.js?v=a681ed88"></script>
+    <script src="_static/documentation_options.js?v=789eb5fd"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'problem';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Periodic solutions and FFT" href="hbm.html" />
-    <link rel="prev" title="Usage – Important classes and functions" href="api.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -107,6 +105,8 @@
       
       
       
+        
+      
       <div class="bd-sidebar-primary bd-sidebar">
         
 
@@ -132,7 +132,7 @@
   
   
   
-    <p class="title logo__title">SKHiPPR 1.0 documentation</p>
+    <p class="title logo__title">SKHiPPR 2.0 documentation</p>
   
 </a></div>
         <div class="sidebar-primary-item">
@@ -148,14 +148,15 @@
  </script></div>
         <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item navbar-nav active">
-        <ul class="current nav bd-sidenav">
+        <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="api.html">Usage – Important classes and functions</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Problem statement</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hbm.html">Periodic solutions and FFT</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Usage – Classes and functions</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="equations.html">Formalizing equations and equation systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvers.html">Solvers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="odes.html">ODEs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hbm.html">FFT and harmonic balance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="stability.html">Stability methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="continuation.html">Continuation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="shooting.html">Addendum: Shooting method</a></li>
 </ul>
 </details></li>
@@ -308,22 +309,8 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-functions">Residual functions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.systems.examples.trivial_newton_residual"><code class="docutils literal notranslate"><span class="pre">trivial_newton_residual()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.systems.examples.trivial_hbm_system"><code class="docutils literal notranslate"><span class="pre">trivial_hbm_system()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-skhippr.problems.newton">Solving nonlinear equations</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem"><code class="docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.get_params"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.get_params()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.f_with_params"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.f_with_params()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.residual_function"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.residual_function()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.reset"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.reset()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.solve"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.solve()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-functions">Residual functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solving-nonlinear-equations">Solving nonlinear equations</a></li>
 </ul>
             </nav>
         </div>
@@ -343,7 +330,7 @@ document.write(`
 <li><p><a class="reference internal" href="#problem-statement" id="id1">Problem statement</a></p>
 <ul>
 <li><p><a class="reference internal" href="#residual-functions" id="id2">Residual functions</a></p></li>
-<li><p><a class="reference internal" href="#module-skhippr.problems.newton" id="id3">Solving nonlinear equations</a></p></li>
+<li><p><a class="reference internal" href="#solving-nonlinear-equations" id="id3">Solving nonlinear equations</a></p></li>
 </ul>
 </li>
 </ul>
@@ -351,242 +338,10 @@ document.write(`
 <section id="residual-functions">
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">Residual functions</a><a class="headerlink" href="#residual-functions" title="Link to this heading">#</a></h2>
 <p>The module <code class="xref py py-mod docutils literal notranslate"><span class="pre">skhippr.systems</span></code> provides a zoo of dynamical systems, which are used in the demonstration scripts. However, it is expected that users may want to write their own system functions.</p>
-<p>The following two functions illustrate the syntax requirements for input functions to <a class="reference internal" href="#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> and <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a>, respectively.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="skhippr.systems.examples.trivial_newton_residual">
-<span class="sig-prename descclassname"><span class="pre">skhippr.systems.examples.</span></span><span class="sig-name descname"><span class="pre">trivial_newton_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.systems.examples.trivial_newton_residual" title="Link to this definition">#</a></dt>
-<dd><p>Illustrates the syntax of a residual function for an exemplary trivial Newton problem.
-The <a class="reference internal" href="#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> attempts to find a value for the first argument such that the <code class="docutils literal notranslate"><span class="pre">residual</span></code> is returned as (numerically) zero.</p>
-<p>A residual function must return the residual and the derivative w.r.t. the first argument. Derivatives w.r.t other arguments are optional (are used in, e.g., continuation).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>np.ndarray</em>) – The first argument must refer to the variable(s) for which the residual is computed. Can (optionally) be vectorized, where each <code class="docutils literal notranslate"><span class="pre">x[:,</span> <span class="pre">k]</span></code> denotes an individual vector of unknowns.</p></li>
-<li><p><strong>parameter_1</strong> (<em>float</em>) – An exemplary scalar parameter.</p></li>
-<li><p><strong>**parameters</strong> – Additional parameters.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul>
-<li><p><strong>residual</strong> (<em>np.ndarray</em>) – The residual array, with the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
-<li><p><strong>derivatives</strong> (<em>dict of str to np.ndarray</em>) –</p>
-<dl class="simple">
-<dt>Dictionary containing derivatives:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>: Jacobian of the residual with respect to the first argument <code class="docutils literal notranslate"><span class="pre">x</span></code>; <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(x.shape[0],</span> <span class="pre">x.shape[0],</span> <span class="pre">*x.shape[1:])</span></code>.</p></li>
-<li><p>(e.g.) <code class="docutils literal notranslate"><span class="pre">&quot;parameter_1&quot;</span></code>: Derivative of the residual with respect to the input argument <code class="docutils literal notranslate"><span class="pre">parameter_1</span></code>, same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>The first argument, the unknown variable, may have an arbitrary name other than <code class="docutils literal notranslate"><span class="pre">x</span></code>. In that case, the corresponding key in <code class="docutils literal notranslate"><span class="pre">derivatives</span></code> must reflect the correct name of the variable and that name must be passed to the <a class="reference internal" href="#skhippr.problems.newton.NewtonProblem" title="skhippr.problems.newton.NewtonProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a> upon initialization.</p></li>
-<li><p>Implementation of the vectorized formulation is optional: All methods fall back to evaluating multiple unknowns one-by-one if necessary.</p></li>
-</ul>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="skhippr.systems.examples.trivial_hbm_system">
-<span class="sig-prename descclassname"><span class="pre">skhippr.systems.examples.</span></span><span class="sig-name descname"><span class="pre">trivial_hbm_system</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.systems.examples.trivial_hbm_system" title="Link to this definition">#</a></dt>
-<dd><p>Illustrates the syntax of the ODE system function for an exemplary trivial HBM problem.</p>
-<p>he system function must return the right-hand side of the ODE depending on the time <code class="docutils literal notranslate"><span class="pre">t</span></code>, the state variable as second argument, and optional parameters. The encoding of the residual and the derivatives wotks as in <a class="reference internal" href="#skhippr.systems.examples.trivial_newton_residual" title="skhippr.systems.examples.trivial_newton_residual"><code class="xref py py-func docutils literal notranslate"><span class="pre">trivial_newton_residual()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t</strong> (<em>float</em><em> or </em><em>np.ndarray</em>) – Time. This argument <strong>must</strong> be the first and must be called <code class="docutils literal notranslate"><span class="pre">t</span></code>. In the vectorized formulation, <code class="docutils literal notranslate"><span class="pre">t[k]</span></code> must correspond to <code class="docutils literal notranslate"><span class="pre">x[:,</span> <span class="pre">k]</span></code>.</p></li>
-<li><p><strong>x</strong> (<em>np.ndarray</em>) – The second argument refers to the state variable of the system. Can (optionally) be vectorized, where each <code class="docutils literal notranslate"><span class="pre">x[:,</span> <span class="pre">k]</span></code> denotes an individual state corresponding to time <code class="docutils literal notranslate"><span class="pre">t[k]</span></code>.</p></li>
-<li><p><strong>parameter_1</strong> (<em>float</em>) – An exemplary scalar parameter.</p></li>
-<li><p><strong>**parameters</strong> – Additional parameters.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul>
-<li><p><strong>residual</strong> (<em>np.ndarray</em>) – The right-hand side of the ODE, with the same shape as <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
-<li><p><strong>derivatives</strong> (<em>dict of str to np.ndarray</em>) –</p>
-<dl class="simple">
-<dt>Dictionary containing derivatives:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>: Jacobian of the ODE with respect to the first argument <code class="docutils literal notranslate"><span class="pre">x</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(x.shape[0],</span> <span class="pre">x.shape[0],</span> <span class="pre">*x.shape[1:])</span></code>.</p></li>
-<li><p>(e.g.) <code class="docutils literal notranslate"><span class="pre">&quot;parameter_1&quot;</span></code>: Derivative of the ODE with respect to the input argument <code class="docutils literal notranslate"><span class="pre">parameter_1</span></code>, same shape as <cite>x</cite>.</p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The second argument, the state, may have an arbitrary name other than <code class="docutils literal notranslate"><span class="pre">x</span></code>. In that case, the corresponding key in <code class="docutils literal notranslate"><span class="pre">derivatives</span></code> must reflect the correct name of the variable and that name must be passed to the <a class="reference internal" href="hbm.html#skhippr.problems.HBM.HBMProblem" title="skhippr.problems.HBM.HBMProblem"><code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code></a> upon initialization.</p>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>The system function <strong>must</strong> accept time <code class="docutils literal notranslate"><span class="pre">t</span></code> as first argument, even in the autonomous case where this time is not used!</p>
-</div>
-</dd></dl>
-
+<p>The following two functions illustrate the syntax requirements for input functions to <code class="xref py py-class docutils literal notranslate"><span class="pre">NewtonProblem</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">HBMProblem</span></code>, respectively.</p>
 </section>
-<section id="module-skhippr.problems.newton">
-<span id="solving-nonlinear-equations"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Solving nonlinear equations</a><a class="headerlink" href="#module-skhippr.problems.newton" title="Link to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skhippr.problems.newton.</span></span><span class="sig-name descname"><span class="pre">NewtonProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residual_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_guess</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'x'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stability_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod" title="skhippr.stability._StabilityMethod._StabilityMethod"><span class="pre">_StabilityMethod</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem" title="Link to this definition">#</a></dt>
-<dd><p>Implements Newton’s method for solving nonlinear equations. Also supports optional stability analysis after convergence.</p>
-<p>Definition of the underlying equation system:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#skhippr.problems.newton.NewtonProblem.f_with_params" title="skhippr.problems.newton.NewtonProblem.f_with_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">f_with_params()</span></code></a></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">variable</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">x0</span></code> (initial guess)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;param&gt;</span></code>, when passed to the constructor as optional keyword argument, becomes an attribute with the corresponding value and is passed as keyword argument to the residual function.</p></li>
-</ul>
-<p>Newton solver parameters:</p>
-<ul class="simple">
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">tolerance</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">max_iterations</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">verbose</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">stability_method</span></code></p></li>
-</ul>
-<p>Attributes (updated during the solution process):</p>
-<ul class="simple">
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">derivatives</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">converged</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">stable</span></code></p></li>
-<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">eigenvalues</span></code></p></li>
-</ul>
-<p>Important class methods:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#skhippr.problems.newton.NewtonProblem.solve" title="skhippr.problems.newton.NewtonProblem.solve"><code class="xref py py-func docutils literal notranslate"><span class="pre">solve()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#skhippr.problems.newton.NewtonProblem.reset" title="skhippr.problems.newton.NewtonProblem.reset"><code class="xref py py-func docutils literal notranslate"><span class="pre">reset()</span></code></a></p></li>
-</ul>
-<section id="attributes">
-<h3>Attributes:<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
-<dl>
-<dt>f<span class="classifier">Callable[…, tuple[np.ndarray, dict[str, np.ndarray]]]</span></dt><dd><p>Residual function directly as provided by the user. Takes the parameters as keyword arguments. Must return a tuple whose first entry is the residual and whose second entry is a dictionary collecting the derivatives w.r.t. the arguments (argument name as key).</p>
-</dd>
-<dt>variable<span class="classifier">str</span></dt><dd><p>Name of the variable being solved for. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;x&quot;</span></code>.</p>
-</dd>
-<dt>x0<span class="classifier">np.ndarray</span></dt><dd><p>Initial guess for the solution.</p>
-</dd>
-<dt>x<span class="classifier">np.ndarray</span></dt><dd><p>Current solution estimate.</p>
-</dd>
-<dt>converged<span class="classifier">bool</span></dt><dd><p>Indicates whether the solver has converged.</p>
-</dd>
-<dt>residual<span class="classifier"><code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code></span></dt><dd><p>Current residual vector.</p>
-</dd>
-<dt>derivatives<span class="classifier">dict[str, np.ndarray] or <code class="docutils literal notranslate"><span class="pre">None</span></code></span></dt><dd><p>Dictionary of derivatives (e.g., Jacobian) with respect to variables at <code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code>. Keys correspond to input arguments of the residual function and values to the corresponding Jacobian.</p>
-</dd>
-<dt>num_iter<span class="classifier">int</span></dt><dd><p>Number of iterations performed.</p>
-</dd>
-<dt>stability_method<span class="classifier"><a class="reference internal" href="stability.html#skhippr.stability._StabilityMethod._StabilityMethod" title="skhippr.stability._StabilityMethod._StabilityMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">_StabilityMethod</span></code></a> or <code class="docutils literal notranslate"><span class="pre">None</span></code></span></dt><dd><p>Object encoding stability method. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code> (no stability analysis performed).</p>
-</dd>
-<dt>stable<span class="classifier">bool or None</span></dt><dd><p>Indicates whether the solution is stable (if stability analysis is performed). <code class="docutils literal notranslate"><span class="pre">None</span></code> if no stability analysis was performed.</p>
-</dd>
-<dt>eigenvalues<span class="classifier">np.ndarray or None</span></dt><dd><p>Eigenvalues computed during stability analysis. <code class="docutils literal notranslate"><span class="pre">None</span></code> if no stability analysis was performed.</p>
-</dd>
-<dt>max_iterations<span class="classifier">int</span></dt><dd><p>Maximum number of allowed iterations.</p>
-</dd>
-<dt>verbose<span class="classifier">bool</span></dt><dd><p>If True, prints progress information.</p>
-</dd>
-<dt>tolerance<span class="classifier">float</span></dt><dd><p>Convergence tolerance for the residual norm.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem.get_params">
-<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys_to_exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem.get_params" title="Link to this definition">#</a></dt>
-<dd><p>Retrieve a dictionary of the parameters that are passed to the residual function, optionally excluding some.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>keys_to_exclude</strong> (<em>tuple</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – A tuple of parameter names to exclude from the returned dictionary. Default is an empty tuple.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary containing the parameter names of the residual function and their corresponding values, excluding those specified in <code class="docutils literal notranslate"><span class="pre">keys_to_exclude</span></code>.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem.f_with_params">
-<span class="sig-name descname"><span class="pre">f_with_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem.f_with_params" title="Link to this definition">#</a></dt>
-<dd><p>Calls the residual function with the provided arguments and parameters. Parameters that are not explicitly set are filled by <a class="reference internal" href="#skhippr.problems.newton.NewtonProblem.get_params" title="skhippr.problems.newton.NewtonProblem.get_params"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_params()</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>tuple</em>) – Positional arguments to pass to the residual function. Must includes the variable itself.</p></li>
-<li><p><strong>**kwargs</strong> (<em>dict</em>) – Keyword arguments to pass to the residual function.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><p>The result of calling the residual with the combined arguments and parameters:</p>
-<ul class="simple">
-<li><p>the residual as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code></p></li>
-<li><p>the derivatives as a dictionary</p></li>
-</ul>
-</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tuple[np.ndarray, dict[str, np.ndarray]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem.residual_function">
-<span class="sig-name descname"><span class="pre">residual_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem.residual_function" title="Link to this definition">#</a></dt>
-<dd><p>Residual function evaluated at the current guess <code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code> with the default parameters.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This function is used in the Newton update and should be overridden by subclasses.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><p>The result of calling the residual with the combined arguments and parameters:</p>
-<ul class="simple">
-<li><p>the residual as a <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code></p></li>
-<li><p>the derivatives as a dictionary</p></li>
-</ul>
-</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>tuple[np.ndarray, dict[str, np.ndarray]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem.reset" title="Link to this definition">#</a></dt>
-<dd><p>Reset the state of the solver, optionally with a new initial guess.</p>
-<p>If a new initial guess <code class="docutils literal notranslate"><span class="pre">x0_new</span></code> is provided, updates the internal state accordingly.
-Resets convergence status, iteration count, and other diagnostic attributes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>x0_new</strong> (<em>array-like</em><em>, </em><em>optional</em>) – New initial guess for the solver. If provided, replaces the current initial guess
-and resets related state variables.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="skhippr.problems.newton.NewtonProblem.solve">
-<span class="sig-name descname"><span class="pre">solve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skhippr.problems.newton.NewtonProblem.solve" title="Link to this definition">#</a></dt>
-<dd><p>Applies Newton’s method to solve the system of nonlinear equations given by <a class="reference internal" href="#skhippr.problems.newton.NewtonProblem.residual_function" title="skhippr.problems.newton.NewtonProblem.residual_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">residual_function()</span></code></a>.</p>
-<p>Performs iterative correction steps starting from the initial guess <code class="xref py py-attr docutils literal notranslate"><span class="pre">x0</span></code> until the residual norm is sufficiently small or the maximum number of iterations is reached. After convergence, performs a stability check if applicable.</p>
-<p class="rubric">Notes</p>
-<ul class="simple">
-<li><p>Solution is stored in <code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code> and final residual in <code class="xref py py-attr docutils literal notranslate"><span class="pre">residual</span></code> with derivatives <code class="xref py py-attr docutils literal notranslate"><span class="pre">derivatives</span></code>.</p></li>
-<li><p>Prints progress and convergence information if <code class="xref py py-attr docutils literal notranslate"><span class="pre">verbose</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
-</ul>
-</dd></dl>
-
-</section>
-</dd></dl>
-
+<section id="solving-nonlinear-equations">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Solving nonlinear equations</a><a class="headerlink" href="#solving-nonlinear-equations" title="Link to this heading">#</a></h2>
 </section>
 </section>
 
@@ -601,24 +356,6 @@ and resets related state variables.</p>
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="left-prev"
-       href="api.html"
-       title="previous page">
-      <i class="fa-solid fa-angle-left"></i>
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Usage – Important classes and functions</p>
-      </div>
-    </a>
-    <a class="right-next"
-       href="hbm.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Periodic solutions and FFT</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
@@ -635,22 +372,8 @@ and resets related state variables.</p>
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-functions">Residual functions</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.systems.examples.trivial_newton_residual"><code class="docutils literal notranslate"><span class="pre">trivial_newton_residual()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.systems.examples.trivial_hbm_system"><code class="docutils literal notranslate"><span class="pre">trivial_hbm_system()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-skhippr.problems.newton">Solving nonlinear equations</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem"><code class="docutils literal notranslate"><span class="pre">NewtonProblem</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.get_params"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.get_params()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.f_with_params"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.f_with_params()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.residual_function"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.residual_function()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.reset"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.reset()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#skhippr.problems.newton.NewtonProblem.solve"><code class="docutils literal notranslate"><span class="pre">NewtonProblem.solve()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-functions">Residual functions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#solving-nonlinear-equations">Solving nonlinear equations</a></li>
 </ul>
   </nav></div>
 

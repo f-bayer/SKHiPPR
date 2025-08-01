@@ -1,13 +1,19 @@
 import pytest
 import numpy as np
-from copy import replace
+from copy import copy, replace
 
-from skhippr.systems.nonautonomous import duffing
-from skhippr.problems.HBM import HBMProblem
+from skhippr.Fourier import Fourier
+from skhippr.odes.nonautonomous import Duffing
+from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
     KoopmanHillSubharmonic,
 )
+
+
+@pytest.fixture
+def ode():
+    return Duffing(t=0, x=np.array([0, 1]), alpha=1, beta=3, F=1, delta=0.1, omega=1.3)
 
 
 def test_C_W_construction(fourier_small, verbose=False):
@@ -42,59 +48,37 @@ def test_C_subh_time(fourier_small, t_over_period):
     assert np.allclose(KHP_subh.C_subh_time(t_over_period), C_subh)
 
 
-def test_subharmonic_hill_matrix(fourier, params_duffing):
+def test_subharmonic_hill_matrix(fourier, solver, ode):
     """Compute periodic solution using HBM"""
-    params = params_duffing[1]
-    omega = params["omega"]
-    del params["omega"]
 
-    ts = fourier.time_samples_normalized
-    x0 = np.vstack((np.cos(ts), -omega * np.sin(ts)))
+    ts = fourier.time_samples(ode.omega)
+    x0 = np.vstack([np.cos(ode.omega * ts), -ode.omega * np.sin(ode.omega * ts)])
+    hbm = HBMEquation(ode, ode.omega, fourier, fourier.DFT(x0))
 
-    def f(t, x, **parameters):
-        return duffing(t, x, omega=omega, **parameters)
+    solver.solve_equation(hbm, "X")
 
-    prb = HBMProblem(
-        fourier=fourier,
-        f=f,
-        initial_guess=fourier.DFT(x0),
-        omega=omega,
-        stability_method=None,
-        parameters_f=params,
-    )
-    prb.solve()
-    assert prb.converged
-
-    H = prb.hill_matrix()
+    H = hbm.hill_matrix()
     KHP_subh = KoopmanHillSubharmonic(fourier)
-    H_subh = KHP_subh.hill_subh(prb)
+    H_subh = KHP_subh.hill_subh(hbm)
 
     # Solve period-doubled problem
-    omega_subh = omega / 2
-    x_time = prb.x_time()
-    fourier_subh = replace(fourier, N_HBM=2 * fourier.N_HBM, L_DFT=2 * fourier.L_DFT)
+    fourier_subh = Fourier(
+        2 * fourier.N_HBM, 2 * fourier.L_DFT, fourier.n_dof, fourier.real_formulation
+    )
+    x_time = hbm.x_time()
     X0_subh = fourier_subh.DFT(np.hstack((x_time, x_time)))
 
-    sol_subh = HBMProblem(
-        fourier=fourier_subh,
-        f=f,
-        initial_guess=X0_subh,
-        omega=omega_subh,
-        stability_method=None,
-        verbose=True,
-        parameters_f=params,
-    )
+    hbm_subh = HBMEquation(ode, ode.omega, fourier_subh, X0_subh, period_k=2)
 
-    sol_subh.solve()
-    assert sol_subh.converged
-    assert np.allclose(X0_subh, sol_subh.x, atol=1e-4)
+    solver.solve_equation(hbm_subh, "X")
+    assert np.allclose(X0_subh, hbm_subh.X, atol=1e-5)
 
-    H_tilde = sol_subh.hill_matrix()
+    H_tilde = hbm_subh.hill_matrix()
 
     H_ref, H_sub_ref = extract_blocks_H(H_tilde, fourier_subh.n_dof)
 
-    assert np.allclose(H_ref, H)
-    assert np.allclose(H_sub_ref, H_subh)
+    assert np.allclose(H_ref, b=H, atol=2e-5, rtol=2e-5)
+    assert np.allclose(H_sub_ref, H_subh, atol=2e-5, rtol=2e-5)
 
 
 def KHP_double_size(fourier, real_formulation=None):

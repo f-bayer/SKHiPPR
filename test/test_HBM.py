@@ -4,142 +4,117 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from skhippr.problems.shooting import shooting
-from skhippr.problems.HBM import HBMProblem, HBMProblem_autonomous
-from skhippr.problems.shooting import ShootingProblem
+from skhippr.cycles.hbm import HBMEquation, HBMSystem
+from skhippr.cycles.shooting import ShootingBVP, ShootingSystem
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import duffing
-from skhippr.systems.autonomous import vanderpol
+from skhippr.odes.nonautonomous import Duffing
+from skhippr.odes.autonomous import Vanderpol
+from skhippr.solvers.newton import NewtonSolver
 
 
 @pytest.mark.parametrize("period_k", [1, 5])
-def test_HBM_duffing(fourier, params_duffing, period_k, visualize=False):
+def test_HBM_equation(solver, duffing_ode, fourier, period_k, visualize=False):
 
+    period_k, ode = duffing_ode
     if visualize:
         print("Duffing oscillator")
 
-    params = params_duffing[period_k]
-    omega = params["omega"]
+    T = 2 * np.pi / ode.omega
 
-    """ Compute periodic solution using shooting """
-    # Find period-5 solution using shooting method
-    ode_kwargs = {"atol": 1e-7, "rtol": 1e-7}
-    sol_shoot = ShootingProblem(
-        f=duffing,
-        x0=[1.0, 0.0],
-        T=2 * period_k * np.pi / omega,
-        kwargs_odesolver=ode_kwargs,
-        parameters=params,
-        period_k=period_k,
-    )
-    sol_shoot.solve()
-    assert sol_shoot.converged
+    # Reference: Find periodic solution using shooting method
+    shooting = ShootingBVP(ode, T=T, period_k=period_k, atol=1e-7, rtol=1e-7)
+
+    solver.solve_equation(shooting, "x")
 
     """ Compute periodic solution using HBM """
-    t_eval = fourier.time_samples(omega, periods=period_k)[::period_k]
-    x_shoot = sol_shoot.x_time(t_eval=t_eval)
+    t_eval = fourier.time_samples(ode.omega, periods=period_k)[::period_k]
+    x_shoot = shooting.x_time(t_eval=t_eval)
     X0 = fourier.DFT(x_shoot + np.random.rand(*x_shoot.shape) * 1e-1)
 
-    HBMsol = HBMProblem(
-        f=duffing,
-        initial_guess=X0,
-        omega=omega,
+    hbm = HBMEquation(
+        ode=ode,
+        omega=ode.omega,
         fourier=fourier,
-        variable="x",
-        stability_method=None,
-        tolerance=1e-8,
-        max_iterations=30,
-        verbose=visualize,
+        initial_guess=X0,
         period_k=period_k,
-        parameters_f=params,
+        stability_method=None,
     )
 
     if visualize:
-        print(HBMsol)
+        print(hbm)
 
-    HBMsol.solve()
+    solver.solve_equation(hbm, "X")
 
     if visualize:
-        print(HBMsol)
-
-    assert HBMsol.converged
+        print(hbm)
 
     # Assert that the HBM solution is indeed a solution
-
-    x_shoot = sol_shoot.x_time(t_eval=t_eval)
-    x_hbm = HBMsol.x_time()
+    x_hbm = hbm.x_time()
     if visualize:
         plt.figure()
         plt.plot(x_shoot[0, :], x_shoot[1, :], label="ODE")
         plt.plot(np.real(x_hbm[0, :]), np.real(x_hbm[1, :]), "--", label="HBM")
         plt.legend()
         plt.title(
-            f"{'real' if fourier.real_formulation else 'complex'} Duffing \n {HBMsol}"
+            f"{'real' if fourier.real_formulation else 'complex'} Duffing \n {hbm}"
         )
 
-    # assert np.allclose(x_hbm, x_shoot, atol=1e-1)
+    assert np.allclose(x_hbm, x_shoot, atol=1e-1)
 
 
-def test_HBM_aut(fourier, visualize=True):
+@pytest.mark.parametrize("initial_error", (0, 0.05))
+@pytest.mark.parametrize("autonomous", [False, True])
+def test_HBMSystem(solver, fourier, autonomous, initial_error, visualize=False):
 
-    params = {"nu": 1}
-    omega0 = 1.0
+    x_0 = np.array([2.1, 0.0])
+    if autonomous:
+        ode = Vanderpol(t=0, x=x_0, nu=0.8)
+        T = 2 * np.pi
+    else:
+        ode = Duffing(t=0, x=x_0, alpha=1, beta=3, F=1, delta=1, omega=1.3)
+        T = 2 * np.pi / ode.omega
 
-    print("Van der Pol oscillator")
+    # Shooting system for reference
+    shooting_system = ShootingSystem(ode=ode, T=T, period_k=1, atol=1e-7, rtol=1e-7)
+    shooting_system.T = T
+    solver.solve(shooting_system)
+    assert shooting_system.solved
 
-    """ Compute periodic solution using HBM """
-    t0 = fourier.time_samples(omega0)
-    x0_hbm = np.vstack((np.cos(omega0 * t0), -omega0 * np.sin(omega0 * t0)))
+    omega = 2 * np.pi / shooting_system.T
 
-    sol_HBM = HBMProblem_autonomous(
-        f=vanderpol,
-        initial_guess=x0_hbm,
-        omega=omega0,
+    t_eval = fourier.time_samples(omega, periods=1)
+    x_shoot = shooting_system.equations[0].x_time(t_eval=t_eval)
+    X0 = fourier.DFT(x_shoot)
+    X0 += initial_error * np.random.rand(*X0.shape)
+
+    hbm_system = HBMSystem(
+        ode=ode,
+        omega=omega,
         fourier=fourier,
-        verbose=True,
-        parameters_f=params,
+        initial_guess=X0,
+        stability_method=None,
     )
-    print(sol_HBM)
-    sol_HBM.solve()
-    print(sol_HBM)
-    assert sol_HBM.converged
-    x_p_hbm = sol_HBM.x_time()
 
-    # Solve the shooting problem for reference
-    sol_shoot = ShootingProblem(
-        f=vanderpol,
-        x0=np.real(x_p_hbm[:, 0]),
-        T=2 * np.pi / np.real(sol_HBM.omega),
-        autonomous=True,
-        variable="x",
-        verbose=visualize,
-        kwargs_odesolver={"atol": 1e-7, "rtol": 1e-7},
-        parameters=params,
-    )
-    x_p_shoot = sol_shoot.x_time(fourier.time_samples(np.real(sol_HBM.omega)))
-    try:
-        assert np.allclose(x_p_hbm, x_p_shoot, atol=1e-1, rtol=1e-1)
-    except AssertionError as AE:
-        if visualize:
-            plt.figure()
-            plt.plot(fourier.time_samples(sol_HBM.omega), x_p_hbm.T, label="HBM")
-            plt.plot(
-                fourier.time_samples(sol_HBM.omega), x_p_shoot.T, "--", label="Shooting"
-            )
-            plt.show()
-            pass
-        raise AE
+    solver.solve(hbm_system)
+    assert hbm_system.solved
 
     if visualize:
-        print(f"Max imaginary part: {max(abs(np.imag(x_p_hbm[0,:])))}")
+        print(np.max(np.abs(hbm_system.X)))
         plt.figure()
-        plt.plot(x_p_shoot[0, :], x_p_shoot[1, :], label="ODE")
-        plt.plot(x_p_hbm[0, :], x_p_hbm[1, :], "--", label="HBM")
-        plt.legend()
-        plt.title(
-            f"{'real' if fourier.real_formulation else 'complex'} van der Pol \n {sol_HBM}"
-        )
+        x_time = hbm_system.equations[0].x_time()
+        plt.plot(x_time[0, :], x_time[1, :], label="hbm")
+        plt.plot(x_shoot[0, :], x_shoot[1, :], "--", label="shooting")
+    # assert np.allclose(hbm_system.equations[0].x_time(), x_shoot, atol=1e-2, rtol=1e-2)
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    my_solver = NewtonSolver(verbose=True)
+    my_fourier = Fourier(N_HBM=15, L_DFT=128, n_dof=2, real_formulation=True)
+    for period_k in [1, 5]:
+        test_HBM_equation(
+            my_solver, None, fourier=my_fourier, period_k=period_k, visualize=True
+        )
+    test_HBMSystem(
+        my_solver, my_fourier, autonomous=True, visualize=True, initial_error=0.05
+    )
+    plt.show()

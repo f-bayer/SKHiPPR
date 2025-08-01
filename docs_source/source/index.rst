@@ -28,14 +28,15 @@ SKHiPPR documentation
    * Bayer and Leine (2025, preprint): *Explicit error bounds and guaranteed convergence of the Koopman-Hill projection stability method for linear time-periodic dynamics*, https://arxiv.org/abs/2503.21318 
    * Project website: https://www.inm.uni-stuttgart.de/research_nonlinear_mechanics/project_bayer/
 
-This toolbox is object-oriented and modularized. It generates continuation curves with stability information by combining four modular aspects:
+This toolbox is object-oriented and modularized. It can generate continuation curves along arbitrary (differentiable)  systems of algebraic equations and also branches of periodic solutions with stability information. This requires the following workflow: 
 
-#. A user-defined system function returns the right-hand side of a system of (either algebraic or differential) equations as well as the derivatives.
-#. A :py:class:`~skhippr.problems.newton.NewtonProblem` (or subclasses) instance, initialized with the system function, encodes a nonlinear equation problem (i.e., a rootfinding problem), and solves it using Newton's method.
-#. An instance of a subclass of :py:class:`~skhippr.stability._StabilityMethod._StabilityMethod` provides the functionality to evaluate stability of the problem.
-#. The :py:func:`~skhippr.problems.continuation.pseudo_arclength_continuator` wraps a :py:class:`~skhippr.problems.newton.NewtonProblem` into a :py:class:`~skhippr.problems.continuation.BranchPoint` and iteratively predicts, solves and yields the subsequent points on the continuation branch.
+#. The user provides a first-order ordinary differential equation as a concrete subclass of :py:class:`~skhippr.odes.AbstractODE.AbstractODE`.
+#. Using the ODE, a :py:class:`~skhippr.Fourier.Fourier` object for configuration of the FFT, and optionally a :py:class:`~skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM` object, a :py:class:`~skhippr.cycles.hbm.HBMSystem` object is instantiated to encode the harmonic balance problem.
+#. A :py:class:`~skhippr.problems.newton.NewtonSolver` (or subclasses) instance can solve the :py:class:`~skhippr.cycles.hbm.HBMSystem` immediately and determine stability.
+#. The :py:func:`~skhippr.problems.continuation.pseudo_arclength_continuator` iterates through a solution branch along a specified continuation parameter.
 
-The main purpose of SKHiPPR is to provide a framework for comparing various stability analysis methods for periodic solutions and resonance curves in dynamical systems based on the Harmonic Balance method. For this reason, the toolbox is designed to be extensible and modular. For stability determination based on the Hill matrix (Jacobian of the HBM problem), the following classes are available and can be used interchangeably: 
+
+The main purpose of SKHiPPR is to provide a framework for comparing various stability analysis methods for periodic solutions and resonance curves in dynamical systems based on the Harmonic Balance method. For stability determination based on the Hill matrix (Jacobian of the HBM problem), the following classes are available and can be used interchangeably: 
 
 * :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillProjection` (direct Koopman-Hill projection method, cf. Bayer and Leine (2023))
 * :py:class:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic` (Koopman-Hill projection with subharmonics, cf. Bayer and Leine (2025))
@@ -44,7 +45,7 @@ The main purpose of SKHiPPR is to provide a framework for comparing various stab
 
 The modular framework enables easy addition of new problem formulations and comparison of stability methods.
 
-To install SKHiPPR locally on your machine, take a look at the :doc:`installation guide <installation>`. To get started, check out the :doc:`examples` or the :doc:`api`. 
+To install SKHiPPR locally on your machine, take a look at the :doc:`installation guide <installation>`. To get started, check out the :doc:`examples` or the :doc:`api` section. 
 
 .. A :doc:`full API reference <modules>` is also available, but not recommended for getting started.
 

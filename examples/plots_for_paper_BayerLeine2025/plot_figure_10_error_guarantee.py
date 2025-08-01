@@ -27,22 +27,22 @@ Dependencies:
 -------------
 - numpy
 - matplotlib
-- skhippr (Fourier, systems.nonautonomous, problems.shooting, problems.HBM, stability.KoopmanHillProjection)
+- skhippr (Fourier, systems.nonautonomous, problems.shooting, problems.hbm, stability.KoopmanHillProjection)
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pytest import param
 from skhippr.Fourier import Fourier
-from skhippr.systems.nonautonomous import duffing
-from skhippr.problems.shooting import ShootingProblem
-from skhippr.problems.HBM import HBMProblem
+from skhippr.solvers.newton import NewtonSolver
+from skhippr.odes.nonautonomous import Duffing
+from skhippr.cycles.shooting import ShootingBVP
+from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
 
 
 def Phi_t_ref(
-    ts, problem_ref: HBMProblem, ode_kwargs: dict[str, float] = None
+    solver, ts, ode: Duffing, fourier, ode_kwargs: dict[str, float] = None
 ) -> tuple[np.ndarray, list[np.ndarray]]:
     """
     Computes the reference fundamental matrix solution using shooting at a given set of time samples.
@@ -70,37 +70,27 @@ def Phi_t_ref(
     if ode_kwargs is None:
         ode_kwargs = {"atol": 1e-13, "rtol": 1e-13}
 
-    T = 2 * np.pi / problem_ref.omega
+    T = 2 * np.pi / ode.omega
+    ode.x = np.array([0.2, 0.0])
 
-    problem_shooting = ShootingProblem(
-        f=duffing,
-        x0=np.array([0.2, 0.0]),
-        T=T,
-        tolerance=1e-12,
-        verbose=True,
-        kwargs_odesolver=ode_kwargs,
-        parameters=problem_ref.get_params(),
-    )
-    problem_shooting.solve()
-    assert problem_shooting.converged
+    shoot = ShootingBVP(ode, T=T, atol=1e-13, rtol=1e-13)
+    solver.solve_equation(shoot, "x")
 
     # Temporarily set ts as a keyword arg to the ode solver
-    problem_shooting.kwargs_odesolver["t_eval"] = ts
-    _, _, Phi_ts = problem_shooting.integrate_with_fundamental_matrix(
-        problem_shooting.x,
-        T,
+    shoot.kwargs_odesolver["t_eval"] = ts
+    _, _, Phi_ts = shoot.integrate_with_fundamental_matrix(
+        shoot.x,
+        t=T,
     )
 
     # Remove t_eval as kwarg because it is explicitly set in x_time
-    del problem_shooting.kwargs_odesolver["t_eval"]
-    x_time = problem_shooting.x_time(
-        t_eval=problem_ref.fourier.time_samples(params["omega"])
-    )
+    del shoot.kwargs_odesolver["t_eval"]
+    x_time = shoot.x_time(t_eval=fourier.time_samples(ode.omega))
 
     return x_time, Phi_ts
 
 
-def errors_koopman_hill(ts, N_HBM, problem_ref: HBMProblem, Phi_ref, params_decay=None):
+def errors_koopman_hill(ts, N_HBM, hbm_ref: HBMEquation, Phi_ref, params_decay=None):
     """
     Computes the numerical and theoretical error bounds for the fundamental solution matrix
     of a system solved using the Koopman-Hill projection method within the Harmonic Balance Method (HBM) framework.
@@ -125,41 +115,38 @@ def errors_koopman_hill(ts, N_HBM, problem_ref: HBMProblem, Phi_ref, params_deca
     """
 
     # Set up problem
-    fourier = problem_ref.fourier.__replace__(N_HBM=N_HBM)
-    params = problem_ref.get_params()
-    problem = HBMProblem(
-        f=duffing,
-        initial_guess=fourier.DFT(problem_ref.x_time()),
-        fourier=fourier,
-        omega=params["omega"],
-        stability_method=KoopmanHillProjection(fourier),
-        parameters_f=params,
-        verbose=False,
+    fourier_ref = hbm_ref.fourier
+    fourier = Fourier(
+        N_HBM, fourier_ref.L_DFT, fourier_ref.n_dof, fourier_ref.real_formulation
     )
-    problem.solve()
-    assert problem.converged
+    hbm = HBMEquation(
+        ode=ode,
+        omega=ode.omega,
+        fourier=fourier,
+        initial_guess=fourier.DFT(fourier_ref.inv_DFT(hbm_ref.X)),
+        stability_method=KoopmanHillProjection(fourier),
+    )
+    solver.solve_equation(hbm, "X")
 
     # Determine fundamental solution matrix and error
-    T = 2 * np.pi / params["omega"]
+    T = 2 * np.pi / hbm.ode.omega
     errors_num = np.zeros_like(ts)
 
     for k, t in enumerate(ts):
-        Phi_t = problem.stability_method.fundamental_matrix(
-            t_over_period=t / T, problem=problem
-        )
+        Phi_t = hbm.stability_method.fundamental_matrix(t_over_period=t / T, hbm=hbm)
         errors_num[k] = np.linalg.norm(Phi_t - Phi_ref[:, :, k], ord=2)
 
     # Error bound
     if params_decay is None:
-        params_decay = problem_ref.exponential_decay_parameters()
-    errors_bound = problem.error_bound_fundamental_matrix(
+        params_decay = hbm_ref.exponential_decay_parameters()
+    errors_bound = hbm.error_bound_fundamental_matrix(
         ts, params_decay[:, 0], params_decay[:, 1]
     )
 
     return errors_num, errors_bound
 
 
-def N_koopman_hill(ts, N_max, E_des, problem_ref, Phi_ref, params_decay):
+def N_koopman_hill(ts, N_max, E_des, hbm_ref, Phi_ref, params_decay):
     """
     Computes the minimum number of harmonics required to guarantee a desired error threshold
     for a given set of time points, using both a theoretical error bound and a numerical check.
@@ -189,7 +176,7 @@ def N_koopman_hill(ts, N_max, E_des, problem_ref, Phi_ref, params_decay):
     """
     # decay parameters
     if params_decay is None:
-        params_decay = problem_ref.exponential_decay_parameters()
+        params_decay = hbm_ref.exponential_decay_parameters()
 
     # error bound
     N_bound = np.inf * np.ones_like(ts)
@@ -201,7 +188,7 @@ def N_koopman_hill(ts, N_max, E_des, problem_ref, Phi_ref, params_decay):
 
     for N in range(N_max):
 
-        errors_num, _ = errors_koopman_hill(ts, N, problem_ref, Phi_ref, params_decay)
+        errors_num, _ = errors_koopman_hill(ts, N, hbm_ref, Phi_ref, params_decay)
         mask_replace = np.isnan(N_num) & (errors_num <= E_des)
         N_num[mask_replace] = N
 
@@ -210,7 +197,7 @@ def N_koopman_hill(ts, N_max, E_des, problem_ref, Phi_ref, params_decay):
     return N_num, N_bound
 
 
-def plot_error_over_t(ts, N_HBM, problem_ref, Phi_ref, params_decay):
+def plot_error_over_t(ts, N_HBM, hbm, Phi_ref, params_decay):
     """
     Plots the numerical and guaranteed error over time for a given problem and HBM order.
 
@@ -224,8 +211,8 @@ def plot_error_over_t(ts, N_HBM, problem_ref, Phi_ref, params_decay):
     Returns:
         None. Displays a matplotlib figure with the error curves.
     """
-    T = 2 * np.pi / problem_ref.omega
-    e_num, e_guar = errors_koopman_hill(ts, N_HBM, problem_ref, Phi_ref, params_decay)
+    T = 2 * np.pi / hbm.ode.omega
+    e_num, e_guar = errors_koopman_hill(ts, N_HBM, hbm, Phi_ref, params_decay)
     fig, ax = plt.subplots(1, 1)
     ax.plot(ts / T, e_guar, label="error bound")
     ax.plot(ts / T, e_num, "--", label="actual error")
@@ -236,7 +223,7 @@ def plot_error_over_t(ts, N_HBM, problem_ref, Phi_ref, params_decay):
     ax.legend()
 
 
-def plot_error_over_N(t, Ns_HBM, problem_ref, Phi_ref, params_decay):
+def plot_error_over_N(t, Ns_HBM, hbm_ref, Phi_ref, params_decay):
     """
     Plots the numerical and guaranteed error over different values of N for a given time.
     Parameters:
@@ -248,12 +235,12 @@ def plot_error_over_N(t, Ns_HBM, problem_ref, Phi_ref, params_decay):
     Returns:
         None. Displays a matplotlib figure showing the error bound and actual error as a function of N.
     """
-    T = 2 * np.pi / problem_ref.omega
+    T = 2 * np.pi / hbm.ode.omega
     Phi_ref = Phi_ref[:, :, np.newaxis]
     es_num = []
     es_guar = []
     for N in Ns_HBM:
-        e_num, e_guar = errors_koopman_hill([t], N, problem_ref, Phi_ref, params_decay)
+        e_num, e_guar = errors_koopman_hill([t], N, hbm_ref, Phi_ref, params_decay)
         es_num.append(e_num[0])
         es_guar.append(e_guar[0])
     es_num = np.array(es_num)
@@ -269,7 +256,7 @@ def plot_error_over_N(t, Ns_HBM, problem_ref, Phi_ref, params_decay):
     ax.legend()
 
 
-def plot_N_over_t(ts, E_des, problem_ref, Phi_ref, params_decay):
+def plot_N_over_t(ts, E_des, hbm_ref, Phi_ref, params_decay):
     """
     Plots the evolution of the required number of basis functions N over time for a given desired error E_des.
     This function computes both the guaranteed upper bound and the actual number of harmonics needed to achieve the desired error tolerance, and visualizes them on a logarithmic scale.
@@ -283,7 +270,7 @@ def plot_N_over_t(ts, E_des, problem_ref, Phi_ref, params_decay):
         None. Displays a matplotlib figure with the plot.
     """
 
-    N_num, N_bound = N_koopman_hill(ts, 60, E_des, problem_ref, Phi_ref, params_decay)
+    N_num, N_bound = N_koopman_hill(ts, 60, E_des, hbm_ref, Phi_ref, params_decay)
 
     fig, ax = plt.subplots(1, 1)
     ax.plot(ts, N_bound, label=f"N* (guaranteed)")
@@ -296,33 +283,34 @@ def plot_N_over_t(ts, E_des, problem_ref, Phi_ref, params_decay):
 
 
 if __name__ == "__main__":
-    params = {"alpha": 0.5, "beta": 3, "delta": 0.05, "F": 0.1, "omega": 0.3}
-    fourier_ref = Fourier(N_HBM=40, L_DFT=512, n_dof=2, real_formulation=True)
-    problem_ref = HBMProblem(
-        duffing,
-        np.zeros(fourier_ref.n_dof * (2 * fourier_ref.N_HBM + 1)),
-        params["omega"],
-        fourier_ref,
-        variable="x",
-        stability_method=KoopmanHillProjection(fourier_ref),
-        parameters_f=params,
+    ode = Duffing(
+        t=0, x=np.array([0.2, 0]), alpha=0.5, beta=3, delta=0.05, F=0.1, omega=0.3
     )
-    ts = np.linspace(0, 2 * np.pi / params["omega"], 100, endpoint=True)
+    fourier_ref = Fourier(N_HBM=40, L_DFT=512, n_dof=2, real_formulation=True)
+    solver = NewtonSolver()
 
-    x_init, Phi_ref = Phi_t_ref(ts, problem_ref)
+    ts = np.linspace(0, 2 * np.pi / ode.omega, 100, endpoint=True)
 
-    problem_ref.reset(x0_new=problem_ref.fourier.DFT(x_init))
-    problem_ref.solve()
-    assert problem_ref.converged
-    params_decay = problem_ref.exponential_decay_parameters()
+    x_init, Phi_ref = Phi_t_ref(solver, ts, ode, fourier=fourier_ref)
 
-    plot_error_over_t(ts, 8, problem_ref, Phi_ref, params_decay)
+    hbm = HBMEquation(
+        ode,
+        ode.omega,
+        fourier_ref,
+        fourier_ref.DFT(x_init),
+        stability_method=KoopmanHillProjection(fourier_ref),
+    )
+
+    solver.solve_equation(hbm, unknown="X")
+    params_decay = hbm.exponential_decay_parameters()
+
+    plot_error_over_t(ts, 8, hbm, Phi_ref, params_decay)
     plot_error_over_N(
-        t=2 * np.pi / params["omega"],
+        t=2 * np.pi / ode.omega,
         Ns_HBM=np.arange(1, fourier_ref.N_HBM + 1),
-        problem_ref=problem_ref,
+        hbm_ref=hbm,
         Phi_ref=Phi_ref[:, :, -1],
         params_decay=params_decay,
     )
-    plot_N_over_t(ts, 1e-5, problem_ref, Phi_ref, params_decay)
+    plot_N_over_t(ts, 1e-5, hbm, Phi_ref, params_decay)
     plt.show()

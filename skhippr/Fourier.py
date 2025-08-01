@@ -6,49 +6,33 @@ from scipy.linalg import block_diag
 
 class Fourier:
     """
-    Helper class for (Fast) Fourier Transform (FFT) and related operations. Supports complex-and real-valued formulations (see notes).
+    Methods for (Fast) Fourier Transform (FFT) and related operations in real or complex formulation.
 
-    Important attributes:
+    Attributes:
 
-    * :py:attr:`~skhippr.Fourier.Fourier.n_dof`
-    * :py:attr:`~skhippr.Fourier.Fourier.N_HBM`
-    * :py:attr:`~skhippr.Fourier.Fourier.L_DFT`
-    * :py:attr:`~skhippr.Fourier.Fourier.real_formulation`
+    * :py:attr:`~skhippr.Fourier.Fourier.n_dof`: Number of states (degrees of freedom) of the considered signals.
+    * :py:attr:`~skhippr.Fourier.Fourier.N_HBM`: Largest harmonic to be considered in the Fourier series.
+    * :py:attr:`~skhippr.Fourier.Fourier.L_DFT`: Number of samples for the fast Fourier transform (FFT). Must be ``>= 2 * (N_HBM + 1)`` to avoid aliasing.
+    * :py:attr:`~skhippr.Fourier.Fourier.real_formulation`: Whether Fourier coefficients are returned in real or complex formulation.
 
-    Important class methods:
+    Useful methods:
 
     * :py:func:`~skhippr.Fourier.Fourier.time_samples`
     * :py:func:`~skhippr.Fourier.Fourier.DFT`
     * :py:func:`~skhippr.Fourier.Fourier.inv_DFT`
+    * :py:func:`~skhippr.Fourier.Fourier.matrix_DFT`
+    * :py:func:`~skhippr.Fourier.Fourier.matrix_inv_DFT`
+    * :py:func:`~skhippr.Fourier.Fourier.derivative_coeffs`
     * :py:func:`~skhippr.Fourier.Fourier.differentiate`
     * :py:func:`~skhippr.Fourier.Fourier.__replace__`
 
     Notes
     -----
-    This class supports both real-valued and complex-valued formulations.
-        * For the complex-valued formulation, Fourier coefficients are represented in increasing frequency order (from ``-N_HBM`` to ``N_HBM``).
-        * For the real-valued formulation, the 0-th Fourier coefficient is stored first, then all cosine coefficients in increasing frequency order, then all sine coefficients in increasing frequency order.
 
-    Attributes:
-    -----------
-    n_dof : int
-        Number of degrees of freedom of the considered system.
-    N_HBM : int
-        Number of harmonics.
-    L_DFT : int
-        Number of FFT samples.
-    real_formulation : bool
-        Indicates if real-valued formulation is used.
-    T_to_cplx_from_real : np.ndarray
-        Transformation matrix for Fourier coefficients from real to complex formulation.
-    T_to_real_from_cplx : np.ndarray
-        Transformation matrix for Fourier coefficients from complex to real representation.
-    DFT_matrix : np.ndarray
-        Discrete Fourier Transform matrix. Encodes the discrete Fourier transform in matrix form, which is equivalent to but less efficient than FFT.
-    iDFT_matrix : np.ndarray
-        Inverse Discrete Fourier Transform matrix. Encodes the inverse discrete Fourier transform in matrix form, which is equivalent to but less efficient than iFFT.
-    derivative_matrix : np.ndarray
-        Matrix for computing the Fourier coefficients of the derivative of a periodic signal.
+    This class supports both real-valued and complex-valued formulations.
+
+    * For the complex-valued formulation, Fourier coefficients are represented in increasing frequency order (from ``-N_HBM`` to ``N_HBM``).
+    * For the real-valued formulation, the 0-th Fourier coefficient is stored first, then all cosine coefficients in increasing frequency order, then all sine coefficients in increasing frequency order.
 
     """
 
@@ -232,12 +216,12 @@ class Fourier:
         """
         Generate a uniformly spaced vector of time samples starting at ``0`` with ``L_DFT`` samples per period.
 
-        Notes
-        -----
-        If ``periods`` is non-integer, it is rounded down to obtain an integer number of samples that are equally spaced at the DFT sampling frequency. The last sample lies in [``T*periods-dt``, ``T*periods``).
+        * If ``periods`` is integer, the last sample is ``T*periods-dt``.
+        * If ``periods`` is non-integer, it is rounded down to obtain an integer number of samples that are equally spaced at the DFT sampling frequency. The last sample lies in ``[T*periods-dt, T*periods)``.
 
         Parameters
         ----------
+
         omega : float
             The angular frequency (in radians per unit time).
         periods : float, optional
@@ -245,6 +229,7 @@ class Fourier:
 
         Returns
         -------
+
         np.ndarray
             1-D array of time samples.
 

@@ -4,15 +4,15 @@ from scipy import sparse
 from scipy.linalg import expm
 
 from skhippr.Fourier import Fourier
-from skhippr.problems.HBM import HBMProblem
-from skhippr.stability._StabilityHBM import _StabilityHBM
+from skhippr.cycles.hbm import HBMEquation
+from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 
 
-class KoopmanHillProjection(_StabilityHBM):
+class KoopmanHillProjection(AbstractStabilityHBM):
     """
     Direct Koopman Hill projection method for stability analysis of periodic solutions.
 
-    This class implements the abstract method :py:func:`~skhippr.stability._StabilityHBM._StabilityHBM.fundamental_matrix` of its parent class :py:class:`~skhippr.stability._StabilityHBM._StabilityHBM` using the direct Koopman-Hill projection formula: ::
+    This subclass of :py:class:`~skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM` implements the abstract method :py:func:`~skhippr.stability.AbstractStabilityHBM.AbstractStabilityHBM.fundamental_matrix` of its parent class using the direct Koopman-Hill projection formula: ::
 
         fundamental_matrix = C @ D_time(t) @ np.expm(hill_matrix*t) @ W
 
@@ -67,9 +67,7 @@ class KoopmanHillProjection(_StabilityHBM):
             self.W = self.fourier.T_to_real_from_cplx @ self.W
             self.C = self.C @ self.fourier.T_to_cplx_from_real
 
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using direct Koopman-Hill projection.
 
@@ -80,7 +78,7 @@ class KoopmanHillProjection(_StabilityHBM):
         where:
 
             * ``C`` and ``W`` are projection matrices that were computed once-and-for-all at initialization.
-            * :py:func:`~skhippr.problems.HBM.HBMProblem.hill_matrix` is obtained from the Jacobian matrix of the :py:class:`~skhippr.problems.HBM.HBMProblem`.
+            * :py:func:`~skhippr.cycles.hbm.hbmProblem.hill_matrix` is obtained from the Jacobian matrix of the :py:class:`~skhippr.cycles.hbm.hbmProblem`.
             * :py:func:`~skhippr.stability.KoopmanHillProjection.KoopmanHillProjection.D_time` scales the projection matrix -- Only relevant if ``t_over_period`` is non-integer and ``self.C`` has been manually modified to be nontrivial.
 
         Parameters
@@ -89,7 +87,7 @@ class KoopmanHillProjection(_StabilityHBM):
         t_over_period : float
             The time normalized over the period (i.e., t/T, where T is the period).
         problem : HBMProblem
-            A solved :py:class:`~skhippr.problems.HBM.HBMProblem`, encoding the periodic solution.
+            A solved :py:class:`~skhippr.cycles.hbm.hbmProblem`, encoding the periodic solution.
 
         Returns
         -------
@@ -100,8 +98,8 @@ class KoopmanHillProjection(_StabilityHBM):
         """
 
         C = self.C_time(t_over_period)
-        hill_matrix = problem.hill_matrix()
-        t = t_over_period * 2 * np.pi / problem.omega
+        hill_matrix = hbm.hill_matrix()
+        t = t_over_period * 2 * np.pi / hbm.omega
 
         funda_mat = C @ expm(hill_matrix * t) @ self.W
 
@@ -138,7 +136,7 @@ class KoopmanHillProjection(_StabilityHBM):
         """
         Constructs the time-dependent transformation matrix D(t) for the projection matrix at arbitrary (non-integer) times t.
 
-        For the complex-valued formulation, the ``k``-th block column of ``self.C`` is scaled by ``np.exp(k * omega * t)`` and the resulting matrix is diagonal (see Bayer&Leine, 2023). The real-valued formulation follows by multiplication with the transformation matrix :py:attr:`HBMProblem.T_to_cplx_from_real <skhippr.problems.HBM.HBMProblem.T_to_cplx_from_real>`.
+        For the complex-valued formulation, the ``k``-th block column of ``self.C`` is scaled by ``np.exp(k * omega * t)`` and the resulting matrix is diagonal (see Bayer&Leine, 2023). The real-valued formulation follows by multiplication with the transformation matrix :py:attr:`HBMProblem.T_to_cplx_from_real <skhippr.cycles.hbm.hbmProblem.T_to_cplx_from_real>`.
 
         Parameters
         ----------
@@ -181,7 +179,7 @@ class KoopmanHillProjection(_StabilityHBM):
     @override
     def error_bound(self, t, a, b):
         """
-        Compute the theoretical error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.problems.HBM.HBMProblem.exponential_decay_parameters`.
+        Compute the theoretical error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.cycles.hbm.hbmProblem.exponential_decay_parameters`.
 
         According to (Bayer & Leine, 2025), the error bound is given by: ::
 
@@ -217,7 +215,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
     The subharmonic formulation is more accurate (error bound decays twice as fast) at the cost of approximately twice the computation time of the direct method.
 
-    Upon initialization, The projection matrices ``self.C`` and ``self.W`` as well as ``self.C_subh`` and ``self.W_subh`` are constructed once-and-for-all depending on the formulation (real or complex), and stored as attributes.
+    Upon initialization, the projection matrices ``self.C`` and ``self.W`` as well as ``self.C_subh`` and ``self.W_subh`` are constructed once-and-for-all depending on the formulation (real or complex), and stored as attributes.
 
     Parameters
     ----------
@@ -275,9 +273,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         self.W_subh = np.kron(W0[1:, :], eye)
         self.C_subh = -np.kron(C0[:, 1:], eye)
 
-    def fundamental_matrix(
-        self, t_over_period: float, problem: HBMProblem
-    ) -> np.ndarray:
+    def fundamental_matrix(self, t_over_period: float, hbm: HBMEquation) -> np.ndarray:
         """
         Compute the fundamental solution matrix for the given periodic solution and normalized time using subharmonic Koopman-Hill projection.
 
@@ -289,7 +285,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
             * ``C``, ``W``, ``W_subh`` are projection matrices that were computed once-and-for-all at initialization.
             * :py:func:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic.C_subh_time` is computed by scaling ``C_subh`` for non-integer times.
-            * :py:func:`~skhippr.problems.HBM.HBMProblem.hill_matrix` is obtained from the Jacobian matrix of the :py:class:`~skhippr.problems.HBM.HBMProblem`.
+            * :py:func:`~skhippr.cycles.hbm.hbmProblem.hill_matrix` is obtained from the Jacobian matrix of the :py:class:`~skhippr.cycles.hbm.hbmProblem`.
             * :py:func:`~skhippr.stability.KoopmanHillProjection.KoopmanHillSubharmonic.hill_subh` is obtained from the Hill matrix by eliminating the constant row and column and shifting the frequencies by 0.5.
 
         Parameters
@@ -298,7 +294,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         t_over_period : float
             The time normalized over the period (i.e., t/T, where T is the period).
         problem : HBMProblem
-            A solved :py:class:`~skhippr.problems.HBM.HBMProblem`, encoding the periodic solution.
+            A solved :py:class:`~skhippr.cycles.hbm.hbmProblem`, encoding the periodic solution.
 
         Returns
         -------
@@ -311,10 +307,10 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         C = self.C_time(t_over_period)
         C_subh = self.C_subh_time(t_over_period=t_over_period)
 
-        Phi_t = super().fundamental_matrix(t_over_period=t_over_period, problem=problem)
+        Phi_t = super().fundamental_matrix(t_over_period=t_over_period, hbm=hbm)
 
-        hill_mat_subh = self.hill_subh(problem=problem)
-        t = 2 * np.pi / problem.omega * t_over_period
+        hill_mat_subh = self.hill_subh(equ=hbm)
+        t = 2 * np.pi / hbm.omega * t_over_period
         Phi_t += C_subh @ expm(hill_mat_subh * t) @ self.W_subh
 
         return Phi_t
@@ -360,13 +356,13 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         if C is None:
             C = self.C_time(t_over_period)
 
-    def hill_subh(self, problem: HBMProblem) -> np.ndarray:
+    def hill_subh(self, equ: HBMEquation) -> np.ndarray:
         """
         Constructs the subharmonic Hill matrix for the given HBM problem.
 
         As described in (Bayer and Leine, 2025), the subharmonic Hill matrix is given by the even row and column blocks of the Hill matrix evaluated with the halved frequency.
 
-        However, practically, the subharmonic Hill matrix is constructed immediately from the :py:func:`~skhippr.problems.HBM.HBMProblem.hill_matrix` by removing the 0-frequency row and column and shifting all frequency terms by ``omega/2``.
+        However, practically, the subharmonic Hill matrix is constructed immediately from the :py:func:`~skhippr.cycles.hbm.hbmProblem.hill_matrix` by removing the 0-frequency row and column and shifting all frequency terms by ``omega/2``.
 
         Parameters
         ----------
@@ -386,7 +382,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
         * Bayer et al., 2024, Appendix: Details on the block structure real-valued formulation.
         """
 
-        hill_mat = problem.hill_matrix()
+        hill_mat = equ.hill_matrix()
         if self.fourier.real_formulation:
             # Split the Hill matrix into blocks for const, cos, sin
             blocks = []
@@ -417,7 +413,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
             # Construct their subharmonic pendants
             # Tc = Tc
-            Ts += 0.5 * problem.omega * np.eye(self.fourier.n_dof * self.fourier.N_HBM)
+            Ts += 0.5 * equ.omega * np.eye(self.fourier.n_dof * self.fourier.N_HBM)
 
             Kc = np.vstack((Jc, Kc[: -self.fourier.n_dof, :]))
             Ks = np.vstack((Js, Ks[: -self.fourier.n_dof, :]))
@@ -427,14 +423,14 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
         else:
             Hill_subh = hill_mat[self.fourier.n_dof :, self.fourier.n_dof :]
-            Hill_subh = Hill_subh + 0.5j * problem.omega * np.eye(
+            Hill_subh = Hill_subh + 0.5j * equ.omega * np.eye(
                 self.fourier.n_dof * 2 * self.fourier.N_HBM
             )
         return Hill_subh
 
     def error_bound(self, t, a, b):
         """
-        Compute the theoretical error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.problems.HBM.HBMProblem.exponential_decay_parameters`.
+        Compute the theoretical error bound for the fundamental solution matrix based on the exponential decay of Fourier coefficient matrices as returned by :py:class:`~skhippr.cycles.hbm.hbmProblem.exponential_decay_parameters`.
 
         According to (Bayer & Leine, 2025), the error bound in the subharmonic formulation is given by: ::
 

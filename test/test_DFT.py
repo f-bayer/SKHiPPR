@@ -66,10 +66,7 @@ def test_reconstruct_X(fourier_small: Fourier, verbose=False):
 
     X_reconstructed = fourier_small.DFT(x_samp)
     X_reconstructed_deprecated = fourier_small._DFT(x_samp)
-    # fig, axs = plt.subplots(ncols=1, nrows=2)
-    # axs[0].plot(np.real(X), "+")
-    # axs[0].plot(np.real(X_reconstructed), "x")
-    # plt.show()
+
     assert np.allclose(X, X_reconstructed)
     assert np.allclose(X, X_reconstructed_deprecated)
     if verbose:
@@ -102,7 +99,6 @@ def test_reconstruct_x_samp(fourier_small: Fourier, verbose=False):
             end=" ",
         )
     omega = np.random.rand()
-    ts = fourier_small.time_samples(omega)
     assert fourier_small.N_HBM >= 3  # Prevent aliasing
 
     omega = np.random.rand()
@@ -116,11 +112,6 @@ def test_reconstruct_x_samp(fourier_small: Fourier, verbose=False):
     # back to freq domain
     x_samp_reconstructed = fourier_small.inv_DFT(X)
     x_samp_reconstructed_deprecated = fourier_small._inv_DFT(X)
-    # fig, axs = plt.subplots(ncols=x_samp.shape[0], nrows=1)
-    # for k in range(x_samp.shape[0]):
-    #     axs[k].plot(x_samp[k, :])
-    #     axs[k].plot(x_samp_reconstructed[k, :], "+")
-    # plt.show()
 
     assert np.allclose(x_samp, x_samp_reconstructed)
     assert np.allclose(x_samp, x_samp_reconstructed_deprecated)
@@ -178,6 +169,42 @@ def test_too_large_frequency(fourier_small: Fourier, verbose=False):
     assert not np.allclose(x_samp, x_samp_reconstructed)
     if verbose:
         print("success (expected results to differ)")
+
+
+def test_matrix_DFT_and_iDFT(fourier):
+    omega = np.random.rand()
+    phase_3 = np.random.rand()
+
+    # Check minimum required frequency
+    assert fourier.N_HBM >= 5
+    ts = fourier.time_samples(omega)[np.newaxis, np.newaxis, :]
+
+    # Construct test case
+    A_samples = np.vstack(
+        (
+            np.hstack(
+                (
+                    3 * np.cos(omega * ts + 3),
+                    -np.sin(omega * ts) + 0.5 * np.cos(5 * omega * ts + phase_3),
+                )
+            ),
+            np.hstack(
+                (-4 * np.sin(2 * omega * ts) + 3, np.ones((1, 1, fourier.L_DFT)))
+            ),
+        )
+    )
+
+    # Compare transformations
+    A = fourier.matrix_DFT(A_samples)
+    A_old = fourier._matrix_DFT(A_samples)
+
+    print(f"Difference: {np.max(np.abs(A - A_old))}")
+
+    assert np.allclose(A, A_old, atol=1e-13, rtol=1e-13)
+
+    # Compare inverse transformations
+    A_samples_fft = fourier.matrix_inv_DFT(A)
+    assert np.allclose(A_samples_fft, A_samples, atol=1e-14, rtol=1e-14)
 
 
 if __name__ == "__main__":
