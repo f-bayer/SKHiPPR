@@ -38,9 +38,9 @@ class AbstractODE(AbstractEquation):
 
     @abstractmethod
     def dynamics(self, t=None, x=None) -> np.ndarray:
-        """Return the right-hand side of the first-order ode x_dot = f(t, x) as a 1-D numpy array of size ``self.n_dof``. This method can be passed into ``scipy.integrate.solve_ivp`.
-        All parameters are to be obtained from the corresponding attributes by default.
-        Subclass implementations are expected to check the correct dimensions of ``x`` and ``t``.
+        """Return the right-hand side of the first-order ode x_dot = f(t, x) as a 1-D numpy array of size ``self.n_dof``. This method can be passed into ``scipy.integrate.solve_ivp``.
+
+        Subclass implementations are expected to check the correct dimensions of ``x`` and ``t`` using :py:func:`~skhippr.odes.AbstractODE.AbstractODE.check_dimensions`.
 
         Parameters
         ----------
@@ -48,8 +48,6 @@ class AbstractODE(AbstractEquation):
             Time variable. If ``None``, ``self.t`` is used.
         x : np.ndarray, optional
             State vector. If ``None``, ``self.x`` is used.
-
-            If ``t`` is a scalar, ``x`` must be 1-D or have exactly one column. If ``t`` is a vector, ``x`` must have the same number of columns as ``t``.
         """
         if x is None:
             x = self.x
@@ -60,7 +58,15 @@ class AbstractODE(AbstractEquation):
         return f
 
     def check_dimensions(self, t=None, x=None):
+        """Check the dimensions of the time variable and state vector.
+        If ``t`` is a scalar, ``x`` must be 1-D or have exactly one column. If ``t`` is a vector, ``x`` must have the same number of columns as ``t``.
 
+        Raises
+        ------
+
+        ValueError
+            If the dimensions of ``t`` and ``x`` are incompatible or if ``x`` does not have the expected number of rows.
+        """
         if x is not None and x.shape[0] != self.n_dof:
             raise ValueError(f"{x} must have {self.n_dof} rows but has {x.shape[0]}")
         if t is not None and np.isscalar(t) and len(x.shape) > 1 and x.shape[1] > 1:

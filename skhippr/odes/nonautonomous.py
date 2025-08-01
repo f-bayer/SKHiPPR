@@ -4,6 +4,14 @@ from skhippr.odes.AbstractODE import AbstractODE
 
 
 class Duffing(AbstractODE):
+    """
+    Non-autonomous Duffing oscillator as concrete subclass of :py:class:`~skhippr.odes.AbstractODE.AbstractODE`. ::
+
+        dx[0]/dt = x[1]
+        dx[1]/dt = -alpha * x[0] - delta * x[1] - beta * [0]**3 + F * cos(omega * t)
+
+    """
+
     def __init__(
         self,
         t: float,

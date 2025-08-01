@@ -7,8 +7,15 @@ from skhippr.odes.AbstractODE import AbstractODE
 
 
 class HillODE(AbstractODE):
+    """
+    Encodes damped Hill-type ODEs of the form ::
+
+        dx[0]/dt = x[1]
+        dx[1]/dt = - d*x[1] - (a + b*g(omega*t))*x[0]
+
+    where ``g`` is a 2*pi-periodic function, e.g., a cosine or a rectangular wave."""
+
     def __init__(self, t, x, g_fcn, a=0, b=1, omega=1, damping=0):
-        """Encodes damped Hill ODEs of the form x_ddot + d*x_dot + (a + b*g(omega*t))*x"""
         super().__init__(False, 2)
 
         self.g_fcn = g_fcn
@@ -63,6 +70,10 @@ class HillODE(AbstractODE):
 
 
 class HillLTI(HillODE):
+    """
+    Subclass of :py:class:`~skhippr.odes.HillODE` with ``g = lambda t: 1``, encoding a linear time-invariant (LTI) Hill equation.
+    """
+
     def __init__(self, t, x, a=0, b=1, damping=0, omega=1):
         super().__init__(t, x, lambda t: 1, a, b, omega, damping)
 
@@ -70,17 +81,12 @@ class HillLTI(HillODE):
         """
         Compute the fundamental matrix of the linear time-invariant (LTI) Hill system using the matrix exponential.
 
-        Parameters:
-            t (float): The final time at which to evaluate the fundamental matrix.
-            t_0 (float): The initial time.
-            gamma_sq (float or array-like): System parameter(s) used in the LTI system.
-            d (float, optional): Additional system parameter, default is 0.
-
-        Returns:
-            numpy.ndarray: The fundamental matrix evaluated at (t - t_0).
-
-        Notes:
-            The matrix exponential is computed using `scipy.linalg.expm`.
+        Parameters
+        ----------
+        t : float
+            The final time at which to evaluate the fundamental matrix.
+        t_0 : float, optional
+            The initial time. If `None`, defaults to `self.t`.
         """
         if t_0 is None:
             t_0 = self.t
@@ -90,6 +96,13 @@ class HillLTI(HillODE):
 
 
 class SmoothedMeissner(HillODE):
+    """
+    Subclass of :py:class:`~skhippr.odes.HillODE` with g(t) being a smoothed square wave. The smoothing parameter ``smoothing`` must lie between 0 and 1.
+
+    * For ``smoothing = 0``, we obtain the Meissner equation (Hill equation with rectangular forcing). In this case, a close-form expression for the fundamental matrix is available.
+    * For ``smoothing = 1``, we obtain the Mathieu equation (Hill equation with cosine forcing)
+    """
+
     def __init__(self, t, x, smoothing=0, a=0, b=1, omega=1, damping=0):
         if not (0 <= smoothing <= 1):
             raise ValueError(
@@ -106,6 +119,7 @@ class SmoothedMeissner(HillODE):
             return cos / np.sqrt(cos**2 + self.smoothing * np.sin(t) ** 2)
 
     def fundamental_matrix(self, t_end: float, t_0: float = None) -> np.ndarray:
+        """Compute the closed-form fundamental matrix of the Meissner equation (smoothing = 0)."""
         if self.smoothing != 0:
             raise ValueError(
                 "Fundamental matrix in closed form only available for un-smoothed Meissner equation!"
@@ -152,11 +166,17 @@ class SmoothedMeissner(HillODE):
 
 
 class MathieuODE(SmoothedMeissner):
+    """Subclass of :py:class:`~skhippr.odes.SmoothedMeissner` with ``smoothing = 1``. This corresponds to the Mathieu equation, which is a special case of the Hill equation with cosine forcing."""
+
     def __init__(self, t, x, a=0, b=1, omega=1, damping=0):
         super().__init__(t=t, x=x, smoothing=1, a=a, b=b, omega=omega, damping=damping)
 
 
 class TruncatedMeissner(HillODE):
+    """
+    Truncated Meissner equation as a subclass of :py:class:`~skhippr.odes.HillODE.HillODE`. The forcing is the Fourier series of the rectangular wave of the Meissner equation, but truncated to the first ``N_harmonics`` harmonics.
+    """
+
     def __init__(self, t, x, N_harmonics, a=0, b=1, omega=1, damping=0):
 
         self.N_harmonics = N_harmonics
@@ -177,6 +197,18 @@ class TruncatedMeissner(HillODE):
 
 
 class ShirleyODE(AbstractODE):
+    """Two-state quantum system as a subclass of :py:class:`~skhippr.odes.AbstractODE. This is the example discussed by Shirley in https://doi.org/10.1103/PhysRev.138.B979 . The equations of motion are ::
+
+        dx[0]/dt = -i * E_alpha * x[0] - i * 2 * b * cos(omega * t) * x[1]
+        dx[1]/dt = -i * E_beta * x[1] - i * 2 * b * cos(omega * t) * x[0]
+
+    where ``i`` is the complex unit.
+
+    Note
+    ----
+
+    The equations of motion are complex-valued, so the state vector ``x`` is expected to be complex-valued as well. This system can only be handled with the complex-valued HBM formulation.
+    """
 
     def __init__(self, t, x, E_alpha, E_beta, b, omega):
         super().__init__(autonomous=False, n_dof=2)

@@ -5,41 +5,11 @@ from skhippr.odes.AbstractODE import AbstractODE
 
 class Vanderpol(AbstractODE):
     """
-    Van der Pol oscillator as a first-order autonomous ODE system.
+    Autonomous van der Pol oscillator as a subclass of :py:class:`~skhippr.odes.AbstractODE.AbstractODE`. ::
 
-    Parameters
-    ----------
+        dx[0]/dt = x[1]
+        dx[1]/dt = nu * (1 - x[0]**2) * x[1] - x[0]
 
-    x : np.ndarray
-        Initial state vector of shape (2, ...), where the first dimension corresponds to the two degrees of freedom.
-    nu : float
-        Nonlinearity/damping parameter of the Van der Pol oscillator.
-
-    Attributes
-    ----------
-
-    nu : float
-        Nonlinearity/damping parameter.
-    x : np.ndarray
-        State vector.
-
-    Methods
-    -------
-
-    parse_kwargs(**kwargs)
-        Parses keyword arguments for state and parameter values.
-    dynamics(t=None, **kwargs)
-        Computes the time derivative of the state vector according to the Van der Pol equations.
-    derivative(variable, **kwargs)
-        Computes the derivative of the dynamics with respect to a given variable ('x' or 'nu').
-
-    Raises
-    ------
-
-    ValueError
-        If the state vector `x` does not have the correct shape.
-    AttributeError
-        If the requested derivative variable is not recognized.
     """
 
     def __init__(self, x: np.ndarray, nu: float, t=0):
@@ -50,31 +20,7 @@ class Vanderpol(AbstractODE):
 
     @override
     def dynamics(self, t=None, x=None):
-        """
-        Calculates the dynamics of the system at a given time.
 
-        Parameters
-        ----------
-
-        t : float, optional
-            The current time. Default is None.
-        **kwargs : dict
-            Additional keyword arguments. Can contain 'x' and 'nu', which are otherwise onbtained from self.x and self.nu.
-
-        Returns
-        -------
-
-        f : ndarray
-            The computed derivatives of the state variables.
-
-        Notes
-        -----
-
-        This function expects `kwargs` to contain the state `x` and input `nu`, which are parsed using `self.parse_kwargs`.
-        The dynamics are defined as:
-            f[0] = x[1]
-            f[1] = nu * (1 - x[0]**2) * x[1] - x[0]
-        """
         if x is None:
             x = self.x
 
@@ -87,38 +33,6 @@ class Vanderpol(AbstractODE):
 
     @override
     def closed_form_derivative(self, variable, t=None, x=None):
-        """
-        Compute the derivative of the Van der Pol system with respect to a given variable.
-
-        Parameters
-        ----------
-
-        variable : str
-            The variable with respect to which the derivative is computed.
-            Supported values are "x" (state variable) and "nu" (system parameter).
-        **kwargs
-            Additional keyword arguments. May contain:
-                x : np.ndarray
-                    State variable array of shape (2, ...).
-                nu : float or np.ndarray
-                    System parameter(s).
-            By default, these values are set by self.x and self.nu.
-
-        Returns
-        -------
-
-        np.ndarray
-            The derivative of the system with respect to the specified variable:
-            - If `variable` is "x", returns the Jacobian matrix with respect to `x` of shape (2, 2, ...).
-            - If `variable` is "nu", returns the derivative with respect to `nu` of shape (2, ...).
-
-        Raises
-        ------
-
-        AttributeError
-            If the specified variable is not "x" or "nu".
-        """
-
         if x is None:
             x = self.x
 
@@ -142,6 +56,13 @@ class Vanderpol(AbstractODE):
 
 
 class Truss(AbstractODE):
+    """
+    Autonomous truss system as a subclass of :py:class:`~skhippr.odes.AbstractODE.AbstractODE`. A mass ``m`` can move horizontally with viscous damping (``c``). It is attached to a linear spring (``k``, ``l_0``) mounted at the point ``(0, a)``. A constant force ``F`` acts on the mass. For small values of ``F``, there are three coexisting equilibria. The equations of motion are ::
+
+        dx[0]/dt = x[1]
+        dx[1]/dt = -k/m * x[0] + k/m * x[0] * l_0 / sqrt(a**2 + x[0]**2) + F/m - c/m * x[1]
+
+    """
 
     def __init__(
         self,
@@ -241,6 +162,13 @@ class Truss(AbstractODE):
 
 
 class BlockOnBelt(AbstractODE):
+    """
+    Smoothed Block-on-belt system as a subclass of :py:class:`~skhippr.odes.AbstractODE.AbstractODE`. A block with mass ``m`` is placed on a belt with constant velocity ``vdr``. The block is subject to a spring force ``Fs`` and smoothed coulomb friction with the belt. The equations of motion are ::
+
+    dx[0]/dt = x[1]
+    dx[1]/dt = -k/m * x[0] + Fs/m * 2/pi * arctan(epsilon * (x[1] - vdr)) / (1 + delta * abs(x[1] - vdr))
+
+    """
 
     def __init__(
         self,
