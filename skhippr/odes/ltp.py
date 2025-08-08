@@ -65,9 +65,15 @@ class HillODE(AbstractODE):
 
             case "b":
                 df_db = np.zeros_like(x)
-                df_db[1, ...] = -self.g_fcn(tau) * self.x[0, ...]
+                df_db[1, ...] = -self.g_fcn(tau) * x[0, ...]
 
                 return df_db[:, np.newaxis, ...]
+
+            case "a":
+                df_da = np.zeros_like(x)
+                df_da[1, ...] = -x[0, ...]
+
+                return df_da[:, np.newaxis, ...]
 
             case _:
                 raise NotImplementedError(

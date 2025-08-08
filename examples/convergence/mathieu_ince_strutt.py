@@ -14,8 +14,9 @@ from skhippr.Fourier import Fourier
 from skhippr.equations.AbstractEquation import AbstractEquation
 from skhippr.equations.EquationSystem import EquationSystem
 from skhippr.cycles.hbm import HBMEquation
-from skhippr.odes.ltp import MathieuODE
+from skhippr.odes.ltp import MathieuODE, SmoothedMeissner
 from skhippr.solvers.newton import NewtonSolver
+from skhippr.solvers.continuation import pseudo_arclength_continuator
 from skhippr.stability.KoopmanHillProjection import (
     KoopmanHillProjection,
     KoopmanHillSubharmonic,
@@ -84,29 +85,67 @@ class InceStruttSystem(EquationSystem):
 
 
 def main():
-    a_grid = np.linspace(-0.5, 3, 101)
-    b_grid = np.linspace(0, 5, num=101)
+    a_grid = np.linspace(-0.5, 3, 21)
+    b_grid = np.linspace(0, 5, num=21)
 
-    fourier = Fourier(N_HBM=10, L_DFT=30, n_dof=2, real_formulation=True)
+    fourier = Fourier(N_HBM=10, L_DFT=60, n_dof=2, real_formulation=True)
     X = np.zeros((2 * fourier.N_HBM + 1) * fourier.n_dof)
-    ode = MathieuODE(t=0, x=np.array([0.0, 0.0]), a=1, b=1, omega=1, damping=0)
+    ode = SmoothedMeissner(
+        t=0, x=np.array([0.0, 0.0]), a=1, b=1, omega=1, damping=0, smoothing=1
+    )
     hbm = HBMEquation(
         ode=ode,
         omega=ode.omega,
         fourier=fourier,
         initial_guess=X,
-        stability_method=KoopmanHillProjection(fourier=fourier),
+        stability_method=KoopmanHillSubharmonic(fourier=fourier),
+        period_k=2,
     )
-    # _, magnitudes_fm = ince_strutt_rastered(a_grid, b_grid, hbm)
-    # ax = plot_magnitude(magnitudes_fm, logscale=True, a_grid=a_grid, b_grid=b_grid)
+    _, magnitudes_fm = ince_strutt_rastered(a_grid, b_grid, hbm)
+    ax = plot_magnitude(magnitudes_fm, logscale=True, a_grid=a_grid, b_grid=b_grid)
 
     # Continuation along stability boundary
-    ode.a = -0.001
-    ode.b = 0
-    sys_IS = InceStruttSystem(hbm)
-    solver = NewtonSolver()
-    solver.solve(sys_IS)
-    assert sys_IS.solved
+
+    as_tongue_2 = [0.24, 0.26, 2.24, 2.26]
+    as_tongue = [2.25, 2.5]
+    solver = NewtonSolver(verbose=True)
+
+    for a in as_tongue:
+        solver.verbose = True
+        hbm.ode.a = a
+        hbm.ode.b = 1
+        hbm.X[2] = 1  # nonzero initial guess
+        hbm.X[3] = -ode.omega
+        sys_IS = InceStruttSystem(hbm, varying_parameter="a")
+        print(
+            f"Initial guess for period-{sys_IS.equations[0].period_k} IS solution: a = {sys_IS.equations[0].ode.a}, b = {sys_IS.equations[0].ode.b}"
+        )
+        solver.solve(sys_IS)
+        assert sys_IS.solved
+        print(
+            f"Solved IS system at initial guess for period-{sys_IS.equations[0].period_k} solution: a = {sys_IS.equations[0].ode.a}, b = {sys_IS.equations[0].ode.b}"
+        )
+
+        _as = []
+        bs = []
+        solver.verbose = False
+
+        for branch_point in pseudo_arclength_continuator(
+            sys_IS,
+            solver,
+            continuation_parameter="b",
+            num_steps=100,
+            stepsize=0.05,
+            initial_direction=1,
+        ):
+            print(f"next branch point: a = {branch_point.a}, b = {branch_point.b}")
+            _as.append(branch_point.a)
+            bs.append(branch_point.b)
+            if (not min(a_grid) < branch_point.a < max(a_grid)) or (
+                not min(b_grid) < branch_point.b < max(b_grid)
+            ):
+                break
+        plt.plot(_as, bs)
 
 
 def ince_strutt_rastered(a_grid: Iterable, b_grid: Iterable, hbm: HBMEquation):
@@ -144,8 +183,7 @@ def plot_magnitude(magnitude_fm, logscale=True, a_grid=None, b_grid=None):
     #     # ensure that stability cutoff is at magnitude = 0
     #     magnitude_fm = magnitude_fm - 1
 
-    max_val = np.max(magnitude_fm)
-    shade = np.minimum(magnitude_fm, 10)  # np.maximum(0, magnitude_fm)
+    shade = np.maximum(1, np.minimum(magnitude_fm, 10))  # np.maximum(0, magnitude_fm)
 
     if logscale:
         norm = "log"
@@ -154,10 +192,11 @@ def plot_magnitude(magnitude_fm, logscale=True, a_grid=None, b_grid=None):
 
     # Show image
     fig, ax = plt.subplots()
-    ax.pcolormesh(a_grid, b_grid, shade, cmap="gray_r", norm=norm)
-    cbar = plt.colorbar(label="largest FM (magnitude)")
-    ax.xlabel("$a$")
-    ax.ylabel("$b$")
+    image = ax.pcolormesh(a_grid, b_grid, shade, cmap="gray_r", norm=norm)
+    cbar = fig.colorbar(image, label="largest FM (magnitude)")
+    ax.set_xlabel("$a$")
+    ax.set_ylabel("$b$")
+    cbar.set_ticks((1, 10), labels=("$\\leq 10^0$ (stable)", "$\\geq 10^1$"))
 
     return ax
 
