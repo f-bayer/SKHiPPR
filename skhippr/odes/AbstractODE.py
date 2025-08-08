@@ -153,3 +153,93 @@ class AbstractODE(AbstractEquation):
         """Requires subclasses to implement a closed-form derivative with optional arguments ``t`` and ``x``."""
 
         return super().closed_form_derivative(variable)
+
+
+class SecondOrderODE(AbstractODE):
+    """A second-order ODE is represented as a first-order ODE with twice the number of degrees of freedom."""
+
+    def __init__(
+        self,
+        t: float,
+        q: np.ndarray,
+        dq: np.ndarray,
+        M: np.ndarray,
+        D: np.ndarray,
+        K: np.ndarray,
+        autonomous=False,
+        stability_method=None,
+    ):
+        n_dof = 2 * M.shape[0]
+        super().__init__(autonomous, n_dof, stability_method)
+
+        self.t = t
+        self.x = np.concatenate((np.atleast_1d(q), np.atleast_1d(dq)), axis=0)
+        self.M = M
+        self.D = D
+        self.K = K
+
+    @abstractmethod
+    def f_nonlin(self, t=None, q=None, dq=None) -> np.ndarray:
+        """Everything that is not represented in M, D, K. CAUTION: Includes forcing!"""
+
+    def derivative_f_nonlin(self, variable, t, q=None, dq=None) -> np.ndarray:
+        """Derivative of the non-linear part with respect to q and dq."""
+        raise NotImplementedError(
+            "Derivative of the non-linear part not implemented to default to FD evaluation. To be overridden in subclass."
+        )
+
+        match variable:
+            case "q":
+                ...
+            case "dq":
+                ...
+            case _:
+                raise NotImplementedError
+
+    @override
+    def dynamics(self, t=None, x=None) -> np.ndarray:
+        """Returns the first-order dynamics for a second-order ODE."""
+        if x is None:
+            x = self.x
+        if t is None:
+            t = self.t
+        self.check_dimensions(t, x)
+
+        q, dq = np.split(x, 2, axis=0)
+        f = np.zeros_like(x)
+        f[: q.shape[0], ...] = dq
+
+        rhs = self.D @ dq + self.K @ q + self.f_nonlin(t, q, dq)
+        f[q.shape[0] :, ...] = np.linalg.solve(self.M, -rhs)
+
+        return f
+
+    @override
+    def closed_form_derivative(self, variable, t=None, x=None) -> np.ndarray:
+        """Closed-form derivative for the second-order ODE."""
+        if t is None:
+            t = self.t
+        if x is None:
+            x = self.x
+        self.check_dimensions(t, x)
+
+        q, dq = np.split(x, 2, axis=0)
+
+        match variable:
+            case "x":
+                n_dof = q.shape[0]
+                df_dx = np.zeros((x.shape[0], *x.shape))
+                for k in range(n_dof):
+                    df_dx[k, k + n_dof, ...] = 1
+                    df_dx[n_dof:, :n_dof, ...] = -np.linalg.solve(
+                        self.M,
+                        self.K + self.derivative_f_nonlin("q", t, q, dq),
+                    )
+                    df_dx[n_dof:, n_dof:, ...] = -np.linalg.solve(
+                        self.M,
+                        self.D + self.derivative_f_nonlin("dq", t, q, dq),
+                    )
+                return df_dx
+            case _:
+                dfnl_dvar = self.derivative_f_nonlin(variable, t, q, dq)
+                return np.vstack([np.zeros_like(dfnl_dvar), dfnl_dvar])
