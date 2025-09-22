@@ -22,12 +22,19 @@ class PseudoSpectrumEquation(AbstractEquation):
             eigenvalues, _ = np.linalg.eig(A)
             z = eigenvalues[0]
 
-        self.re_z = np.real(z)
-        self.im_z = np.imag(z)
+        self.z = z
+
+    @property
+    def z(self):
+        return self.re_z + 1j * self.im_z
+
+    @z.setter
+    def z(self, value):
+        self.re_z = np.real(value)
+        self.im_z = np.imag(value)
 
     def residual_function(self):
-        z = self.re_z + 1j * self.im_z
-        R = self.A - z * self.eye
+        R = self.A - self.z * self.eye
         _, s, _ = np.linalg.svd(R)
         sigma_min = np.min(s)
         return np.atleast_1d(sigma_min - self.epsilon)
@@ -35,6 +42,11 @@ class PseudoSpectrumEquation(AbstractEquation):
     def closed_form_derivative(self, variable):
         if variable == "epsilon":
             return np.atleast_2d(-1)
+        if variable == "z":
+            raise ValueError(
+                "Derivative of real-valued residual w.r.t complex variable 'z' problematic. "
+                "Consider 're_z' (real part) and 'im_z' (imaginary part) as two independent, real-valued unknowns. "
+            )
 
         return super().closed_form_derivative(variable)
 
@@ -45,6 +57,7 @@ def compute_pseudospectrum(
     z_init: complex = None,
     tolerance: float = 1e-8,
     verbose: bool = True,
+    max_step=0.1,
 ) -> np.ndarray:
     """
     Computes a boundary of the pseudospectrum of a given matrix A around an
@@ -83,6 +96,7 @@ def compute_pseudospectrum(
         solver=solver,
         verbose=verbose,
         num_steps=5000,
+        stepsize_range=(0.01 * max_step, max_step),
     ):
         z = bp.re_z + 1j * bp.im_z
         pseudo_spectrum.append(z)
@@ -92,6 +106,17 @@ def compute_pseudospectrum(
             break
 
     return np.array(pseudo_spectrum)
+
+
+def does_pseudospectrum_include(A: np.array, epsilon: float, z_vals: np.array) -> bool:
+    """Determine whether the pseudospectrum of A includes any of the points in z_vals."""
+    equ = PseudoSpectrumEquation(A, epsilon, z_vals[0])
+    for z in z_vals:
+        equ.z = z
+        if equ.residual() < 0:
+            return True
+
+    return False
 
 
 def plot_pseudospectrum(A, epsilon=0.3, ax=None):

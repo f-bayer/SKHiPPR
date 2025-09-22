@@ -39,7 +39,10 @@ from skhippr.solvers.newton import NewtonSolver
 from skhippr.odes.nonautonomous import Duffing
 from skhippr.cycles.shooting import ShootingBVP
 from skhippr.cycles.hbm import HBMEquation
-from skhippr.stability.KoopmanHillProjection import KoopmanHillProjection
+from skhippr.stability.KoopmanHillProjection import (
+    KoopmanHillProjection,
+    KoopmanHillSubharmonic,
+)
 
 import plot_figure_9_duffing_b
 
@@ -93,7 +96,9 @@ def Phi_t_ref(
     return x_time, Phi_ts
 
 
-def errors_koopman_hill(ts, N_HBM, hbm_ref: HBMEquation, Phi_ref, params_decay=None):
+def errors_koopman_hill(
+    ts, N_HBM, hbm_ref: HBMEquation, Phi_ref, params_decay=None, subharmonic=False
+):
     """
     Computes the numerical and theoretical error bounds for the fundamental solution matrix
     of a system solved using the Koopman-Hill projection method within the Harmonic Balance Method (HBM) framework.
@@ -122,12 +127,18 @@ def errors_koopman_hill(ts, N_HBM, hbm_ref: HBMEquation, Phi_ref, params_decay=N
     fourier = Fourier(
         N_HBM, fourier_ref.L_DFT, fourier_ref.n_dof, fourier_ref.real_formulation
     )
+
+    if subharmonic:
+        stability_method = KoopmanHillSubharmonic(fourier)
+    else:
+        stability_method = KoopmanHillProjection(fourier)
+
     hbm = HBMEquation(
         ode=ode,
         omega=ode.omega,
         fourier=fourier,
         initial_guess=fourier.DFT(fourier_ref.inv_DFT(hbm_ref.X)),
-        stability_method=KoopmanHillProjection(fourier),
+        stability_method=stability_method,
     )
     solver.solve_equation(hbm, "X")
 
@@ -150,7 +161,7 @@ def errors_koopman_hill(ts, N_HBM, hbm_ref: HBMEquation, Phi_ref, params_decay=N
     return errors_num, errors_bound
 
 
-def N_koopman_hill(ts, N_max, E_des, hbm_ref, Phi_ref, params_decay):
+def N_koopman_hill(ts, N_max, E_des, hbm_ref, Phi_ref, params_decay, subharmonic=False):
     """
     Computes the minimum number of harmonics required to guarantee a desired error threshold
     for a given set of time points, using both a theoretical error bound and a numerical check.
@@ -190,11 +201,16 @@ def N_koopman_hill(ts, N_max, E_des, hbm_ref, Phi_ref, params_decay):
         ) / (b - np.log(2))
         N_bound = np.ceil(np.minimum(N_bound, N_next))
 
+    if subharmonic:
+        N_bound = np.ceil(0.5 * N_bound)
+
     N_num = np.nan * np.ones_like(ts)
 
     for N in range(N_max):
 
-        errors_num, _ = errors_koopman_hill(ts, N, hbm_ref, Phi_ref, params_decay)
+        errors_num, _ = errors_koopman_hill(
+            ts, N, hbm_ref, Phi_ref, params_decay, subharmonic=subharmonic
+        )
         mask_replace = np.isnan(N_num) & (errors_num <= E_des)
         N_num[mask_replace] = N
 
