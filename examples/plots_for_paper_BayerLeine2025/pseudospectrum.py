@@ -113,7 +113,7 @@ def does_pseudospectrum_include(A: np.array, epsilon: float, z_vals: np.array) -
     equ = PseudoSpectrumEquation(A, epsilon, z_vals[0])
     for z in z_vals:
         equ.z = z
-        if equ.residual() < 0:
+        if equ.residual(update=True) < 0:
             return True
 
     return False

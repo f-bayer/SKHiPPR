@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import tikzplotlib
 import numpy as np
 from scipy.integrate import solve_ivp
+from tqdm import trange
 
 from skhippr.Fourier import Fourier
 from skhippr.odes.ltp import MathieuODE
-from skhippr.cycles.hbm import HBMEquation
+from skhippr.cycles.hbm import HBMEquation, HBMSystem
 
 from skhippr.stability.AbstractStabilityHBM import AbstractStabilityHBM
 from skhippr.stability.KoopmanHillProjection import (
@@ -160,10 +161,119 @@ def plot_near_PD():
         tikzplotlib.save(f"examples/convergence/FMs_a_{a}_b_{ode.b}.tikz")
 
 
-def plot_N_over_a(ode, a_values, E_des=1e-6):
-    pass
+def plot_N_over_a(ode, a_values, E_des=1e-6, fourier_ref=None, subh=True):
+
+    unit_circle = np.exp(1j * np.linspace(0, 2 * np.pi, 250))
+    real_axis = np.linspace(-1.1, 1.1, 250)
+
+    if fourier_ref is None:
+        fourier_ref = Fourier(N_HBM=100, L_DFT=1024, n_dof=2, real_formulation=True)
+
+    N_vals = np.nan * np.ones((4, len(a_values)))
+    T = 2 * np.pi / ode.omega
+    if subh:
+        StabClass = KoopmanHillSubharmonic
+    else:
+        StabClass = KoopmanHillProjection
+
+    stabchanges = []
+    last_stable = None
+
+    for k, a in enumerate(a_values):
+        ode.a = a
+        hbm_ref = HBMEquation(
+            ode,
+            ode.omega,
+            fourier_ref,
+            initial_guess=np.zeros(2 * (2 * fourier_ref.N_HBM + 1)),
+            stability_method=StabClass(fourier_ref, tol=1e-10),
+        )
+        hbm_ref.residual(update=True)
+        hbm_ref.derivative("X", update=True)
+        Phi_T_ref = hbm_ref.stability_method.fundamental_matrix(
+            t_over_period=1, hbm=hbm_ref
+        )
+        FMs_ref = hbm_ref.stability_method.determine_eigenvalues(hbm_ref)
+        stable_ref = hbm_ref.stability_criterion(FMs_ref)
+
+        print(FMs_ref)
+
+        print(f"{k}/{len(a_values)}: a = {a}")
+
+        if k > 0 and last_stable != stable_ref:
+            stabchanges.append((a + a_values[k - 1]) / 2)
+
+        for N in trange(1, 150):
+
+            # Set up and initialize Hill matrix
+            fourier = fourier_ref.__replace__(N_HBM=N)
+            hbm = HBMEquation(
+                ode,
+                ode.omega,
+                fourier,
+                initial_guess=np.zeros(2 * (2 * N + 1)),
+                stability_method=StabClass(fourier, tol=1e-10),
+            )
+            hbm.residual(update=True)
+            hbm.derivative("X", update=True)  # to initialize the Hill matrix correctly
+
+            Phi_T = hbm.stability_method.fundamental_matrix(1, hbm)
+            FMs = hbm.stability_method.determine_eigenvalues(hbm)
+            stable = hbm.stability_criterion(FMs)
+
+            # 0. guaranteed error
+            if np.isnan(N_vals[0, k]) or np.isnan(N_vals[1, k]):
+                E_opt = optimal_error_bound(hbm, t=T, subharmonic=subh)
+                if E_opt < E_des and np.isnan(N_vals[0, k]):
+                    N_vals[0, k] = N
+
+            # 1. guaranteed stability
+            if np.isnan(N_vals[1, k]):
+                if stable:
+                    to_check = real_axis
+                else:
+                    to_check = unit_circle
+
+                if not does_pseudospectrum_include(Phi_T, E_opt, unit_circle):
+                    N_vals[1, k] = N
+
+            # 2.  Actual error
+            if np.isnan(N_vals[2, k]):
+                E_num = np.linalg.norm(Phi_T - Phi_T_ref)
+                if E_num < E_des:
+                    N_vals[2, k] = N
+
+            # 3. Actual stability
+            if np.isnan(N_vals[3, k]) and stable == stable_ref:
+                N_vals[3, k] = N
+
+            if not any(np.isnan(N_vals[:, k])):
+                break
+
+    plt.figure()
+    plt.vlines(
+        stabchanges,
+        0,
+        np.max(N_vals),
+        linestyles="--",
+        colors="gray",
+        label="stability change",
+    )
+    plt.plot(a_values, N_vals[0, :], label=f"Guaranteed E < {E_des}")
+    plt.plot(a_values, N_vals[1, :], label=f"Guaranteed stability info")
+    plt.plot(a_values, N_vals[2, :], label=f"Numerical E < {E_des}")
+    plt.plot(a_values, N_vals[3, :], label=f"Numerical stability info")
+
+    plt.title(f"Mathieu equation b = {ode.b}, omega = {ode.omega}")
+    plt.xlabel("a")
+    plt.ylabel("b")
+    plt.legend()
+
+    tikzplotlib.save(f"mathieu_traversing_a_b_{ode.b}_omega_{ode.omega}.tex")
 
 
 if __name__ == "__main__":
-    plot_near_PD()
+    # plot_near_PD()
+    ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=2)
+    plot_N_over_a(ode, [1, 2, 3])
     plt.show()
