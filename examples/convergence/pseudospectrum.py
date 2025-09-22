@@ -1,14 +1,12 @@
-"""This file illustrates the relationship between eigenvalues and errors in Phi for the Mathieu equation."""
+"""This module provides methods to determine the epsilon-pseudospectrum of a matrix.
+Eigenvalues of perturbations of this matrix up to epsilon lie within the pseudospectrum.
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skhippr.odes.ltp import MathieuODE
-
-from skhippr.Fourier import Fourier
 from skhippr.equations.AbstractEquation import AbstractEquation
 from skhippr.equations.EquationSystem import EquationSystem
-from skhippr.cycles.hbm import HBMEquation
 from skhippr.solvers.newton import NewtonSolver
 from skhippr.solvers.continuation import pseudo_arclength_continuator
 
@@ -41,19 +39,50 @@ class PseudoSpectrumEquation(AbstractEquation):
         return super().closed_form_derivative(variable)
 
 
-def compute_pseudospectrum(A=None, epsilon=0.3, z_init=None):
+def compute_pseudospectrum(
+    A: np.array = None,
+    epsilon: float = 0.3,
+    z_init: complex = None,
+    tolerance: float = 1e-8,
+    verbose: bool = True,
+) -> np.ndarray:
+    """
+    Computes a boundary of the pseudospectrum of a given matrix A around an
+    initial value z_0 using pseudo-arclength continuation.
 
+    Eigenvalues of A + dA, where ||dA|| < ``epsilon``, lie within the pseudospectrum.
+
+    Parameters
+    ----------
+
+    A : array-like or None
+        The input matrix for which the pseudospectrum is to be computed.
+    epsilon : float, optional
+        The perturbation parameter defining the pseudospectrum boundary (default is 0.3).
+    z_init : complex or None, optional
+        Initial guess for the complex variable z (default is None, then ``A``'s first eigenvalue is used).
+    tolerance : float, optional
+        Tolerance for the Newton solver (default is 1e-8).
+    verbose : bool, optional
+        If True, enables verbose output during computation (default is True).
+
+    Returns
+    -------
+
+    pseudo_spectrum : np.ndarray
+        List of complex numbers representing the computed pseudospectrum boundary.
+    """
     eq = PseudoSpectrumEquation(A=A, epsilon=epsilon, z=z_init)
     sys = EquationSystem(equations=[eq], unknowns=["re_z", "im_z"])
-    solver = NewtonSolver(verbose=False)
+    solver = NewtonSolver(verbose=False, tolerance=tolerance)
 
     pseudo_spectrum = []
 
     for bp in pseudo_arclength_continuator(
         initial_system=sys,
         solver=solver,
-        verbose=True,
-        num_steps=500,
+        verbose=verbose,
+        num_steps=5000,
     ):
         z = bp.re_z + 1j * bp.im_z
         pseudo_spectrum.append(z)
@@ -62,10 +91,29 @@ def compute_pseudospectrum(A=None, epsilon=0.3, z_init=None):
         ) > np.imag(pseudo_spectrum[-2]):
             break
 
-    return pseudo_spectrum
+    return np.array(pseudo_spectrum)
 
 
 def plot_pseudospectrum(A, epsilon=0.3, ax=None):
+    """
+    Plots the pseudospectrum of a given matrix A.
+
+    Parameters
+    ----------
+
+    A : array-like or np.ndarray
+        The input square matrix whose pseudospectrum is to be plotted.
+    epsilon : float, optional
+        The perturbation parameter for the pseudospectrum calculation (default is 0.3).
+    ax : matplotlib.axes.Axes, optional
+        The axes on which to plot. If None, a new figure and axes are created.
+
+    Notes
+    -----
+
+    The function plots the eigenvalues of A as red 'x' markers and the pseudospectrum points
+    around each eigenvalue as dots. The aspect ratio of the plot is set to 'equal'.
+    """
 
     if ax is None:
         fig, ax = plt.subplots(1, 1)
@@ -78,6 +126,8 @@ def plot_pseudospectrum(A, epsilon=0.3, ax=None):
         ax.plot(np.real(p_spectrum), np.imag(p_spectrum), ".")
 
     ax.set_aspect("equal")
+    ax.set_ylabel("Im")
+    ax.set_xlabel("Re")
 
 
 def examples_pseudospectrum():
