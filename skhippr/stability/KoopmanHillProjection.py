@@ -183,7 +183,7 @@ class KoopmanHillProjection(AbstractStabilityHBM):
 
         According to (Bayer & Leine, 2025), the error bound is given by: ::
 
-            || E(t) || < (2*exp(-b))**N_HBM * (exp(4*a*t) - 1)
+            || E(t) || < (2*exp(-b))**N_HBM * exp(4*a*t)
 
         Parameters
         ----------
@@ -202,7 +202,7 @@ class KoopmanHillProjection(AbstractStabilityHBM):
             The computed error bound for the fundamental solution matrix.
 
         """
-        return (2 * np.exp(-b)) ** self.fourier.N_HBM * np.exp(4 * a * np.abs(t) - 1)
+        return (2 * np.exp(-b)) ** self.fourier.N_HBM * (np.exp(4 * a * np.abs(t)) - 1)
 
 
 class KoopmanHillSubharmonic(KoopmanHillProjection):
@@ -434,7 +434,7 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
 
         According to (Bayer & Leine, 2025), the error bound in the subharmonic formulation is given by: ::
 
-            || E(t) || < (2*exp(-b))**(2*N_HBM) * (exp(4*a*t) - 1)
+            || E(t) || < (2*exp(-b))**(2*N_HBM) * exp(4*a*t)
 
         Parameters
         ----------
@@ -453,6 +453,6 @@ class KoopmanHillSubharmonic(KoopmanHillProjection):
             The computed error bound for the fundamental solution matrix.
 
         """
-        return (2 * np.exp(-b)) ** (2 * self.fourier.N_HBM) * np.exp(
-            4 * a * np.abs(t) - 1
+        return (2 * np.exp(-b)) ** (2 * self.fourier.N_HBM) * (
+            np.exp(4 * a * np.abs(t)) - 1
         )
