@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import tikzplotlib
 import numpy as np
 from scipy.integrate import solve_ivp
-from tqdm import trange
+from tqdm import trange, tqdm
+
+import csv
 
 from skhippr.Fourier import Fourier
 from skhippr.odes.ltp import MathieuODE
@@ -272,8 +275,122 @@ def plot_N_over_a(ode, a_values, E_des=1e-6, fourier_ref=None, subh=True):
     tikzplotlib.save(f"mathieu_traversing_a_b_{ode.b}_omega_{ode.omega}.tex")
 
 
+def plot_ince_strutt(ode, a_values, b_values, fourier, subh=True, logscale=True):
+
+    unit_circle = np.exp(1j * np.linspace(0, 2 * np.pi, 250))
+    real_axis = np.linspace(-1.1, 1.1, 250)
+
+    if subh:
+        stability_method = KoopmanHillSubharmonic(fourier, tol=1e-10)
+    else:
+        stability_method = KoopmanHillProjection(fourier, tol=1e-10)
+
+    lambda_max = np.nan * np.ones((len(b_values), len(a_values)))
+    E_opt = np.nan * np.ones_like(lambda_max)
+    guaranteed = np.nan * np.ones_like(lambda_max)
+
+    X = np.zeros(2 * (2 * fourier.N_HBM + 1))
+    T = 2 * np.pi / ode.omega
+
+    # Write header row with a_values if first b iteration
+    with open("ince_strutt_FM.csv", "w", newline="") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(["b\\a"] + list(a_values))
+    with open("ince_strutt_guaranty.csv", "w", newline="") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(["b\\a"] + list(a_values))
+    with open("ince_strutt_E_opt.csv", "w", newline="") as csv_file:
+        writer = csv.writer(csv_file, delimiter=";")
+        writer.writerow(["b\\a"] + list(a_values))
+
+    for idx_b, b in enumerate(b_values):
+        ode.b = b
+        print(f"{idx_b}/{len(b_values)}: b = {b}")
+        for idx_a, a in enumerate(tqdm(a_values)):
+            ode.a = a
+
+            # Set up and initialize Hill matrix
+            hbm = HBMEquation(
+                ode,
+                ode.omega,
+                fourier,
+                initial_guess=X,
+                stability_method=stability_method,
+            )
+            hbm.residual(update=True)
+            hbm.determine_stability(update=True)
+            FMs = hbm.eigenvalues
+            Phi_T = stability_method.fundamental_matrix(t_over_period=1, hbm=hbm)
+
+            E_opt[idx_b, idx_a] = optimal_error_bound(hbm, t=T, subharmonic=subh)
+            lambda_max[idx_b, idx_a] = np.max(np.abs(FMs))
+
+            if hbm.stable:
+                to_check = real_axis
+            else:
+                to_check = unit_circle
+            guaranty = not does_pseudospectrum_include(
+                Phi_T, E_opt[idx_b, idx_a], to_check
+            )
+            if guaranty:
+                if hbm.stable:
+                    guaranteed[idx_b, idx_a] = 1
+                else:
+                    guaranteed[idx_b, idx_a] = -1
+
+        # After each b iteration, append the newly added row to a CSV file
+        with open("ince_strutt_FM.csv", "a", newline="") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow([b] + list(lambda_max[idx_b, :]))
+
+        with open("ince_strutt_guaranty.csv", "a", newline="") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow([b] + list(guaranteed[idx_b, :]))
+
+        with open("ince_strutt_E_opt.csv", "a", newline="") as csv_file:
+            writer = csv.writer(csv_file, delimiter=";")
+            writer.writerow([b] + list(guaranteed[idx_b, :]))
+
+    shade = np.maximum(1, np.minimum(lambda_max, 10))  # np.maximum(0, magnitude_fm)
+
+    if logscale:
+        norm = "log"
+    else:
+        norm = "linear"
+
+    # Show image
+    fig, ax = plt.subplots()
+    image = ax.pcolormesh(a_values, b_values, shade, cmap="gray_r", norm=norm)
+    cbar = fig.colorbar(image, label="largest FM (magnitude)")
+
+    # Plot overlay for guarantee
+    cmap = ListedColormap(
+        [
+            (0, 0, 1, 0.5),  # blue (for 1)
+            (0, 0, 0, 0),  # transparent (for 0 or nan)
+            (1, 0, 0, 0.5),  # red (for -1)
+        ]
+    )
+    ax.pcolormesh(a_values, b_values, guaranteed, cmap=cmap)
+
+    ax.set_xlabel("$a$")
+    ax.set_ylabel("$b$")
+    cbar.set_ticks((1, 10), labels=("$\\leq 10^0$ (stable)", "$\\geq 10^1$"))
+
+    return ax
+
+
 if __name__ == "__main__":
+
     # plot_near_PD()
+
     ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=2)
-    plot_N_over_a(ode, [1, 2, 3])
+    # plot_N_over_a(ode, [1, 2, 3])
+
+    a_values = np.linspace(3.5, 4.5, 20)
+    b_values = np.linspace(0, 5, 20)
+    fourier = Fourier(N_HBM=20, L_DFT=1024, n_dof=2)
+
+    plot_ince_strutt(ode, a_values, b_values, fourier=fourier)
+
     plt.show()
