@@ -202,6 +202,9 @@ def plot_N_over_a(ode, a_values, E_des=1e-6, fourier_ref=None, subh=True):
 
         if k > 0 and last_stable != stable_ref:
             stabchanges.append((a + a_values[k - 1]) / 2)
+            print('Stability change!')
+
+        last_stable = stable_ref
 
         for N in trange(1, 150):
 
@@ -275,5 +278,5 @@ def plot_N_over_a(ode, a_values, E_des=1e-6, fourier_ref=None, subh=True):
 if __name__ == "__main__":
     # plot_near_PD()
     ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=2)
-    plot_N_over_a(ode, [1, 2, 3])
+    plot_N_over_a(ode, np.linspace(-0.5, 3, 500))
     plt.show()
