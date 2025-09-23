@@ -205,7 +205,7 @@ def plot_N_over_a(ode, a_values, E_des=1e-6, fourier_ref=None, subh=True):
 
         if k > 0 and last_stable != stable_ref:
             stabchanges.append((a + a_values[k - 1]) / 2)
-            print('Stability change!')
+            print("Stability change!")
 
         last_stable = stable_ref
 
@@ -391,9 +391,9 @@ if __name__ == "__main__":
     ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=2)
     # plot_N_over_a(ode, [1, 2, 3])
 
-    a_values = np.linspace(3.5, 4.5, 20)
+    a_values = np.linspace(-1, 8, 500)
     b_values = np.linspace(0, 5, 20)
-    fourier = Fourier(N_HBM=20, L_DFT=1024, n_dof=2)
+    fourier = Fourier(N_HBM=45, L_DFT=1024, n_dof=2)
 
     plot_ince_strutt(ode, a_values, b_values, fourier=fourier)
 
