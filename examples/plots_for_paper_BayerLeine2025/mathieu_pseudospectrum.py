@@ -377,6 +377,7 @@ def plot_ince_strutt(ode, a_values, b_values, fourier, subh=True, logscale=True)
     ax.set_ylabel("$b$")
     cbar.set_ticks((1, 10), labels=("$\\leq 10^0$ (stable)", "$\\geq 10^1$"))
 
+    tikzplotlib.save("ince-strutt.tex")
     return ax
 
 
