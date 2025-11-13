@@ -18,7 +18,10 @@ from skhippr.stability.KoopmanHillProjection import (
 )
 
 
-from pseudospectrum import does_pseudospectrum_include, compute_pseudospectrum
+from skhippr.equations.PseudoSpectrumEquation import (
+    does_pseudospectrum_include,
+    compute_pseudospectrum,
+)
 
 
 def optimal_error_bound(hbm: HBMEquation, t: float, subharmonic: bool = False):

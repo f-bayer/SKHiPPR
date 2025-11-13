@@ -196,13 +196,21 @@ class HBMEquation(AbstractCycleEquation):
         # Transform between real and complex formulation
         if real_formulation is not None:
 
-            if self.real_formulation and not real_formulation:
+            if self.fourier.real_formulation and not real_formulation:
                 # return complex-valued Hill matrix
-                H = self.T_to_cplx_from_real @ H @ self.T_to_real_from_cplx
+                H = (
+                    self.fourier.T_to_cplx_from_real
+                    @ H
+                    @ self.fourier.T_to_real_from_cplx
+                )
 
-            elif real_formulation and not self.real_formulation:
+            elif real_formulation and not self.fourier.real_formulation:
                 # return real-valued Hill matrix
-                H = self.T_to_real_from_cplx @ H @ self.T_to_cplx_from_real
+                H = (
+                    self.fourier.T_to_real_from_cplx
+                    @ H
+                    @ self.fourier.T_to_cplx_from_real
+                )
 
         return H
 

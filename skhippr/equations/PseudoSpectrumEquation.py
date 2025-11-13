@@ -1,5 +1,18 @@
 """This module provides methods to determine the epsilon-pseudospectrum of a matrix.
-Eigenvalues of perturbations of this matrix up to epsilon lie within the pseudospectrum.
+
+If matrix B is a perturbation of matrix A, i.e., ||A-B|| <= epsilon,
+then the eigenvalues of B must lie within the epsilon-pseudospectrum of A. (Trefethen, 1997).
+The epsilon-pseudospectrum of A is defined as
+
+    Lambda_epsilon(A) = {z: sigma_min(z*eye - A) <= epsilon}
+
+i.e. all complex numbers for which the minimum singular value of (z*eye - A)
+is smaller than epsilon.
+
+Reference:
+----------
+Trefethen, L. N. (1997), 'Pseudospectra of Linear Operators', SIAM Review, 383--406
+doi: 10.1137/s0036144595295284
 """
 
 import numpy as np
@@ -98,11 +111,10 @@ def compute_pseudospectrum(
         num_steps=5000,
         stepsize_range=(0.01 * max_step, max_step),
     ):
-        z = bp.re_z + 1j * bp.im_z
-        pseudo_spectrum.append(z)
-        if len(pseudo_spectrum) > 1 and np.imag(z) > np.imag(
-            pseudo_spectrum[0]
-        ) > np.imag(pseudo_spectrum[-2]):
+        pseudo_spectrum.append(bp.re_z + +1j * bp.im_z)
+        if len(pseudo_spectrum) > 1 and bp.im_z > np.imag(pseudo_spectrum[0]) > np.imag(
+            pseudo_spectrum[-2]
+        ):
             break
 
     return np.array(pseudo_spectrum)
