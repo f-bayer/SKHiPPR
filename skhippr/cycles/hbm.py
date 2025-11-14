@@ -180,7 +180,7 @@ class HBMEquation(AbstractCycleEquation):
 
         return self.fourier.DFT(derivatives_time)
 
-    def hill_matrix(self, real_formulation: bool = None) -> np.ndarray:
+    def hill_matrix(self, real_formulation: bool = None, update=False) -> np.ndarray:
         """Return the Hill matrix, which is the derivative of the HBM equations w.r.t. ``X``.
 
         Parameters
@@ -191,7 +191,7 @@ class HBMEquation(AbstractCycleEquation):
 
         """
 
-        H = self.derivative("X", update=False)
+        H = self.derivative("X", update=update)
 
         # Transform between real and complex formulation
         if real_formulation is not None:
