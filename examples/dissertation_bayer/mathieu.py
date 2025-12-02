@@ -15,7 +15,16 @@ from skhippr.equations.PseudoSpectrumEquation import compute_pseudospectrum
 solver = NewtonSolver()
 
 
-def plot_all_hill_EVs(ode, N_HBM=10, ax_FE=None, ax_FM=None, save=False, **plot_args):
+def plot_all_hill_EVs(
+    ode,
+    N_HBM=10,
+    ax_FE=None,
+    ax_FM=None,
+    save=False,
+    vals_eigenvector=(),
+    real_formulation=False,
+    **plot_args,
+):
     fourier = Fourier(N_HBM=N_HBM, L_DFT=1024, n_dof=2)
     # ode = TruncatedMeissner(
     #     t=0,
@@ -37,17 +46,22 @@ def plot_all_hill_EVs(ode, N_HBM=10, ax_FE=None, ax_FM=None, save=False, **plot_
     solver = NewtonSolver(verbose=True)
     solver.solve_equation(hbm, "X")
 
-    hill_matrix = hbm.hill_matrix(real_formulation=False)
+    hill_matrix = hbm.hill_matrix(real_formulation=real_formulation)
     print(hill_matrix.shape)
 
     eigenvalues, eigenvectors = np.linalg.eig(hill_matrix)
+
+    if real_formulation:
+        eigenvectors = fourier.T_to_cplx_from_real @ eigenvectors
 
     if ax_FE is None:
         _, ax_FE = plt.subplots(1, 1)
 
     ax_FE.plot(np.real(eigenvalues), np.imag(eigenvalues), ".", **plot_args)
     if save:
-        tikzplotlib.save("examples/dissertation_bayer/plots/mathieu_spurious.tikz")
+        tikzplotlib.save(
+            f"examples/dissertation_bayer/plots/mathieu_spurious_delta_{ode.a}_epsilon_{ode.b}_damping_{ode.damping}.tikz"
+        )
 
     if ax_FM is not None:
         FMs = np.exp(eigenvalues * 2 * np.pi / omega)
@@ -57,6 +71,23 @@ def plot_all_hill_EVs(ode, N_HBM=10, ax_FE=None, ax_FM=None, save=False, **plot_
             np.real(FMs_choice), np.imag(FMs_choice), "x", mfc="none", **plot_args
         )
         ax_FM.plot()
+
+    for val in vals_eigenvector:
+        idx_min = np.argmin(np.abs(eigenvalues - val))
+        eigenvector = eigenvectors[:, idx_min]
+        eigenvector = np.reshape(eigenvector, shape=(ode.n_dof, -1), order="F")
+        norms_ev = np.linalg.norm(eigenvector, ord=2, axis=0)
+        _, ax = plt.subplots(1, 1)
+        ax.bar(np.arange(-fourier.N_HBM, fourier.N_HBM + 1), norms_ev)
+        plt.title(f"eigenvector norm to eigenvalue {eigenvalues[idx_min]}")
+        tikzplotlib.save(
+            f"examples/dissertation_bayer/plots/mathieu_eigenvectors_{np.real(val)}_{np.imag(val)}.tikz"
+        )
+        w = hbm.stability_method._weighted_mean(
+            eigenpair=(eigenvalues[idx_min], eigenvectors[:, idx_min])
+        )
+        print(f"alpha= {eigenvalues[idx_min]}:weighted mean =0.5 + {w - 0.5}")
+
     return hill_matrix
 
 
@@ -169,7 +200,7 @@ def plot_eigenvalues_continuously(
                 A = J_coeffs[:, :, hbm.fourier.N_HBM]
             eigenvalues_old, _ = np.linalg.eig(A)
 
-        eigenvalues, _ = np.linalg.eig(hbm.hill_matrix(update=True))
+        eigenvalues, eigenvectors = np.linalg.eig(hbm.hill_matrix(update=True))
         FEs, _ = hbm.stability_method.hill_EVP(hbm, visualize=False)
 
         color = (factor, 0, factor)
@@ -201,36 +232,56 @@ def plot_eigenvalues_continuously(
 if __name__ == "__main__":
     # Plot first demo case
     epsilon = 3
-    delta = 2
+    delta = 0.15
     ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
-    # plot_all_hill_EVs(ode=ode, N_HBM=10, save=True, ax_FE=None)
+    plot_all_hill_EVs(
+        ode=ode,
+        N_HBM=10,
+        save=True,
+        ax_FE=None,
+        vals_eigenvector=[0.1j, 8j],
+        real_formulation=False,
+    )
     # plot_mathieu_pseudospectrum(epsilon=3, delta=2)
 
-    # Plot varying epsilon case
-    fig, ax = plt.subplots(2, 2)
-    phis = np.linspace(0, 2 * np.pi, 200)
-    ax[0, 1].plot(np.cos(phis), np.sin(phis), "k")
-    ax[0, 1].set_aspect("equal")
-    ax[0, 1].set_xlim([-1.5, 1.5])
-    ax[0, 1].set_ylim([-1.5, 1.5])
-    ax[0, 0].set_xlim([-1, 1])
-
-    delta = 12
-    epsilons = np.linspace(0, 12, 200)
-    fourier = Fourier(N_HBM=3, real_formulation=False, L_DFT=1024, n_dof=2)
-
-    ode = MathieuODE(t=0, x=np.array([0.0, 0.0]), b=epsilons[0], a=delta)
-    hbm = HBMEquation(
+    # Unstable case with negative Floquet multipliers
+    epsilon = 2
+    delta = 0.15
+    ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
+    plot_all_hill_EVs(
         ode=ode,
-        omega=ode.omega,
-        fourier=fourier,
-        initial_guess=np.zeros(ode.n_dof * (2 * fourier.N_HBM + 1)),
-        stability_method=ClassicalHill(fourier, "symmetry"),
+        N_HBM=7,
+        save=True,
+        ax_FE=None,
+        vals_eigenvector=[-0.75 + 0.5j, -0.75 - 0.5j, 0.5 + 0.5j, 0.5 - 0.5j],
+        real_formulation=True,
     )
 
-    plot_eigenvalues_continuously(
-        hbm, "b", epsilons, ax[1, 0], ax_FE=ax[0, 0], ax_FM=ax[0, 1]
-    )
+    # # Plot varying epsilon case
+    # fig, ax = plt.subplots(2, 2)
+    # phis = np.linspace(0, 2 * np.pi, 200)
+    # ax[0, 1].plot(np.cos(phis), np.sin(phis), "k")
+    # ax[0, 1].set_aspect("equal")
+    # ax[0, 1].set_xlim([-1.5, 1.5])
+    # ax[0, 1].set_ylim([-1.5, 1.5])
+    # ax[0, 0].set_xlim([-1, 1])
+
+    # delta = 12
+    # epsilons = np.linspace(0, 12, 200)
+    # fourier = Fourier(N_HBM=3, real_formulation=False, L_DFT=1024, n_dof=2)
+
+    # ode = MathieuODE(t=0, x=np.array([0.0, 0.0]), b=epsilons[0], a=delta)
+    # hbm = HBMEquation(
+    #     ode=ode,
+    #     omega=ode.omega,
+    #     fourier=fourier,
+    #     initial_guess=np.zeros(ode.n_dof * (2 * fourier.N_HBM + 1)),
+    #     stability_method=ClassicalHill(fourier, "symmetry"),
+    # )
+
+    # plot_eigenvalues_continuously(
+    #     hbm, "b", epsilons, ax[1, 0], ax_FE=ax[0, 0], ax_FM=ax[0, 1]
+    # )
 
     # delta_max = 10
     # epsilon_max = 20

@@ -1,0 +1,41 @@
+% This file was created with tikzplotlib v0.10.1.post13.
+\begin{tikzpicture}
+
+\definecolor{darkgrey176}{RGB}{176,176,176}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+tick align=outside,
+tick pos=left,
+title={eigenvector norm to eigenvalue (0.46538865273315755+0.5000000000000028j)},
+x grid style={darkgrey176},
+xmin=-11.44, xmax=11.44,
+xtick style={color=black},
+y grid style={darkgrey176},
+ymin=0, ymax=0.51251706905844,
+ytick style={color=black}
+]
+\draw[draw=none,fill=steelblue31119180] (axis cs:-10.4,0) rectangle (axis cs:-9.6,8.73219641427366e-11);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-9.4,0) rectangle (axis cs:-8.6,4.71482287359331e-09);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-8.4,0) rectangle (axis cs:-7.6,2.0111534597423e-07);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-7.4,0) rectangle (axis cs:-6.6,6.5695654315171e-06);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-6.4,0) rectangle (axis cs:-5.6,0.000157746231305753);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-5.4,0) rectangle (axis cs:-4.6,0.00263368596548916);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-4.4,0) rectangle (axis cs:-3.6,0.0282361469652978);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-3.4,0) rectangle (axis cs:-2.6,0.172108645391348);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-2.4,0) rectangle (axis cs:-1.6,0.488111494341371);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-1.4,0) rectangle (axis cs:-0.6,0.480958981670063);
+\draw[draw=none,fill=steelblue31119180] (axis cs:-0.4,0) rectangle (axis cs:0.4,0.480958981670065);
+\draw[draw=none,fill=steelblue31119180] (axis cs:0.6,0) rectangle (axis cs:1.4,0.488111494341371);
+\draw[draw=none,fill=steelblue31119180] (axis cs:1.6,0) rectangle (axis cs:2.4,0.172108645391346);
+\draw[draw=none,fill=steelblue31119180] (axis cs:2.6,0) rectangle (axis cs:3.4,0.0282361469652967);
+\draw[draw=none,fill=steelblue31119180] (axis cs:3.6,0) rectangle (axis cs:4.4,0.00263368596548921);
+\draw[draw=none,fill=steelblue31119180] (axis cs:4.6,0) rectangle (axis cs:5.4,0.000157746231305685);
+\draw[draw=none,fill=steelblue31119180] (axis cs:5.6,0) rectangle (axis cs:6.4,6.56956543160781e-06);
+\draw[draw=none,fill=steelblue31119180] (axis cs:6.6,0) rectangle (axis cs:7.4,2.01115345835624e-07);
+\draw[draw=none,fill=steelblue31119180] (axis cs:7.6,0) rectangle (axis cs:8.4,4.7148233231855e-09);
+\draw[draw=none,fill=steelblue31119180] (axis cs:8.6,0) rectangle (axis cs:9.4,8.73412731662124e-11);
+\draw[draw=none,fill=steelblue31119180] (axis cs:9.6,0) rectangle (axis cs:10.4,1.31024532517203e-12);
+\end{axis}
+
+\end{tikzpicture}
