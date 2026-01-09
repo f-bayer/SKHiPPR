@@ -391,13 +391,13 @@ if __name__ == "__main__":
 
     # plot_near_PD()
 
-    ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=2)
+    ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=1)
     # plot_N_over_a(ode, [1, 2, 3])
 
-    a_values = np.linspace(-1, 8, 500)
+    a_values = np.linspace(0, 1.5, 21)
     b_values = np.linspace(0, 5, 20)
-    fourier = Fourier(N_HBM=45, L_DFT=1024, n_dof=2)
+    fourier = Fourier(N_HBM=90, L_DFT=1024, n_dof=2)
 
-    plot_ince_strutt(ode, a_values, b_values, fourier=fourier)
+    plot_ince_strutt(ode, a_values, b_values, fourier=fourier, subh=False)
 
     plt.show()
