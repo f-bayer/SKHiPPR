@@ -338,6 +338,12 @@ def last_try_accuracy(N_max, delta, epsilon, damping, omega):
     ):
         errors[idx, :] = error_over_N(hbm_template, t_over_period, N_max, FMs_ref)
         plt.semilogy(errors[idx, :])
+        plt.legend(
+            ["direct", "subh", "direct with half omega", "alternating with half omega"]
+        )
+    tikzplotlib.save(
+        f"examples/dissertation_bayer/plots/mathieu_delta_{ode.a}_epsi_{ode.b}_subh_accuracy"
+    )
     plt.show()
 
 
