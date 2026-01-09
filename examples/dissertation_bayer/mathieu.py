@@ -342,7 +342,7 @@ def last_try_accuracy(N_max, delta, epsilon, damping, omega):
             ["direct", "subh", "direct with half omega", "alternating with half omega"]
         )
     tikzplotlib.save(
-        f"examples/dissertation_bayer/plots/mathieu_delta_{ode.a}_epsi_{ode.b}_subh_accuracy"
+        f"examples/dissertation_bayer/plots/mathieu_delta_{ode.a}_epsi_{ode.b}_subh_accuracy.tikz"
     )
     plt.show()
 
