@@ -235,16 +235,9 @@ def plot_eigenvalues_continuously(
         pass
 
 
-def plot_accuracy_over_N_subh(delta=1, epsilon=0.5, damping=0.01, omega=2, N_max=60):
-    """
-    - direct with normal omega
-    - subharmonic with normal omega
-    - direct with halved omega
-    - [1, -1, 1, ..., -1, 1] with halved omega
-    """
+def last_try_accuracy(N_max, delta, epsilon, damping, omega):
 
     ode = MathieuODE(0, np.array([0, 0]), a=delta, b=epsilon, damping=damping, omega=2)
-    solver = NewtonSolver(tolerance=1e-9, max_iterations=20, verbose=True)
 
     # Reference
     print(f"Reference solution...")
@@ -265,71 +258,99 @@ def plot_accuracy_over_N_subh(delta=1, epsilon=0.5, damping=0.01, omega=2, N_max
     FMs_ref = stabm_ref.determine_eigenvalues(hbm=hbm_ref)
     print(f"done. FMs: {FMs_ref}")
 
-    # iterate
-    errors = np.ones((4, N_max + 1))
-    for N_HBM in range(N_max + 1):
+    def hbm_direct(fourier):
+        stab_method = KoopmanHillProjection(fourier)
+        ode = MathieuODE(
+            t=0, x=np.array([0, 0]), a=delta, b=epsilon, omega=omega, damping=damping
+        )
+
+        initial_guess = np.zeros(fourier.n_dof * (2 * fourier.N_HBM + 1))
+
+        return HBMEquation(
+            ode=ode,
+            omega=omega,
+            fourier=fourier,
+            initial_guess=initial_guess,
+            period_k=1,
+            stability_method=stab_method,
+        )
+
+    def hbm_subh(fourier):
+        stab_method = KoopmanHillSubharmonic(fourier)
+        ode = MathieuODE(
+            t=0, x=np.array([0, 0]), a=delta, b=epsilon, omega=omega, damping=damping
+        )
+
+        initial_guess = np.zeros(fourier.n_dof * (2 * fourier.N_HBM + 1))
+
+        return HBMEquation(
+            ode=ode,
+            omega=omega,
+            fourier=fourier,
+            initial_guess=initial_guess,
+            period_k=1,
+            stability_method=stab_method,
+        )
+
+    def hbm_ones(fourier):
+        stab_method = KoopmanHillProjection(fourier)
+        C = np.ones((1, 2 * fourier.N_HBM + 1))
+        C[1::2] = -1
+        stab_method.C = np.kron(C, np.eye(fourier.n_dof))
 
         ode = MathieuODE(
-            0, np.array([0, 0]), a=delta, b=epsilon, damping=damping, omega=2
-        )
-        fourier = Fourier(N_HBM=N_HBM, L_DFT=1024, n_dof=2, real_formulation=False)
-
-        hbm_direct = HBMEquation(
-            ode,
-            ode.omega,
-            fourier,
-            initial_guess=np.zeros(
-                (ode.n_dof * (2 * fourier.N_HBM + 1)), dtype=complex
-            ),
-            period_k=1,
-            stability_method=None,
+            t=0, x=np.array([0, 0]), a=delta, b=epsilon, omega=omega, damping=damping
         )
 
-        hbm_subh = HBMEquation(
-            ode,
-            0.5 * ode.omega,
-            fourier,
-            initial_guess=np.zeros(
-                (ode.n_dof * (2 * fourier.N_HBM + 1)), dtype=complex
-            ),
-            period_k=1,
-            stability_method=None,
-        )
-        ode.omega = 2
+        initial_guess = np.zeros(fourier.n_dof * (2 * fourier.N_HBM + 1))
 
-        T = 2 * np.pi / ode.omega
-
-        # Direct-direct method
-        C_direct = np.zeros((1, 2 * N_HBM + 1))
-        C_direct[0, N_HBM] = 1
-        C_direct = np.kron(C_direct, np.eye(2))
-        errors[0, N_HBM] = error_KHP_explicit(hbm_direct, T, C_direct, FMs_ref)
-
-        # subh method
-        stab_method = KoopmanHillSubharmonic(fourier)
-        FMs = stab_method.determine_eigenvalues(hbm_direct)
-        errors[1, N_HBM] = min(
-            np.linalg.norm(FMs - FMs_ref), np.linalg.norm(FMs[::-1] - FMs_ref)
+        return HBMEquation(
+            ode=ode,
+            omega=omega,
+            fourier=fourier,
+            initial_guess=initial_guess,
+            period_k=2,
+            stability_method=stab_method,
         )
 
-        # subh-direct method
-        errors[2, N_HBM] = error_KHP_explicit(hbm_subh, T, C_direct, FMs_ref)
+    def hbm_p2_direct(fourier):
+        stab_method = KoopmanHillProjection(fourier)
 
-        # subh-alternating method
-        C_alt = np.ones((1, 2 * N_HBM + 1))
-        C_alt[0, 2::2] = -1
-        C_alt = np.kron(C_alt, np.eye(2))
-        errors[3, N_HBM] = error_KHP_explicit(hbm_subh, T, C_alt, FMs_ref)
+        ode = MathieuODE(
+            t=0, x=np.array([0, 0]), a=delta, b=epsilon, omega=omega, damping=damping
+        )
 
+        initial_guess = np.zeros(fourier.n_dof * (2 * fourier.N_HBM + 1))
+
+        return HBMEquation(
+            ode=ode,
+            omega=omega,
+            fourier=fourier,
+            initial_guess=initial_guess,
+            period_k=2,
+            stability_method=stab_method,
+        )
+
+    errors = np.ones((4, N_max + 1))
     plt.figure()
-    for i in range(errors.shape[0]):
-        plt.semilogy(errors[i, :])
-
+    for idx, (hbm_template, t_over_period) in enumerate(
+        zip((hbm_direct, hbm_subh, hbm_p2_direct, hbm_ones), (1, 1, 1, 1))
+    ):
+        errors[idx, :] = error_over_N(hbm_template, t_over_period, N_max, FMs_ref)
+        plt.semilogy(errors[idx, :])
     plt.show()
 
 
-def error_KHP_explicit(hbm: HBMEquation, t, C, FMs_ref):
+def error_over_N(hbm_template, t_over_period, N_max, FMs_ref):
+    error = np.ones(N_max + 1)
+    for N_HBM in range(N_max + 1):
+        fourier = Fourier(N_HBM=N_HBM, L_DFT=1024, n_dof=2, real_formulation=False)
+        hbm = hbm_template(fourier)
+        error[N_HBM] = error_individual(hbm, t_over_period, FMs_ref)
+    return error
 
+
+def error_individual(hbm, t_over_period, FMs_ref):
     if hbm.fourier.real_formulation:
         raise ValueError("This function only works for complex formulation!")
 
@@ -338,20 +359,16 @@ def error_KHP_explicit(hbm: HBMEquation, t, C, FMs_ref):
         raise ValueError(
             f"Passed un-solved HBM equation with residual {hbm.residual(update=False)}"
         )
+    hbm.hill_matrix(update=True)
 
-    D_vals = np.exp(
-        hbm.omega * 1j * t * np.arange(-hbm.fourier.N_HBM, hbm.fourier.N_HBM + 1)
-    )
-    H = hbm.hill_matrix(update=True)
-    Phi = C @ np.kron(np.diag(D_vals), np.eye(2)) @ expm(H * t) @ W
+    Phi = hbm.stability_method.fundamental_matrix(t_over_period, hbm)
     FMs, _ = np.linalg.eig(Phi)
-
     return min(np.linalg.norm(FMs - FMs_ref), np.linalg.norm(FMs[::-1] - FMs_ref))
 
 
 if __name__ == "__main__":
 
-    plot_accuracy_over_N_subh(delta=1.5, epsilon=1, damping=0, omega=2, N_max=20)
+    last_try_accuracy(N_max=20, delta=1.5, epsilon=1, damping=0.01, omega=2)
     # # # Plot first demo case
     # # epsilon = 3
     # # delta = 0.15
