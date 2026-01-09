@@ -3,6 +3,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import tikzplotlib
+import tqdm
+from scipy.linalg import expm
 
 
 from skhippr.odes.ltp import MathieuODE, TruncatedMeissner
@@ -10,6 +12,10 @@ from skhippr.solvers.newton import NewtonSolver
 from skhippr.Fourier import Fourier
 from skhippr.cycles.hbm import HBMEquation
 from skhippr.stability.ClassicalHill import ClassicalHill
+from skhippr.stability.KoopmanHillProjection import (
+    KoopmanHillProjection,
+    KoopmanHillSubharmonic,
+)
 from skhippr.equations.PseudoSpectrumEquation import compute_pseudospectrum
 
 solver = NewtonSolver()
@@ -229,33 +235,149 @@ def plot_eigenvalues_continuously(
         pass
 
 
-if __name__ == "__main__":
-    # Plot first demo case
-    epsilon = 3
-    delta = 0.15
-    ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
-    plot_all_hill_EVs(
-        ode=ode,
-        N_HBM=10,
-        save=True,
-        ax_FE=None,
-        vals_eigenvector=[0.1j, 8j],
-        real_formulation=False,
-    )
-    # plot_mathieu_pseudospectrum(epsilon=3, delta=2)
+def plot_accuracy_over_N_subh(delta=1, epsilon=0.5, damping=0.01, omega=2, N_max=60):
+    """
+    - direct with normal omega
+    - subharmonic with normal omega
+    - direct with halved omega
+    - [1, -1, 1, ..., -1, 1] with halved omega
+    """
 
-    # Unstable case with negative Floquet multipliers
-    epsilon = 2
-    delta = 0.15
-    ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
-    plot_all_hill_EVs(
-        ode=ode,
-        N_HBM=7,
-        save=True,
-        ax_FE=None,
-        vals_eigenvector=[-0.75 + 0.5j, -0.75 - 0.5j, 0.5 + 0.5j, 0.5 - 0.5j],
-        real_formulation=True,
+    ode = MathieuODE(0, np.array([0, 0]), a=delta, b=epsilon, damping=damping, omega=2)
+    solver = NewtonSolver(tolerance=1e-9, max_iterations=20, verbose=True)
+
+    # Reference
+    print(f"Reference solution...")
+    fourier_ref = Fourier(2 * N_max, 2 * 1024, 2, real_formulation=False)
+    hbm_ref = HBMEquation(
+        ode,
+        ode.omega,
+        fourier_ref,
+        initial_guess=np.zeros(
+            (ode.n_dof * (2 * fourier_ref.N_HBM + 1)), dtype=complex
+        ),
+        period_k=1,
+        stability_method=None,
     )
+    stabm_ref = KoopmanHillSubharmonic(fourier_ref)
+    print(f"Residual: {np.linalg.norm(hbm_ref.residual(update=True))}")
+    hbm_ref.hill_matrix(update=True)
+    FMs_ref = stabm_ref.determine_eigenvalues(hbm=hbm_ref)
+    print(f"done. FMs: {FMs_ref}")
+
+    # iterate
+    errors = np.ones((4, N_max + 1))
+    for N_HBM in range(N_max + 1):
+
+        ode = MathieuODE(
+            0, np.array([0, 0]), a=delta, b=epsilon, damping=damping, omega=2
+        )
+        fourier = Fourier(N_HBM=N_HBM, L_DFT=1024, n_dof=2, real_formulation=False)
+
+        hbm_direct = HBMEquation(
+            ode,
+            ode.omega,
+            fourier,
+            initial_guess=np.zeros(
+                (ode.n_dof * (2 * fourier.N_HBM + 1)), dtype=complex
+            ),
+            period_k=1,
+            stability_method=None,
+        )
+
+        hbm_subh = HBMEquation(
+            ode,
+            0.5 * ode.omega,
+            fourier,
+            initial_guess=np.zeros(
+                (ode.n_dof * (2 * fourier.N_HBM + 1)), dtype=complex
+            ),
+            period_k=1,
+            stability_method=None,
+        )
+        ode.omega = 2
+
+        T = 2 * np.pi / ode.omega
+
+        # Direct-direct method
+        C_direct = np.zeros((1, 2 * N_HBM + 1))
+        C_direct[0, N_HBM] = 1
+        C_direct = np.kron(C_direct, np.eye(2))
+        errors[0, N_HBM] = error_KHP_explicit(hbm_direct, T, C_direct, FMs_ref)
+
+        # subh method
+        stab_method = KoopmanHillSubharmonic(fourier)
+        FMs = stab_method.determine_eigenvalues(hbm_direct)
+        errors[1, N_HBM] = min(
+            np.linalg.norm(FMs - FMs_ref), np.linalg.norm(FMs[::-1] - FMs_ref)
+        )
+
+        # subh-direct method
+        errors[2, N_HBM] = error_KHP_explicit(hbm_subh, T, C_direct, FMs_ref)
+
+        # subh-alternating method
+        C_alt = np.ones((1, 2 * N_HBM + 1))
+        C_alt[0, 2::2] = -1
+        C_alt = np.kron(C_alt, np.eye(2))
+        errors[3, N_HBM] = error_KHP_explicit(hbm_subh, T, C_alt, FMs_ref)
+
+    plt.figure()
+    for i in range(errors.shape[0]):
+        plt.semilogy(errors[i, :])
+
+    plt.show()
+
+
+def error_KHP_explicit(hbm: HBMEquation, t, C, FMs_ref):
+
+    if hbm.fourier.real_formulation:
+        raise ValueError("This function only works for complex formulation!")
+
+    W = np.kron(np.ones((2 * hbm.fourier.N_HBM + 1, 1)), np.eye(2))
+    if np.linalg.norm(hbm.residual(update=True)) > 0:
+        raise ValueError(
+            f"Passed un-solved HBM equation with residual {hbm.residual(update=False)}"
+        )
+
+    D_vals = np.exp(
+        hbm.omega * 1j * t * np.arange(-hbm.fourier.N_HBM, hbm.fourier.N_HBM + 1)
+    )
+    H = hbm.hill_matrix(update=True)
+    Phi = C @ np.kron(np.diag(D_vals), np.eye(2)) @ expm(H * t) @ W
+    FMs, _ = np.linalg.eig(Phi)
+
+    return min(np.linalg.norm(FMs - FMs_ref), np.linalg.norm(FMs[::-1] - FMs_ref))
+
+
+if __name__ == "__main__":
+
+    plot_accuracy_over_N_subh(delta=1.5, epsilon=1, damping=0, omega=2, N_max=20)
+    # # # Plot first demo case
+    # # epsilon = 3
+    # # delta = 0.15
+    # # ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
+    # # plot_all_hill_EVs(
+    # #     ode=ode,
+    # #     N_HBM=10,
+    # #     save=True,
+    # #     ax_FE=None,
+    # #     vals_eigenvector=[0.1j, 8j],
+    # #     real_formulation=False,
+    # # )
+    # # # plot_mathieu_pseudospectrum(epsilon=3, delta=2)
+
+    # # # Unstable case with negative Floquet multipliers
+    # # epsilon = 2
+    # # delta = 0.15
+    # # ode = MathieuODE(t=0, x=np.array([0, 0]), a=delta, b=epsilon, damping=0.1, omega=1)
+    # # plot_all_hill_EVs(
+    # #     ode=ode,
+    # #     N_HBM=7,
+    # #     save=True,
+    # #     ax_FE=None,
+    # #     vals_eigenvector=[-0.75 + 0.5j, -0.75 - 0.5j, 0.5 + 0.5j, 0.5 - 0.5j],
+    # #     real_formulation=True,
+    # # )
 
     # # Plot varying epsilon case
     # fig, ax = plt.subplots(2, 2)

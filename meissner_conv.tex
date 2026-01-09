@@ -1,0 +1,1977 @@
+% This file was created with tikzplotlib v0.10.1.post13.
+\begin{tikzpicture}
+
+\definecolor{crimson2143940}{RGB}{214,39,40}
+\definecolor{darkgrey176}{RGB}{176,176,176}
+\definecolor{darkorange25512714}{RGB}{255,127,14}
+\definecolor{forestgreen4416044}{RGB}{44,160,44}
+\definecolor{lightgrey204}{RGB}{204,204,204}
+\definecolor{mediumpurple148103189}{RGB}{148,103,189}
+\definecolor{sienna1408675}{RGB}{140,86,75}
+\definecolor{steelblue31119180}{RGB}{31,119,180}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.03)},
+  anchor=south west,
+  draw=lightgrey204
+},
+log basis y={10},
+tick align=outside,
+tick pos=left,
+title={Aliasing error in J_k affects KHP accuracy},
+x grid style={darkgrey176},
+xmin=-2.95, xmax=83.95,
+xtick style={color=black},
+y grid style={darkgrey176},
+ymin=1.74383306975446e-09, ymax=0.0356862437062864,
+ymode=log,
+ytick style={color=black},
+ytick={1e-10,1e-09,1e-08,1e-07,1e-06,1e-05,0.0001,0.001,0.01,0.1,1},
+yticklabels={
+  \(\displaystyle {10^{-10}}\),
+  \(\displaystyle {10^{-9}}\),
+  \(\displaystyle {10^{-8}}\),
+  \(\displaystyle {10^{-7}}\),
+  \(\displaystyle {10^{-6}}\),
+  \(\displaystyle {10^{-5}}\),
+  \(\displaystyle {10^{-4}}\),
+  \(\displaystyle {10^{-3}}\),
+  \(\displaystyle {10^{-2}}\),
+  \(\displaystyle {10^{-1}}\),
+  \(\displaystyle {10^{0}}\)
+}
+]
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks]
+table {%
+1 0.0139223372964392
+};
+\addlegendentry{L_DFT=254}
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+2 0.0147702697394212
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+3 0.0166028574950075
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+4 0.00376338365270228
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+5 0.000181179466344043
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+6 0.000161191058707097
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+7 0.00013368811308418
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+8 0.000119529527798336
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+9 8.19184148889732e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+10 1.77773379120551e-05
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+11 3.32902896026408e-05
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+12 2.59674455333147e-05
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+13 3.94041458386006e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+14 2.2060341792085e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+15 1.12454336337696e-05
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+16 7.00471392323775e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+17 6.23120359948913e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+18 2.87027812998063e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+19 3.33947861600158e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+20 1.42256906153886e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+21 6.77753324710647e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+22 4.5014226743401e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+23 1.55110876411831e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+24 2.20710274422647e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+25 6.88689440774153e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+26 5.24391608350725e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+27 2.21323540223026e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+28 3.63582866992757e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+29 6.87101591218379e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+30 5.627862393827e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+31 3.35071793551217e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+32 4.44777180997976e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+33 6.82052599527426e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+34 5.84543803292551e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+35 4.07333728697933e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+36 4.94670129629272e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+37 6.76445676825602e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+38 5.97763158111946e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+39 4.55897373536297e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+40 5.27220047425623e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+41 6.7121683912784e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+42 6.062521725324e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+43 4.90014285265858e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+44 5.49486137503458e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+45 6.66623484937275e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+46 6.11957457355655e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+47 5.1485522787991e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+48 5.65315669284879e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+49 6.62683723319042e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+50 6.15942362399013e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+51 5.33483222556214e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+52 5.76934960932204e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+53 6.5933615640532e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+54 6.1881999230535e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+55 5.47801308870993e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+56 5.85697299112681e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+57 6.56499659740235e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+58 6.20960099737028e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+59 5.59039839091684e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+60 5.9245985969623e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+61 6.54095306318929e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+62 6.2259432904076e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+63 5.68021546401663e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+64 5.9778489937962e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+65 6.52053507592634e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+66 6.23872633492192e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+67 5.75312761431582e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+68 6.02052496130938e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+69 6.50315452293411e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+70 6.24894900555475e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+71 5.81313239823512e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+72 6.05526400829631e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+73 6.48832351134756e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+74 6.25729354883931e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+75 5.86311436931484e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+76 6.08393897726163e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+77 6.47564081662551e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+78 6.2642365586197e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+79 5.90519578890829e-06
+};
+\addplot [semithick, steelblue31119180, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+80 6.10790717060655e-06
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks]
+table {%
+1 0.0139220563426433
+};
+\addlegendentry{L_DFT=1024}
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+2 0.0147699486264837
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+3 0.0166017564226645
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+4 0.00376754589377451
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+5 0.000228595510157233
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+6 0.000213515089405465
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+7 0.000189702044088789
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+8 0.000178242374499345
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+9 0.00010796887170119
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+10 0.000113391693984726
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+11 0.000120848500838386
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+12 0.000116392114844622
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+13 0.000101449774416348
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+14 0.000104301029712891
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+15 0.000108738233571995
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+16 0.000106391045710344
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+17 0.000100204232019774
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+18 0.000101938488248843
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+19 0.000104689646252666
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+20 0.000103225788620448
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+21 9.98944470311307e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+22 0.00010105690393823
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+23 0.000102889832999987
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+24 0.000101884951570358
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+25 9.98274018649069e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+26 0.000100656188653679
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+27 0.000101948191590899
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+28 0.000101213984004532
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+29 9.98247560955186e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+30 0.000100449177179329
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+31 0.000101399896852811
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+32 0.000100839236967723
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+33 9.98434148786748e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+34 0.000100332042170536
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+35 0.000101055343466048
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+36 0.000100612821983833
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+37 9.98685951932547e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+38 0.000100261051414921
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+39 0.000100826055840727
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+40 0.000100467675570815
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+41 9.98935734869735e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+42 0.000100215638887891
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+43 0.000100666498395852
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+44 0.000100370211900039
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+45 9.99162223273503e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+46 0.000100185286241391
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+47 0.000100551409750193
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+48 0.000100302279742488
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+49 9.99360692818314e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+50 0.000100164244767759
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+51 0.000100465916904003
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+52 0.000100253457432157
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+53 9.99532258601232e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+54 0.00010014919842968
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+55 0.000100400828558693
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+56 0.000100217458462578
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+57 9.99679901414412e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+58 0.000100138146704696
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+59 0.000100350231368819
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+60 0.000100190331612885
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+61 9.99806950266164e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+62 0.000100129836014051
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+63 0.000100310189304788
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+64 0.000100169505589207
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+65 9.99916520154341e-05
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+66 0.000100123454948382
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+67 0.000100278005020528
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+68 0.0001001532564152
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+69 0.000100001133514266
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+70 0.000100118463155239
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+71 0.000100251782779609
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+72 0.000100140397914297
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+73 0.000100009370576689
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+74 0.000100114491785298
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+75 0.000100230160496388
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+76 0.000100130095218253
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+77 0.000100016556424246
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+78 0.000100111283452028
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+79 0.000100212140250611
+};
+\addplot [semithick, darkorange25512714, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+80 0.000100121748856912
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks]
+table {%
+1 0.0139220430910262
+};
+\addlegendentry{L_DFT=8190}
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+2 0.0147699288390052
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+3 0.0166016801091037
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+4 0.00376630083637136
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+5 0.000186421251012699
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+6 0.000166435916465416
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+7 0.00013922135208977
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+8 0.00012509217104282
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+9 1.39734715490799e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+10 2.35316192932596e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+11 3.91045045130444e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+12 3.18108022608146e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+13 2.01415560343004e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+14 7.4037500656167e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+15 1.71810672008048e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+16 1.29691871297097e-05
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+17 2.26458285230031e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+18 3.14466491689908e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+19 9.34443191368295e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+20 6.62590451571173e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+21 6.78399254831204e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+22 1.56924307119009e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+23 5.76668863814525e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+24 3.87218419055608e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+25 7.49401631531873e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+26 8.65012849254933e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+27 3.86950848813915e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+28 2.47529428715764e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+29 7.05426844779232e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+30 5.09083791615405e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+31 2.75569809377423e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+32 1.68731867919477e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+33 6.33360001556661e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+34 3.12987182890576e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+35 2.05164282739484e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+36 1.20708069178698e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+37 5.6012204301723e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+38 1.97841377493457e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+39 1.58089721486382e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+40 8.96608331031278e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+41 4.93784571558076e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+42 1.26856182051784e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+43 1.25195059688609e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+44 6.86326026677102e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+45 4.36088737294885e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+46 8.13986678625127e-08
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+47 1.01376542111586e-06
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+48 5.38433112322245e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+49 3.866525600228e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+50 5.13985955612715e-08
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+51 8.36173291362754e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+52 4.31128687876711e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+53 3.44467429312751e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+54 3.11197021819846e-08
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+55 7.00472279084026e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+56 3.51208606985132e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+57 3.08436737953939e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+58 1.71497762853911e-08
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+59 5.94598569484883e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+60 2.90341294206917e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+61 2.77559626053427e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+62 7.97237919346225e-09
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+63 5.1050394891799e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+64 2.43083836626562e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+65 2.50979781911804e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+66 6.87457824521961e-09
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+67 4.42661538867555e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+68 2.05772645129602e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+69 2.27984847341174e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+70 6.03763484637926e-09
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+71 3.87179577905342e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+72 1.75876901186121e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+73 2.07989133434196e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+74 7.97104149643802e-09
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+75 3.4125661301606e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+76 1.51607932064696e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+77 1.90513081937985e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+78 1.04724430443066e-08
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+79 3.02836578431882e-07
+};
+\addplot [semithick, forestgreen4416044, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+80 1.31675920574367e-07
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks]
+table {%
+1 0.0139220421897302
+};
+\addlegendentry{L_DFT=8192}
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+2 0.0147699287972342
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+3 0.0166016813617032
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+4 0.0037662150697863
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+5 0.00018707923700435
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+6 0.000167305310280373
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+7 0.000140278838059745
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+8 0.000126233105837201
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+9 2.15338862225604e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+10 2.9139762443652e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+11 4.2647153257773e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+12 3.59484704656651e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+13 1.37316829180548e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+14 1.69291024642797e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+15 2.36418461673174e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+16 2.03930501175329e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+17 1.24972758425449e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+18 1.42765255895185e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+19 1.792629367631e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+20 1.61212829983411e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+21 1.27472550810978e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+22 1.33648182728918e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+23 1.56424120183266e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+24 1.44964372020916e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+25 1.28075830752236e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+26 1.29680741684199e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+27 1.45280604067931e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+28 1.37304517710519e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+29 1.27973620316468e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+30 1.27693437916148e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+31 1.39064863181439e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+32 1.33160285160391e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+33 1.27674171253722e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+34 1.26599440193964e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+35 1.3526185717879e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+36 1.30697467495678e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+37 1.27341920571794e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+38 1.25954701280034e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+39 1.32773624392643e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+40 1.29130828505004e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+41 1.270303018183e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+42 1.25554581759836e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+43 1.31060796712311e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+44 1.2808132595111e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+45 1.26754241272566e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+46 1.25296024686398e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+47 1.29833839606744e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+48 1.2734895462181e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+49 1.2651501207467e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+50 1.25123449588008e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+51 1.28926269710492e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+52 1.26820673907543e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+53 1.26309303400386e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+54 1.25005192956774e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+55 1.28236968854467e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+56 1.26429000700143e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+57 1.26132627189885e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+58 1.2492238920143e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+59 1.27701711675763e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+60 1.26131803960791e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+61 1.25980576168463e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+62 1.24863368305999e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+63 1.2727815963185e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+64 1.25901779874818e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+65 1.25849241168393e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+66 1.24820678510422e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+67 1.26937509497217e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+68 1.25720663329544e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+69 1.25735300097834e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+70 1.24789429920561e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+71 1.26659631056659e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+72 1.25575898148576e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+73 1.25635983602267e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+74 1.24766336666771e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+75 1.2643012138659e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+76 1.25458644944457e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+77 1.25549001482564e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+78 1.24749144818928e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+79 1.2623846238477e-05
+};
+\addplot [semithick, crimson2143940, mark=*, mark size=3, mark options={solid}, only marks, forget plot]
+table {%
+80 1.25362550009159e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks]
+table {%
+1 0.0139220421897302
+};
+\addlegendentry{L_DFT=hamming}
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+2 0.0147699287972342
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+3 0.0166016813617032
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+4 0.0037662150697863
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+5 0.00018707923700435
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+6 0.000167305310280373
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+7 0.000140278838059745
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+8 0.000126233105837201
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+9 2.15338862225604e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+10 2.9139762443652e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+11 4.2647153257773e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+12 3.59484704656651e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+13 1.37316829180548e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+14 1.69291024642797e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+15 2.36418461673174e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+16 2.03930501175329e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+17 1.24972758425449e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+18 1.42765255895185e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+19 1.792629367631e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+20 1.61212829983411e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+21 1.27472550810978e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+22 1.33648182728918e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+23 1.56424120183266e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+24 1.44964372020916e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+25 1.28075830752236e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+26 1.29680741684199e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+27 1.45280604067931e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+28 1.37304517710519e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+29 1.27973620316468e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+30 1.27693437916148e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+31 1.39064863181439e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+32 1.33160285160391e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+33 1.27674171253722e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+34 1.26599440193964e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+35 1.3526185717879e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+36 1.30697467495678e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+37 1.27341920571794e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+38 1.25954701280034e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+39 1.32773624392643e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+40 1.29130828505004e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+41 1.270303018183e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+42 1.25554581759836e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+43 1.31060796712311e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+44 1.2808132595111e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+45 1.26754241272566e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+46 1.25296024686398e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+47 1.29833839606744e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+48 1.2734895462181e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+49 1.2651501207467e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+50 1.25123449588008e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+51 1.28926269710492e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+52 1.26820673907543e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+53 1.26309303400386e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+54 1.25005192956774e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+55 1.28236968854467e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+56 1.26429000700143e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+57 1.26132627189885e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+58 1.2492238920143e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+59 1.27701711675763e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+60 1.26131803960791e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+61 1.25980576168463e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+62 1.24863368305999e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+63 1.2727815963185e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+64 1.25901779874818e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+65 1.25849241168393e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+66 1.24820678510422e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+67 1.26937509497217e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+68 1.25720663329544e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+69 1.25735300097834e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+70 1.24789429920561e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+71 1.26659631056659e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+72 1.25575898148576e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+73 1.25635983602267e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+74 1.24766336666771e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+75 1.2643012138659e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+76 1.25458644944457e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+77 1.25549001482564e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+78 1.24749144818928e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+79 1.2623846238477e-05
+};
+\addplot [semithick, mediumpurple148103189, mark=o, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+80 1.25362550009159e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks]
+table {%
+1 0.0139220428077931
+};
+\addlegendentry{No aliasing}
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+2 0.0147699285108068
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+3 0.0166016789758048
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+4 0.00376630364403651
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+5 0.000186426295573737
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+6 0.00016644096397956
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+7 0.000139226676731073
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+8 0.000125097523975446
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+9 1.39790352715559e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+10 2.35371564051844e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+11 3.91100989510229e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+12 3.1816424692743e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+13 2.01988276552847e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+14 7.40945122729034e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+15 1.71867779061888e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+16 1.29749255003671e-05
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+17 2.24589907756809e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+18 3.15045161985901e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+19 9.35020883091476e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+20 6.63170889063636e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+21 6.72533508048415e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+22 1.57508280018726e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+23 5.77250859106377e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+24 3.87803148039607e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+25 7.43498994586122e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+26 8.70888810676804e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+27 3.87535877755853e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+28 2.48117181276996e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+29 6.99497744204405e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+30 5.14986059489002e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+31 2.76157088658803e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+32 1.69321867081388e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+33 6.27410819229672e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+34 3.18909471448983e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+35 2.05753304593512e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+36 1.21299805438296e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+37 5.5415708193216e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+38 2.03779423959554e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+39 1.58680134975168e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+40 9.02539556392043e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+41 4.87815353848212e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+42 1.32821547416258e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+43 1.25789113339657e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+44 6.92235424974365e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+45 4.30142020844467e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+46 8.74108873550564e-08
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+47 1.01974767220132e-06
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+48 5.44316147207399e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+49 3.80729088461409e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+50 5.7455846606088e-08
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+51 8.42196286120703e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+52 4.36981456231724e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+53 3.38571109661414e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+54 3.72257651165403e-08
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+55 7.06539729915574e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+56 3.57021622703868e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+57 3.02576261907294e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+58 2.33157163405507e-08
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+59 6.00720724167598e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+60 2.96095761049774e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+61 2.71751720611972e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+62 1.3634224715347e-08
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+63 5.16702820249414e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+64 2.48740683087077e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+65 2.45258352106016e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+66 6.87601218057895e-09
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+67 4.48986882516913e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+68 2.11233532642173e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+69 2.22431765255748e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+70 4.42271719041407e-09
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+71 3.93774503046019e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+72 1.80756615334955e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+73 2.02899235275475e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+74 3.74820129179885e-09
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+75 3.48882419900158e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+76 1.45131416117803e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+77 3.50495440639903e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+78 1.4844526648363e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+79 3.13035685251651e-07
+};
+\addplot [semithick, sienna1408675, mark=x, mark size=3, mark options={solid,fill opacity=0}, only marks, forget plot]
+table {%
+80 1.20217775995179e-07
+};
+\end{axis}
+
+\end{tikzpicture}

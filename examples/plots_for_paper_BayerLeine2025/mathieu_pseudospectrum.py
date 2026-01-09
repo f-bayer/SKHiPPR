@@ -91,13 +91,15 @@ def plot_FMs_with_guarantee(ode, N, subh, ax=None, color=None, **kwargs):
 
     E = optimal_error_bound(hbm, hbm.T_solution, subh)
 
+    print(f"N = {fourier.N_HBM}: E = {E}")
+
     Phi_T = stability_method.fundamental_matrix(t_over_period=1, hbm=hbm)
     FMs, _ = np.linalg.eig(Phi_T)
 
     if 1e-14 < E < 10:
         for k, FM in enumerate(FMs):
             z_pseudospectrum = compute_pseudospectrum(
-                Phi_T, epsilon=E, z_init=FM, verbose=True, max_step=max(3e-3, E)
+                Phi_T, epsilon=E, z_init=FM, verbose=False, max_step=2e-4
             )
             if k == 0:
                 label = f"N = {N}"
@@ -131,15 +133,20 @@ def plot_FM(hbm: HBMEquation, method: AbstractStabilityHBM = None):
 
 
 def plot_near_PD():
-    a_vals = (-0.3549, -0.35485)
+    omega = 1
+    # a_vals = (-0.3549, -0.35485) # for omega = 2
+    a_vals = (0.25 * omega**2 * -0.3549, 0.25 * omega**2 * -0.35485)  # for omega = 1
     for a in a_vals:
-        ode = MathieuODE(0, np.array([0, 0]), a, 2.4, omega=2)
+        # ode = MathieuODE(0, np.array([0, 0]), a, 2.4, omega=2)
+        ode = MathieuODE(0, np.array([0, 0]), a, 0.25 * omega**2 * 2.4, omega=omega)
 
+        n_periods = 5
         # Simulate ODE at this configuration over 10 periods
+        print(f"Wait very long: Integrating over {n_periods} periods")
         T = 2 * np.pi / ode.omega
         sol = solve_ivp(
             ode.dynamics,
-            (0, 300 * T),
+            (0, n_periods * T),
             [0, 0.05],
             dense_output=True,
             rtol=1e-13,
@@ -154,9 +161,9 @@ def plot_near_PD():
 
         ax = None
         styles = ("--", "-", "-.")
-        for N, style in zip([44, 45, 46], styles):
+        for N, style in zip([50, 51, 52], styles):
             ax = plot_FMs_with_guarantee(
-                ode, N, subh=True, ax=ax, linestyle=style, color="k"
+                ode, N, subh=False, ax=ax, linestyle=style, color="k"
             )
         ax.set_title(f"Floquet multipliers and confidence regions for a = {a}")
         ax.set_xlabel("Re")
@@ -389,7 +396,7 @@ def plot_ince_strutt(ode, a_values, b_values, fourier, subh=True, logscale=True)
 
 if __name__ == "__main__":
 
-    # plot_near_PD()
+    plot_near_PD()
 
     ode = MathieuODE(0, np.array([0, 0]), 1, 2.4, omega=1)
     # plot_N_over_a(ode, [1, 2, 3])
@@ -398,6 +405,6 @@ if __name__ == "__main__":
     b_values = np.linspace(0, 5, 20)
     fourier = Fourier(N_HBM=90, L_DFT=1024, n_dof=2)
 
-    plot_ince_strutt(ode, a_values, b_values, fourier=fourier, subh=False)
+    # plot_ince_strutt(ode, a_values, b_values, fourier=fourier, subh=False)
 
     plt.show()

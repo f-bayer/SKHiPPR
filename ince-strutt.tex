@@ -1,0 +1,60 @@
+% This file was created with tikzplotlib v0.10.1.post13.
+\begin{tikzpicture}
+
+\definecolor{darkgrey176}{RGB}{176,176,176}
+
+\begin{axis}[
+colorbar,
+colorbar style={ytick={1,10},yticklabels={\(\displaystyle \leq 10^0\) (stable),\(\displaystyle \geq 10^1\)},minor ytick={0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,2,3,4,5,6,7,8,9,20,30,40,50,60,70,80,90,200,300,400,500,600,700,800,900},minor yticklabels={
+  \(\displaystyle {2\times10^{-1}}\),
+  \(\displaystyle {3\times10^{-1}}\),
+  \(\displaystyle {4\times10^{-1}}\),
+  ,
+  \(\displaystyle {6\times10^{-1}}\),
+  ,
+  ,
+  ,
+  \(\displaystyle {2\times10^{0}}\),
+  \(\displaystyle {3\times10^{0}}\),
+  \(\displaystyle {4\times10^{0}}\),
+  ,
+  \(\displaystyle {6\times10^{0}}\),
+  ,
+  ,
+  ,
+  \(\displaystyle {2\times10^{1}}\),
+  \(\displaystyle {3\times10^{1}}\),
+  \(\displaystyle {4\times10^{1}}\),
+  ,
+  \(\displaystyle {6\times10^{1}}\),
+  ,
+  ,
+  ,
+  \(\displaystyle {2\times10^{2}}\),
+  \(\displaystyle {3\times10^{2}}\),
+  \(\displaystyle {4\times10^{2}}\),
+  ,
+  \(\displaystyle {6\times10^{2}}\),
+  ,
+  ,
+  
+},ylabel={largest FM (magnitude)}},
+colormap/blackwhite,
+point meta max=10,
+point meta min=1,
+tick align=outside,
+tick pos=left,
+x grid style={darkgrey176},
+xlabel={\(\displaystyle a\)},
+xmin=-0.0375, xmax=1.5375,
+xtick style={color=black},
+y grid style={darkgrey176},
+ylabel={\(\displaystyle b\)},
+ymin=-0.131578947368421, ymax=5.13157894736842,
+ytick style={color=black}
+]
+\addplot graphics [includegraphics cmd=\pgfimage,xmin=-0.0375, xmax=1.5375, ymin=-0.131578947368421, ymax=5.13157894736842] {ince-strutt-006.png};
+\addplot graphics [includegraphics cmd=\pgfimage,xmin=-0.0375, xmax=1.5375, ymin=-0.131578947368421, ymax=5.13157894736842] {ince-strutt-007.png};
+\end{axis}
+
+\end{tikzpicture}
