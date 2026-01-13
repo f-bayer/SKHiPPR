@@ -369,7 +369,7 @@ def error_individual(hbm, t_over_period, FMs_ref):
 
     Phi = hbm.stability_method.fundamental_matrix(t_over_period, hbm)
     FMs, _ = np.linalg.eig(Phi)
-    return min(np.linalg.norm(FMs - FMs_ref), np.linalg.norm(FMs[::-1] - FMs_ref))
+    return min(np.max(np.abs((FMs - FMs_ref))), np.max(np.abs((FMs[::-1] - FMs_ref))))
 
 
 if __name__ == "__main__":
